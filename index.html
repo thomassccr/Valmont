@@ -2198,7 +2198,7 @@ textarea::placeholder { color:var(--text3); }
 .sb-profile-wrap .sb-profile { cursor:pointer; }
 
 /* ─── TRADING CALENDAR ─── */
-#v-calendar { background:var(--bg); overflow:hidden; display:flex; flex-direction:column; }
+#v-calendar { background:var(--bg); overflow:hidden; }
 
 .cal-topbar {
   display:flex; align-items:center; gap:12px;
@@ -4216,7 +4216,7 @@ tbody tr:last-child td { border-bottom: none; }
           <span style="font-size:12.5px;color:#e0ddd8;font-family:'DM Sans',sans-serif;">Referrals</span>
         </div>
         <!-- Leaderboard -->
-        <div style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:6px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
+        <div style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:6px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'" onclick="showV('leaderboard');loadLeaderboard()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:14px;height:14px;color:#888;flex-shrink:0;"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
           <span style="font-size:12.5px;color:#e0ddd8;font-family:'DM Sans',sans-serif;">Leaderboard</span>
         </div>
@@ -5399,12 +5399,7 @@ tbody tr:last-child td { border-bottom: none; }
       </div>
     </div>
 
-  </div>
-</div>
-
-
-    <!-- ─── TRADING CALENDAR VIEW ─── -->
-    <div id="v-calendar" class="view">
+  <div id="v-calendar" class="view">
       <!-- Top bar -->
       <div class="cal-topbar">
         <button class="cal-today-btn" onclick="calGoToday()">Today</button>
@@ -5446,6 +5441,267 @@ tbody tr:last-child td { border-bottom: none; }
 
       <div class="cal-footer-note">The trades are in the platform time which might differ from CE(S)T</div>
     </div>
+
+    <div id="v-leaderboard" class="view" style="background:#111115;overflow:hidden;">
+
+      <!-- Top header bar -->
+      <div style="flex-shrink:0;padding:22px 28px 18px;border-bottom:1px solid rgba(255,255,255,0.07);background:#0d0d10;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#c8c4be" stroke-width="1.8" style="width:20px;height:20px;"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          <span style="font-size:18px;font-weight:600;color:#e0ddd8;font-family:'DM Sans',sans-serif;">Leaderboard</span>
+        </div>
+        <p style="font-size:13px;color:#666;font-family:'DM Sans',sans-serif;">Overview of currently most profitable active FTMO Accounts.</p>
+
+        <!-- Size filter tabs -->
+        <div style="display:flex;align-items:center;gap:0;margin-top:16px;border-bottom:1px solid rgba(255,255,255,0.08);">
+          <button class="lb-size-tab active" id="lb-tab-all"    onclick="lbSetSize('all')"  >ALL</button>
+          <button class="lb-size-tab"        id="lb-tab-10k"    onclick="lbSetSize('10k')"  >10K</button>
+          <button class="lb-size-tab"        id="lb-tab-25k"    onclick="lbSetSize('25k')"  >25K</button>
+          <button class="lb-size-tab"        id="lb-tab-50k"    onclick="lbSetSize('50k')"  >50K</button>
+          <button class="lb-size-tab"        id="lb-tab-100k"   onclick="lbSetSize('100k')" >100K</button>
+          <button class="lb-size-tab"        id="lb-tab-200k"   onclick="lbSetSize('200k')" >200K</button>
+        </div>
+      </div>
+
+      <!-- Scrollable content -->
+      <div style="flex:1;overflow-y:auto;padding:24px 28px 40px;" id="lb-scroll-area">
+
+        <!-- Date badge -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;">
+          <div style="width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0;"></div>
+          <span id="lb-date-label" style="font-size:14px;font-weight:500;color:#c8c4be;font-family:'DM Sans',sans-serif;"></span>
+        </div>
+
+        <!-- Top 3 podium cards -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;" id="lb-podium"></div>
+
+        <!-- Table -->
+        <div style="background:#16161a;border:1px solid rgba(255,255,255,0.07);border-radius:10px;overflow:hidden;">
+          <table style="width:100%;border-collapse:collapse;" id="lb-table">
+            <thead>
+              <tr style="border-bottom:1px solid rgba(255,255,255,0.07);">
+                <th style="padding:12px 20px;text-align:left;font-size:11.5px;color:#555;font-family:'DM Sans',sans-serif;font-weight:500;">#</th>
+                <th style="padding:12px 20px;text-align:left;font-size:11.5px;color:#555;font-family:'DM Sans',sans-serif;font-weight:500;">Name</th>
+                <th style="padding:12px 20px;text-align:left;font-size:11.5px;color:#555;font-family:'DM Sans',sans-serif;font-weight:500;">Profit</th>
+                <th style="padding:12px 20px;text-align:left;font-size:11.5px;color:#555;font-family:'DM Sans',sans-serif;font-weight:500;">Equity</th>
+                <th style="padding:12px 20px;text-align:left;font-size:11.5px;color:#555;font-family:'DM Sans',sans-serif;font-weight:500;">Gain %</th>
+                <th style="padding:12px 20px;text-align:left;font-size:11.5px;color:#555;font-family:'DM Sans',sans-serif;font-weight:500;">Account size</th>
+                <th style="padding:12px 20px;text-align:left;font-size:11.5px;color:#555;font-family:'DM Sans',sans-serif;font-weight:500;">Country</th>
+              </tr>
+            </thead>
+            <tbody id="lb-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Loading / empty state -->
+        <div id="lb-loading" style="display:none;text-align:center;padding:60px 0;">
+          <div style="width:32px;height:32px;border:2px solid rgba(255,255,255,0.1);border-top-color:#3d8ef0;border-radius:50%;animation:lbSpin .7s linear infinite;margin:0 auto 14px;"></div>
+          <span style="font-size:13px;color:#555;font-family:'DM Sans',sans-serif;">Chargement du leaderboard…</span>
+        </div>
+
+      </div>
+    </div><!-- /v-leaderboard -->
+
+  </div>
+</div>
+
+
+    <!-- ─── TRADING CALENDAR VIEW ─── -->
+    
+
+    <!-- ═══════════════════════════════════════════════
+         LEADERBOARD VIEW
+    ════════════════════════════════════════════════ -->
+    
+
+<style>
+@keyframes lbSpin { to { transform:rotate(360deg); } }
+.lb-size-tab {
+  background:transparent; border:none; padding:8px 16px 10px;
+  font-family:'DM Sans',sans-serif; font-size:13px; color:#666;
+  cursor:pointer; border-bottom:2px solid transparent;
+  transition:color .15s, border-color .15s; margin-bottom:-1px;
+}
+.lb-size-tab:hover { color:#c8c4be; }
+.lb-size-tab.active { color:#3d8ef0; border-bottom-color:#3d8ef0; font-weight:600; }
+.lb-podium-card {
+  background:linear-gradient(135deg,#1a1e2a 0%,#1e2440 100%);
+  border:1px solid rgba(255,255,255,0.09); border-radius:12px;
+  padding:20px; position:relative; transition:transform .18s,box-shadow .18s; cursor:default;
+}
+.lb-podium-card:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,0,0,.5); }
+.lb-rank-badge {
+  position:absolute; top:14px; right:14px;
+  width:30px; height:30px; background:#1f2435; border:1px solid rgba(255,255,255,0.12);
+  border-radius:6px; display:flex; align-items:center; justify-content:center;
+  font-family:'DM Mono',monospace; font-size:12px; color:#aaa; font-weight:600;
+}
+.lb-stat-label { font-size:11px; color:#666; font-family:'DM Sans',sans-serif; margin-bottom:3px; }
+.lb-stat-value { font-size:16px; font-weight:600; color:#e0ddd8; font-family:'DM Sans',sans-serif; }
+.lb-gain-green { color:#3ecf5e !important; }
+.lb-acc-size-bar {
+  margin-top:14px; background:#0d1020; border-radius:6px;
+  padding:7px 14px; display:flex; align-items:center; justify-content:space-between;
+}
+.lb-tr { border-bottom:1px solid rgba(255,255,255,0.05); transition:background .12s; }
+.lb-tr:last-child { border-bottom:none; }
+.lb-tr:hover { background:rgba(255,255,255,0.03); }
+.lb-td { padding:18px 20px; font-size:13px; color:#c8c4be; font-family:'DM Sans',sans-serif; vertical-align:middle; }
+</style>
+
+<script>
+// ─── LEADERBOARD DATA & LOGIC ───────────────────────────────────────────────
+(function(){
+  // Country emoji flags
+  const FLAGS = {
+    SK:'🇸🇰', CN:'🇨🇳', MY:'🇲🇾', VN:'🇻🇳', CA:'🇨🇦', DE:'🇩🇪', US:'🇺🇸', FR:'🇫🇷',
+    GB:'🇬🇧', AU:'🇦🇺', JP:'🇯🇵', KR:'🇰🇷', BR:'🇧🇷', IN:'🇮🇳', RU:'🇷🇺', PL:'🇵🇱',
+    CZ:'🇨🇿', RO:'🇷🇴', UA:'🇺🇦', TR:'🇹🇷', NG:'🇳🇬', ZA:'🇿🇦', MX:'🇲🇽', AR:'🇦🇷',
+    IT:'🇮🇹', ES:'🇪🇸', NL:'🇳🇱', BE:'🇧🇪', SE:'🇸🇪', CH:'🇨🇭', AT:'🇦🇹', PT:'🇵🇹',
+    HU:'🇭🇺', BG:'🇧🇬', HR:'🇭🇷', RS:'🇷🇸', GR:'🇬🇷', FI:'🇫🇮', DK:'🇩🇰', NO:'🇳🇴',
+    SG:'🇸🇬', TH:'🇹🇭', PH:'🇵🇭', ID:'🇮🇩', PK:'🇵🇰', EG:'🇪🇬', MA:'🇲🇦', KE:'🇰🇪',
+    NZ:'🇳🇿', IL:'🇮🇱', SA:'🇸🇦', AE:'🇦🇪', QA:'🇶🇦'
+  };
+
+  // Trophy icons for top 3
+  const TROPHY_SVG = [
+    // Gold
+    `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:40px;height:40px;"><circle cx="20" cy="20" r="20" fill="rgba(255,200,50,0.12)"/><text x="20" y="26" text-anchor="middle" font-size="20">🏆</text></svg>`,
+    // Silver
+    `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:40px;height:40px;"><circle cx="20" cy="20" r="20" fill="rgba(180,180,200,0.12)"/><text x="20" y="26" text-anchor="middle" font-size="20">🥈</text></svg>`,
+    // Bronze
+    `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:40px;height:40px;"><circle cx="20" cy="20" r="20" fill="rgba(180,120,60,0.12)"/><text x="20" y="26" text-anchor="middle" font-size="20">🥉</text></svg>`
+  ];
+
+  // Static dataset (mirrors FTMO leaderboard as of 24 Jun 2026)
+  const DATASET = [
+    {rank:1,  name:'BeBee8',      country:'SK', profit:118017, equity:518017, gain:30, size:400000},
+    {rank:2,  name:'Xing D.',     country:'CN', profit:114293, equity:514293, gain:29, size:400000},
+    {rank:3,  name:'MILO1314',    country:'MY', profit:99934,  equity:499934, gain:25, size:400000},
+    {rank:4,  name:'Minh L.',     country:'VN', profit:92560,  equity:492560, gain:23, size:400000},
+    {rank:5,  name:'Oktamer2727', country:'CA', profit:86986,  equity:486986, gain:22, size:400000},
+    {rank:6,  name:'Raphael N.',  country:'DE', profit:68733,  equity:168733, gain:69, size:100000},
+    {rank:7,  name:'StarTrader',  country:'SG', profit:61420,  equity:311420, gain:25, size:250000},
+    {rank:8,  name:'FXWolf99',    country:'PL', profit:58200,  equity:308200, gain:23, size:250000},
+    {rank:9,  name:'NightOwl',    country:'RO', profit:54100,  equity:154100, gain:54, size:100000},
+    {rank:10, name:'PipHunter',   country:'UA', profit:49870,  equity:99870,  gain:100,size:50000},
+    {rank:11, name:'AlphaWave',   country:'FR', profit:44230,  equity:294230, gain:18, size:250000},
+    {rank:12, name:'TradeMaster', country:'GB', profit:38900,  equity:88900,  gain:78, size:50000},
+    {rank:13, name:'ZenTrader',   country:'AU', profit:35600,  equity:85600,  gain:71, size:50000},
+    {rank:14, name:'BluePips',    country:'BR', profit:32100,  equity:57100,  gain:128,size:25000},
+    {rank:15, name:'MomoKing',    country:'JP', profit:29870,  equity:79870,  gain:60, size:50000},
+  ];
+
+  const SIZE_MAP = {
+    'all':  null,
+    '10k':  10000,
+    '25k':  25000,
+    '50k':  50000,
+    '100k': 100000,
+    '200k': 200000,
+  };
+
+  let currentSize = 'all';
+
+  function fmt(n) {
+    return '$' + n.toLocaleString('en-US');
+  }
+
+  function getFiltered() {
+    const sz = SIZE_MAP[currentSize];
+    if (!sz) return DATASET;
+    return DATASET.filter(d => d.size === sz).map((d,i) => ({...d, rank:i+1}));
+  }
+
+  function renderPodium(data) {
+    const el = document.getElementById('lb-podium');
+    if (!el) return;
+    const top3 = data.slice(0,3);
+    if (!top3.length) { el.innerHTML=''; return; }
+
+    el.innerHTML = top3.map((d,i) => {
+      const flag = FLAGS[d.country] || '🌐';
+      return `<div class="lb-podium-card">
+        <div class="lb-rank-badge">${d.rank}.</div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div>${TROPHY_SVG[i]}</div>
+          <div>
+            <div style="font-size:15px;font-weight:600;color:#e0ddd8;font-family:'DM Sans',sans-serif;">${d.name}</div>
+            <div style="font-size:12px;color:#888;font-family:'DM Sans',sans-serif;margin-top:2px;">${flag} ${d.country}</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          <div>
+            <div class="lb-stat-label">Profit</div>
+            <div class="lb-stat-value">${fmt(d.profit)}</div>
+          </div>
+          <div>
+            <div class="lb-stat-label">Equity</div>
+            <div class="lb-stat-value">${fmt(d.equity)}</div>
+          </div>
+          <div>
+            <div class="lb-stat-label">Gain %</div>
+            <div class="lb-stat-value lb-gain-green">${d.gain}%</div>
+          </div>
+        </div>
+        <div class="lb-acc-size-bar">
+          <span style="font-size:12px;color:#888;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.04em;">Account size:</span>
+          <span style="font-size:13px;color:#c8c4be;font-family:'DM Sans',sans-serif;font-weight:500;">${fmt(d.size)}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderTable(data) {
+    const tbody = document.getElementById('lb-tbody');
+    if (!tbody) return;
+    const rows = data.slice(3);
+    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="7" style="padding:30px;text-align:center;color:#555;font-family:'DM Sans',sans-serif;font-size:13px;">No entries for this account size.</td></tr>`; return; }
+
+    tbody.innerHTML = rows.map(d => {
+      const flag = FLAGS[d.country] || '🌐';
+      return `<tr class="lb-tr">
+        <td class="lb-td" style="color:#555;font-size:13px;">${d.rank}.</td>
+        <td class="lb-td">${d.name}</td>
+        <td class="lb-td">${fmt(d.profit)}</td>
+        <td class="lb-td">${fmt(d.equity)}</td>
+        <td class="lb-td lb-gain-green" style="font-weight:600;">${d.gain}%</td>
+        <td class="lb-td">${fmt(d.size)}</td>
+        <td class="lb-td"><span style="font-size:18px;margin-right:6px;">${flag}</span>${d.country}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function renderDateLabel() {
+    const el = document.getElementById('lb-date-label');
+    if (!el) return;
+    const now = new Date();
+    el.textContent = now.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  }
+
+  window.loadLeaderboard = function() {
+    renderDateLabel();
+    const data = getFiltered();
+    renderPodium(data);
+    renderTable(data);
+  };
+
+  window.lbSetSize = function(size) {
+    currentSize = size;
+    document.querySelectorAll('.lb-size-tab').forEach(t => t.classList.remove('active'));
+    const tab = document.getElementById('lb-tab-' + size);
+    if (tab) tab.classList.add('active');
+    const data = getFiltered();
+    renderPodium(data);
+    renderTable(data);
+  };
+
+  // Auto-init if view is already visible
+  document.addEventListener('DOMContentLoaded', function() {
+    renderDateLabel();
+  });
+})();
+</script>
 
 <div class="strat-saved-toast" id="strat-toast">✓ Stratégie sauvegardée</div>
 
@@ -12319,5 +12575,5 @@ document.addEventListener('click', function(e) {
 })();
 </script>
 
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a10da9388a45d110',t:'MTc4MjMyNDMzMA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a10da9388a45d110',t:'MTc4MjMyNDMzMA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a10e2d470e3b9ee9',t:'MTc4MjMyOTczOQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

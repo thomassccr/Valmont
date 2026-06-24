@@ -4661,7 +4661,9 @@ tbody tr:last-child td { border-bottom: none; }
           if(!name)name='Compte '+(getAccs().length+1);
           var id=genId();
           var accs=getAccs();
-          accs.push({id:id,name:name,createdAt:Date.now()});
+          // Tag with the current logged-in user so leaderboard can attribute it
+          var ownerId = (typeof currentUser !== 'undefined' && currentUser) ? currentUser.id : null;
+          accs.push({id:id,name:name,createdAt:Date.now(),ownerId:ownerId});
           saveAccs(accs);
           localStorage.setItem(tKey(id),JSON.stringify([]));
           setAct(id);switchAcc({id:id,name:name});window.renderAccTabs();
@@ -5448,10 +5450,13 @@ tbody tr:last-child td { border-bottom: none; }
       <!-- Scrollable content -->
       <div style="flex:1;overflow-y:auto;padding:24px 28px 40px;" id="lb-scroll-area">
 
-        <!-- Date badge -->
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;">
-          <div style="width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0;"></div>
-          <span id="lb-date-label" style="font-size:14px;font-weight:500;color:#c8c4be;font-family:'DM Sans',sans-serif;"></span>
+        <!-- Date badge + VALMONT count -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0;"></div>
+            <span id="lb-date-label" style="font-size:14px;font-weight:500;color:#c8c4be;font-family:'DM Sans',sans-serif;"></span>
+          </div>
+          <div id="lb-valmont-count" style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;color:#3d8ef0;background:rgba(61,142,240,.1);border:1px solid rgba(61,142,240,.2);border-radius:20px;padding:4px 12px;"></div>
         </div>
 
         <!-- Top 3 podium cards -->
@@ -5479,6 +5484,11 @@ tbody tr:last-child td { border-bottom: none; }
         <div id="lb-loading" style="display:none;text-align:center;padding:60px 0;">
           <div style="width:32px;height:32px;border:2px solid rgba(255,255,255,0.1);border-top-color:#3d8ef0;border-radius:50%;animation:lbSpin .7s linear infinite;margin:0 auto 14px;"></div>
           <span style="font-size:13px;color:#555;font-family:'DM Sans',sans-serif;">Chargement du leaderboard…</span>
+        </div>
+        <div id="lb-empty" style="display:none;text-align:center;padding:80px 0;">
+          <div style="font-size:40px;margin-bottom:16px;">🏆</div>
+          <div style="font-size:15px;font-weight:600;color:#c8c4be;font-family:'DM Sans',sans-serif;margin-bottom:8px;">Aucun compte funded pour l'instant</div>
+          <div style="font-size:13px;color:#555;font-family:'DM Sans',sans-serif;">Ajoutez un compte dont le nom contient <span style="color:#3d8ef0;font-family:'DM Mono',monospace;">funded</span> ou <span style="color:#3d8ef0;font-family:'DM Mono',monospace;">live</span> dans votre dashboard pour apparaître ici.</div>
         </div>
 
       </div>
@@ -5547,63 +5557,73 @@ tbody tr:last-child td { border-bottom: none; }
 
   // Trophy icons for top 3
   const TROPHY_SVG = [
-    // Gold
     `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:40px;height:40px;"><circle cx="20" cy="20" r="20" fill="rgba(255,200,50,0.12)"/><text x="20" y="26" text-anchor="middle" font-size="20">🏆</text></svg>`,
-    // Silver
     `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:40px;height:40px;"><circle cx="20" cy="20" r="20" fill="rgba(180,180,200,0.12)"/><text x="20" y="26" text-anchor="middle" font-size="20">🥈</text></svg>`,
-    // Bronze
     `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:40px;height:40px;"><circle cx="20" cy="20" r="20" fill="rgba(180,120,60,0.12)"/><text x="20" y="26" text-anchor="middle" font-size="20">🥉</text></svg>`
   ];
 
-  // ─── Static FTMO dataset (fallback when no VALMONT users) ───
-  const FTMO_DATASET = [
-    {rank:1,  name:'BeBee8',      country:'SK', profit:118017, equity:518017, gain:30, size:400000},
-    {rank:2,  name:'Xing D.',     country:'CN', profit:114293, equity:514293, gain:29, size:400000},
-    {rank:3,  name:'MILO1314',    country:'MY', profit:99934,  equity:499934, gain:25, size:400000},
-    {rank:4,  name:'Minh L.',     country:'VN', profit:92560,  equity:492560, gain:23, size:400000},
-    {rank:5,  name:'Oktamer2727', country:'CA', profit:86986,  equity:486986, gain:22, size:400000},
-    {rank:6,  name:'Raphael N.',  country:'DE', profit:68733,  equity:168733, gain:69, size:100000},
-    {rank:7,  name:'StarTrader',  country:'SG', profit:61420,  equity:311420, gain:25, size:250000},
-    {rank:8,  name:'FXWolf99',    country:'PL', profit:58200,  equity:308200, gain:23, size:250000},
-    {rank:9,  name:'NightOwl',    country:'RO', profit:54100,  equity:154100, gain:54, size:100000},
-    {rank:10, name:'PipHunter',   country:'UA', profit:49870,  equity:99870,  gain:100,size:50000},
-    {rank:11, name:'AlphaWave',   country:'FR', profit:44230,  equity:294230, gain:18, size:250000},
-    {rank:12, name:'TradeMaster', country:'GB', profit:38900,  equity:88900,  gain:78, size:50000},
-    {rank:13, name:'ZenTrader',   country:'AU', profit:35600,  equity:85600,  gain:71, size:50000},
-    {rank:14, name:'BluePips',    country:'BR', profit:32100,  equity:57100,  gain:128,size:25000},
-    {rank:15, name:'MomoKing',    country:'JP', profit:29870,  equity:79870,  gain:60, size:50000},
-  ];
+  // Pas de dataset statique — uniquement les vrais utilisateurs VALMONT
 
-  const SIZE_MAP = {
-    'all':  null,
-    '10k':  10000,
-    '25k':  25000,
-    '50k':  50000,
-    '100k': 100000,
-    '200k': 200000,
-  };
-
+  const SIZE_MAP = { 'all':null, '10k':10000, '25k':25000, '50k':50000, '100k':100000, '200k':200000 };
   let currentSize = 'all';
 
-  function fmt(n) {
-    return '$' + n.toLocaleString('en-US');
+  function fmt(n) { return '$' + Number(n).toLocaleString('en-US'); }
+
+  // ─── Check if a trading account name is "funded" ───
+  function isFundedAccount(name) {
+    if (!name) return false;
+    var n = name.toLowerCase();
+    return n.indexOf('fund') !== -1 || n.indexOf('live') !== -1 || n.indexOf('financ') !== -1;
   }
 
-  // ─── Read VALMONT users from localStorage and build their leaderboard entries ───
+  // ─── Snap size to nearest standard FTMO account size ───
+  function snapSize(s) {
+    if (s >= 300000) return 400000;
+    if (s >= 200000) return 300000;
+    if (s >= 150000) return 200000;
+    if (s >= 75000)  return 100000;
+    if (s >= 35000)  return 50000;
+    if (s >= 15000)  return 25000;
+    return 10000;
+  }
+
+  // ─── Build avatar HTML: photo if available, else initials circle ───
+  function buildAvatarHtml(avatarDataUrl, displayName, size, isCurrentUser) {
+    var sz = size + 'px';
+    var border = isCurrentUser ? '2px solid rgba(255,200,50,.6)' : '2px solid rgba(61,142,240,.35)';
+    if (avatarDataUrl) {
+      return '<div style="width:' + sz + ';height:' + sz + ';border-radius:50%;border:' + border + ';overflow:hidden;flex-shrink:0;">'
+        + '<img src="' + avatarDataUrl + '" style="width:100%;height:100%;object-fit:cover;display:block;">'
+        + '</div>';
+    }
+    var initials = (displayName || '?').split(' ').map(function(w){ return w[0]; }).join('').toUpperCase().slice(0,2);
+    var bg = isCurrentUser ? 'rgba(255,200,50,.18)' : 'rgba(61,142,240,.18)';
+    var color = isCurrentUser ? '#ffc832' : '#3d8ef0';
+    return '<div style="width:' + sz + ';height:' + sz + ';border-radius:50%;border:' + border + ';background:' + bg + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:\'DM Mono\',monospace;font-size:' + Math.round(size*0.35) + 'px;font-weight:700;color:' + color + ';">'
+      + initials + '</div>';
+  }
+
+  // ─── Lire TOUS les users VALMONT + leurs comptes funded → entrées leaderboard ───
   function getValmontUsers() {
-    var users = [];
+    var entries = [];
     try {
-      var raw = localStorage.getItem('vm_dash_accounts');
-      if (!raw) return users;
-      var accounts = JSON.parse(raw);
-      if (!Array.isArray(accounts)) return users;
+      // 1. Tous les comptes login (Thomas, autres users)
+      var loginAccounts = JSON.parse(localStorage.getItem('vm_accounts') || '[]');
+      // 2. Tous les comptes de trading
+      var tradingAccounts = JSON.parse(localStorage.getItem('vm_dash_accounts') || '[]');
+      // 3. Utilisateur actuellement connecté
+      var currentUserId = localStorage.getItem('vm_current_user_id') || null;
+      // Fallback: lire depuis la variable JS globale si dispo
+      if (!currentUserId && typeof currentUser !== 'undefined' && currentUser) {
+        currentUserId = currentUser.id;
+      }
 
-      var activeAccountId = localStorage.getItem('vm_dash_active') || null;
-
-      accounts.forEach(function(acc) {
+      // Pour chaque compte de trading FUNDED
+      tradingAccounts.forEach(function(acc) {
         if (!acc || !acc.id || !acc.name) return;
+        if (!isFundedAccount(acc.name)) return; // Seulement les funded
 
-        // Load trades for this account
+        // Charger les trades
         var trades = [];
         try {
           var tradesRaw = localStorage.getItem('vm_trades_acc_' + acc.id);
@@ -5613,38 +5633,25 @@ tbody tr:last-child td { border-bottom: none; }
           }
         } catch(e) {}
 
-        // Compute total P&L
+        // Calculer le P&L total
         var totalPnl = 0;
         trades.forEach(function(t) {
-          var v = parseFloat(t && t.pnl);
+          var v = parseFloat(t && (t.pnl !== undefined ? t.pnl : (t.profit !== undefined ? t.profit : 0)));
           if (!isNaN(v)) totalPnl += v;
         });
 
-        // Determine account size
-        // 1. If stored on the account, use it
-        // 2. Otherwise infer from trade notional (entry × lots) for a representative trade
-        // 3. Otherwise default to 100k
+        // Taille du compte
         var size = 100000;
         if (typeof acc.size === 'number' && acc.size > 0) {
           size = acc.size;
+        } else if (typeof acc.initialBalance === 'number' && acc.initialBalance > 0) {
+          size = snapSize(acc.initialBalance);
         } else if (trades.length > 0) {
-          // Find first trade with entry & lots to estimate notional
           for (var i = 0; i < trades.length; i++) {
             var t = trades[i];
-            var entry = parseFloat(t.entry);
-            var lots = parseFloat(t.lots);
+            var entry = parseFloat(t.entry), lots = parseFloat(t.lots);
             if (!isNaN(entry) && !isNaN(lots) && entry > 0 && lots > 0) {
-              // FTMO instruments: NAS100, US30, US500 use points × $X per point
-              // We'll just use entry × lots × 100 as a rough notional proxy
-              size = Math.round(entry * lots * 100);
-              // Snap to nearest standard FTMO size
-              if (size > 300000) size = 400000;
-              else if (size > 200000) size = 300000;
-              else if (size > 150000) size = 200000;
-              else if (size > 75000) size = 100000;
-              else if (size > 35000) size = 50000;
-              else if (size > 15000) size = 25000;
-              else size = 10000;
+              size = snapSize(Math.round(entry * lots * 100));
               break;
             }
           }
@@ -5652,155 +5659,209 @@ tbody tr:last-child td { border-bottom: none; }
 
         var equity = size + totalPnl;
         var gain = size > 0 ? Math.round((totalPnl / size) * 100) : 0;
+        var country = acc.country || 'FR';
 
-        // Determine country (default 🌐 if not set)
-        var country = acc.country || '🌐';
+        // ── Trouver le propriétaire (login user) via ownerId ──
+        // ownerId est tagué sur le compte au moment de sa création ou au login
+        var ownerId = acc.ownerId || currentUserId;
+        var ownerLogin = loginAccounts.find(function(la) { return la.id === ownerId; });
 
-        users.push({
-          rank: 0, // Will be recalculated
-          name: acc.name,
+        // Nom à afficher : prénom du login user (pas le nom du compte trading)
+        var displayName = ownerLogin ? ownerLogin.name : (acc.name);
+        // Photo de profil du login user
+        var avatar = ownerId ? (localStorage.getItem('vm_avatar_' + ownerId) || null) : null;
+        // Est-ce le compte de l'utilisateur connecté ?
+        var isMe = ownerId === currentUserId;
+
+        entries.push({
+          rank: 0,
+          name: displayName,
+          accName: acc.name,
           country: country,
           profit: Math.round(totalPnl),
           equity: Math.round(equity),
           gain: gain,
           size: size,
+          avatar: avatar,
           isValmontUser: true,
-          isCurrentUser: acc.id === activeAccountId
+          isCurrentUser: isMe
         });
       });
-    } catch (e) {
-      console.error('Error loading VALMONT users for leaderboard:', e);
+    } catch(e) {
+      console.error('Leaderboard: erreur lecture VALMONT users', e);
     }
-    return users;
+    return entries;
   }
 
-  // Build the full combined dataset — everyone sorted by profit together
+  // Dataset = uniquement les utilisateurs VALMONT réels
   function buildCombinedDataset() {
     var valmont = getValmontUsers();
-    var all = valmont.concat(FTMO_DATASET);
-    // Sort globally by profit (highest first) — VALMONT and FTMO users compete equally
-    all.sort(function(a, b) { return b.profit - a.profit; });
-    return all;
+    valmont.sort(function(a, b) { return b.profit - a.profit; });
+    return valmont;
   }
 
   function getFiltered() {
     var combined = buildCombinedDataset();
     var sz = SIZE_MAP[currentSize];
-    var filtered;
-    if (!sz) {
-      filtered = combined;
-    } else {
-      filtered = combined.filter(function(d) { return d.size === sz; });
-    }
-    // Re-rank
+    var filtered = sz ? combined.filter(function(d){ return d.size === sz; }) : combined;
     return filtered.map(function(d, i) { return Object.assign({}, d, { rank: i + 1 }); });
   }
 
+  // ─── Render podium (top 3) with photo + username ───
   function renderPodium(data) {
-    const el = document.getElementById('lb-podium');
+    var el = document.getElementById('lb-podium');
     if (!el) return;
-    const top3 = data.slice(0,3);
-    if (!top3.length) { el.innerHTML=''; return; }
+    var top3 = data.slice(0, 3);
+    if (!top3.length) { el.innerHTML = ''; return; }
 
-    el.innerHTML = top3.map((d,i) => {
-      const flag = FLAGS[d.country] || '🌐';
-      const valmontBadge = d.isValmontUser
+    el.innerHTML = top3.map(function(d, i) {
+      var flag = FLAGS[d.country] || '🌐';
+      var avatarHtml = d.isValmontUser
+        ? buildAvatarHtml(d.avatar, d.name, 44, d.isCurrentUser)
+        : ('<div style="width:44px;height:44px;flex-shrink:0;">' + TROPHY_SVG[i] + '</div>');
+
+      var valmontBadge = d.isValmontUser
         ? '<span style="display:inline-flex;align-items:center;font-family:\'DM Mono\',monospace;font-size:8px;letter-spacing:.1em;padding:2px 6px;border-radius:3px;background:rgba(61,142,240,.18);color:#3d8ef0;border:1px solid rgba(61,142,240,.3);margin-left:6px;">VALMONT</span>'
         : '';
-      const meBadge = d.isCurrentUser
+      var meBadge = d.isCurrentUser
         ? '<span style="display:inline-flex;align-items:center;font-family:\'DM Mono\',monospace;font-size:8px;letter-spacing:.1em;padding:2px 6px;border-radius:3px;background:rgba(255,200,50,.18);color:#ffc832;border:1px solid rgba(255,200,50,.4);margin-left:4px;">★ MOI</span>'
         : '';
-      const cardStyle = d.isCurrentUser
+      var cardStyle = d.isCurrentUser
         ? 'background:linear-gradient(135deg,#1a1e2a 0%,#2a2418 100%);border:1px solid rgba(255,200,50,.25);'
         : 'background:linear-gradient(135deg,#1a1e2a 0%,#1e2440 100%);border:1px solid rgba(255,255,255,.09);';
-      return `<div class="lb-podium-card" style="${cardStyle}border-radius:12px;padding:20px;position:relative;transition:transform .18s,box-shadow .18s;cursor:default;">
-        <div class="lb-rank-badge">${d.rank}.</div>
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-          <div>${TROPHY_SVG[i]}</div>
-          <div style="flex:1;min-width:0;">
-            <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
-              <div style="font-size:15px;font-weight:600;color:#e0ddd8;font-family:'DM Sans',sans-serif;overflow:hidden;text-overflow:ellipsis;">${d.name}</div>
-              ${valmontBadge}${meBadge}
-            </div>
-            <div style="font-size:12px;color:#888;font-family:'DM Sans',sans-serif;margin-top:2px;">${flag} ${d.country}</div>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
-          <div>
-            <div class="lb-stat-label">Profit</div>
-            <div class="lb-stat-value">${fmt(d.profit)}</div>
-          </div>
-          <div>
-            <div class="lb-stat-label">Equity</div>
-            <div class="lb-stat-value">${fmt(d.equity)}</div>
-          </div>
-          <div>
-            <div class="lb-stat-label">Gain %</div>
-            <div class="lb-stat-value lb-gain-green">${d.gain}%</div>
-          </div>
-        </div>
-        <div class="lb-acc-size-bar">
-          <span style="font-size:12px;color:#888;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.04em;">Account size:</span>
-          <span style="font-size:13px;color:#c8c4be;font-family:'DM Sans',sans-serif;font-weight:500;">${fmt(d.size)}</span>
-        </div>
-      </div>`;
+
+      // Show account type label for VALMONT funded accounts
+      var accLabel = d.isValmontUser && d.accName
+        ? '<div style="font-size:10px;color:#3d8ef0;font-family:\'DM Mono\',monospace;letter-spacing:.08em;margin-top:1px;opacity:.75;">' + d.accName + '</div>'
+        : '';
+
+      // Show trophy icon next to avatar for top 3 VALMONT users
+      var trophyOverlay = d.isValmontUser
+        ? '<div style="position:absolute;bottom:-4px;right:-4px;font-size:16px;line-height:1;">' + ['🏆','🥈','🥉'][i] + '</div>'
+        : '';
+
+      return '<div class="lb-podium-card" style="' + cardStyle + 'border-radius:12px;padding:20px;position:relative;transition:transform .18s,box-shadow .18s;cursor:default;">'
+        + '<div class="lb-rank-badge">' + d.rank + '.</div>'
+        + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">'
+        +   '<div style="position:relative;flex-shrink:0;">'
+        +     avatarHtml
+        +     trophyOverlay
+        +   '</div>'
+        +   '<div style="flex:1;min-width:0;">'
+        +     '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">'
+        +       '<div style="font-size:15px;font-weight:700;color:#e0ddd8;font-family:\'DM Sans\',sans-serif;overflow:hidden;text-overflow:ellipsis;">' + d.name + '</div>'
+        +       valmontBadge + meBadge
+        +     '</div>'
+        +     accLabel
+        +     '<div style="font-size:12px;color:#888;font-family:\'DM Sans\',sans-serif;margin-top:2px;">' + flag + ' ' + d.country + '</div>'
+        +   '</div>'
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">'
+        +   '<div><div class="lb-stat-label">Profit</div><div class="lb-stat-value" style="color:#3ecf5e;">' + fmt(d.profit) + '</div></div>'
+        +   '<div><div class="lb-stat-label">Equity</div><div class="lb-stat-value">' + fmt(d.equity) + '</div></div>'
+        +   '<div><div class="lb-stat-label">Gain %</div><div class="lb-stat-value lb-gain-green">' + d.gain + '%</div></div>'
+        + '</div>'
+        + '<div class="lb-acc-size-bar">'
+        +   '<span style="font-size:11px;color:#888;font-family:\'DM Mono\',monospace;letter-spacing:.04em;">Account size</span>'
+        +   '<span style="font-size:13px;color:#c8c4be;font-family:\'DM Sans\',sans-serif;font-weight:600;">' + fmt(d.size) + '</span>'
+        + '</div>'
+        + '</div>';
     }).join('');
   }
 
+  // ─── Render table rows (rank 4+) with photo + username ───
   function renderTable(data) {
-    const tbody = document.getElementById('lb-tbody');
+    var tbody = document.getElementById('lb-tbody');
     if (!tbody) return;
-    const rows = data.slice(3);
-    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="7" style="padding:30px;text-align:center;color:#555;font-family:'DM Sans',sans-serif;font-size:13px;">No entries for this account size.</td></tr>`; return; }
+    var rows = data.slice(3);
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="padding:30px;text-align:center;color:#555;font-family:\'DM Sans\',sans-serif;font-size:13px;">No entries for this account size.</td></tr>';
+      return;
+    }
 
-    tbody.innerHTML = rows.map(d => {
-      const flag = FLAGS[d.country] || '🌐';
-      const valmontBadge = d.isValmontUser
+    tbody.innerHTML = rows.map(function(d) {
+      var flag = FLAGS[d.country] || '🌐';
+
+      // Avatar cell: photo or initials (28px in table)
+      var avatarCell = d.isValmontUser
+        ? buildAvatarHtml(d.avatar, d.name, 28, d.isCurrentUser)
+        : '<div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);flex-shrink:0;"></div>';
+
+      var valmontBadge = d.isValmontUser
         ? '<span style="display:inline-flex;align-items:center;font-family:\'DM Mono\',monospace;font-size:7px;letter-spacing:.1em;padding:1px 5px;border-radius:3px;background:rgba(61,142,240,.18);color:#3d8ef0;border:1px solid rgba(61,142,240,.3);margin-left:6px;vertical-align:middle;">VALMONT</span>'
         : '';
-      const meBadge = d.isCurrentUser
+      var meBadge = d.isCurrentUser
         ? '<span style="display:inline-flex;align-items:center;font-family:\'DM Mono\',monospace;font-size:7px;letter-spacing:.1em;padding:1px 5px;border-radius:3px;background:rgba(255,200,50,.2);color:#ffc832;border:1px solid rgba(255,200,50,.4);margin-left:4px;vertical-align:middle;">★ MOI</span>'
         : '';
-      const nameStyle = d.isCurrentUser
-        ? 'color:#ffc832;font-weight:700;'
-        : 'color:#e0ddd8;';
-      return `<tr class="lb-tr"${d.isCurrentUser ? ' style="background:rgba(255,200,50,.05);"' : ''}>
-        <td class="lb-td" style="color:#555;font-size:13px;">${d.rank}.</td>
-        <td class="lb-td" style="${nameStyle}">${d.name}${valmontBadge}${meBadge}</td>
-        <td class="lb-td">${fmt(d.profit)}</td>
-        <td class="lb-td">${fmt(d.equity)}</td>
-        <td class="lb-td lb-gain-green" style="font-weight:600;">${d.gain}%</td>
-        <td class="lb-td">${fmt(d.size)}</td>
-        <td class="lb-td"><span style="font-size:18px;margin-right:6px;">${flag}</span>${d.country}</td>
-      </tr>`;
+      var nameColor = d.isCurrentUser ? '#ffc832' : '#e0ddd8';
+      var rowBg = d.isCurrentUser ? ' style="background:rgba(255,200,50,.05);"' : '';
+
+      // Account name sub-label for VALMONT funded accounts
+      var nameCell = '<div style="display:flex;align-items:center;gap:9px;">'
+        + avatarCell
+        + '<div>'
+        +   '<div style="font-size:13px;font-weight:600;color:' + nameColor + ';font-family:\'DM Sans\',sans-serif;">'
+        +     d.name + valmontBadge + meBadge
+        +   '</div>'
+        +   (d.isValmontUser && d.accName ? '<div style="font-size:10px;color:#3d8ef0;font-family:\'DM Mono\',monospace;opacity:.6;">' + d.accName + '</div>' : '')
+        + '</div>'
+        + '</div>';
+
+      return '<tr class="lb-tr"' + rowBg + '>'
+        + '<td class="lb-td" style="color:#555;font-size:13px;">' + d.rank + '.</td>'
+        + '<td class="lb-td">' + nameCell + '</td>'
+        + '<td class="lb-td" style="color:#3ecf5e;font-weight:600;">' + fmt(d.profit) + '</td>'
+        + '<td class="lb-td">' + fmt(d.equity) + '</td>'
+        + '<td class="lb-td lb-gain-green" style="font-weight:600;">' + d.gain + '%</td>'
+        + '<td class="lb-td">' + fmt(d.size) + '</td>'
+        + '<td class="lb-td"><span style="font-size:18px;margin-right:6px;">' + flag + '</span>' + d.country + '</td>'
+        + '</tr>';
     }).join('');
+  }
+
+  // ─── Banner: how many VALMONT funded accounts are on the board ───
+  function renderValmontBanner(data) {
+    var count = data.filter(function(d){ return d.isValmontUser; }).length;
+    var el = document.getElementById('lb-valmont-count');
+    if (el) el.textContent = count > 0
+      ? count + ' compte' + (count > 1 ? 's' : '') + ' VALMONT funded présent' + (count > 1 ? 's' : '') + ' sur le leaderboard'
+      : 'Aucun compte funded VALMONT — ajoutez un compte funded dans votre dashboard';
   }
 
   function renderDateLabel() {
-    const el = document.getElementById('lb-date-label');
+    var el = document.getElementById('lb-date-label');
     if (!el) return;
-    const now = new Date();
-    el.textContent = now.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    var now = new Date();
+    el.textContent = now.toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'});
   }
 
   window.loadLeaderboard = function() {
     renderDateLabel();
-    const data = getFiltered();
-    renderPodium(data);
-    renderTable(data);
+    var data = getFiltered();
+    var emptyEl = document.getElementById('lb-empty');
+    var podiumEl = document.getElementById('lb-podium');
+    var tableWrap = document.querySelector('#lb-scroll-area > div:last-of-type');
+    if (!data.length) {
+      if (emptyEl) emptyEl.style.display = 'block';
+      if (podiumEl) podiumEl.innerHTML = '';
+      var tbody = document.getElementById('lb-tbody');
+      if (tbody) tbody.innerHTML = '';
+    } else {
+      if (emptyEl) emptyEl.style.display = 'none';
+      renderPodium(data);
+      renderTable(data);
+    }
+    renderValmontBanner(data);
   };
 
   window.lbSetSize = function(size) {
     currentSize = size;
-    document.querySelectorAll('.lb-size-tab').forEach(t => t.classList.remove('active'));
-    const tab = document.getElementById('lb-tab-' + size);
+    document.querySelectorAll('.lb-size-tab').forEach(function(t){ t.classList.remove('active'); });
+    var tab = document.getElementById('lb-tab-' + size);
     if (tab) tab.classList.add('active');
-    const data = getFiltered();
-    renderPodium(data);
-    renderTable(data);
+    window.loadLeaderboard();
   };
 
-  // Auto-init if view is already visible
   document.addEventListener('DOMContentLoaded', function() {
     renderDateLabel();
   });
@@ -6199,6 +6260,19 @@ function getStorageKey(userId) { return 'vm_sess_' + userId; }
 
 function loginAs(user) {
   currentUser = user;
+  // Stocker l'utilisateur courant pour que le leaderboard puisse le lire
+  try { localStorage.setItem('vm_current_user_id', user.id); } catch(e) {}
+  // Tagguer les comptes de trading sans ownerId avec cet utilisateur
+  try {
+    if (window.getDashAccounts && window.saveAccounts) {
+      var dashAccs = window.getDashAccounts();
+      var changed = false;
+      dashAccs.forEach(function(acc) {
+        if (!acc.ownerId) { acc.ownerId = user.id; changed = true; }
+      });
+      if (changed) window.saveAccounts(dashAccs);
+    }
+  } catch(e) {}
   // Mettre à jour l'affichage du profil sidebar
   const initials = user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
   document.getElementById('p-init').textContent = initials;

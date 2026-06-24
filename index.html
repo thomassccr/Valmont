@@ -4500,7 +4500,21 @@ tbody tr:last-child td { border-bottom: none; }
           var bar=document.getElementById('acc-tabs-bar');
           if(!bar)return;
           bar.innerHTML='';
-          var accs=getAccs(), act=getAct();
+          var allAccs=getAccs(), act=getAct();
+          // Filter accounts to match current earnings type selection
+          var filterType = (typeof window._currentInflowEarningsType !== 'undefined') ? window._currentInflowEarningsType : 'gross';
+          var accs = (filterType === 'gross') ? allAccs : allAccs.filter(function(a){
+            if(!a.name) return false;
+            var n = a.name.toLowerCase();
+            if(filterType === 'challenge') return n.indexOf('challenge') !== -1;
+            if(filterType === 'verification') return n.indexOf('verif') !== -1;
+            if(filterType === 'funded') return n.indexOf('fund') !== -1 || n.indexOf('live') !== -1;
+            return false;
+          });
+          // If active account is not in filtered list, switch to first visible
+          if(accs.length && !accs.find(function(a){return a.id===act;})){
+            setAct(accs[0].id); switchAcc(accs[0]);
+          }
           accs.forEach(function(acc){
             var tab=document.createElement('div');
             tab.style.cssText='display:flex;align-items:center;gap:7px;padding:0 14px;height:40px;border-bottom:2px solid '+(acc.id===act?'#3d8ef0':'transparent')+';color:'+(acc.id===act?'#3d8ef0':'#4a4844')+';font-family:DM Mono,monospace;font-size:10px;letter-spacing:.08em;cursor:pointer;white-space:nowrap;flex-shrink:0;user-select:none;transition:all .15s;';
@@ -11920,6 +11934,7 @@ document.addEventListener('click', function(e) {
 
   // ── Earnings type dropdown ──────────────────────────────────────────────────
   var _currentEarningsType = 'gross';
+  window._currentInflowEarningsType = 'gross';
 
   window.toggleInflowETDropdown = function(e){
     e.stopPropagation();
@@ -11939,6 +11954,7 @@ document.addEventListener('click', function(e) {
 
   window.selectInflowEarningsType = function(val){
     _currentEarningsType = val;
+    window._currentInflowEarningsType = val;
     var labels = { gross:'Gross earnings', challenge:'Challenge', verification:'Verification', funded:'Funded' };
     var el = document.getElementById('inflow-earnings-type');
     if(el) el.textContent = labels[val] || val;
@@ -11948,6 +11964,8 @@ document.addEventListener('click', function(e) {
     });
     var dd = document.getElementById('inflow-et-dropdown');
     if(dd) dd.style.display='none';
+    // Re-render account tabs to show only matching accounts
+    if(typeof window.renderAccTabs === 'function') window.renderAccTabs();
     applyInflowEarningsFilter();
   };
 
@@ -11962,7 +11980,8 @@ document.addEventListener('click', function(e) {
 
   window.applyInflowEarningsFilter = function(){
     var accs = typeof getAccounts === 'function' ? getAccounts() : [];
-    if(_currentEarningsType === 'gross'){
+    var filterType = window._currentInflowEarningsType || 'gross';
+    if(filterType === 'gross'){
       var allTrades = [];
       accs.forEach(function(acc){
         var t = typeof loadTradesForAccount === 'function' ? loadTradesForAccount(acc.id) : null;
@@ -11972,7 +11991,7 @@ document.addEventListener('click', function(e) {
     } else {
       var filtered = [];
       accs.forEach(function(acc){
-        if(getAccType(acc.name) === _currentEarningsType){
+        if(getAccType(acc.name) === filterType){
           var t = typeof loadTradesForAccount === 'function' ? loadTradesForAccount(acc.id) : null;
           if(t && Array.isArray(t)) filtered = filtered.concat(t);
         }

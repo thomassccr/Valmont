@@ -245,6 +245,11 @@ body::after { content:''; position:fixed; inset:0; background-image:url("data:im
 .disc-ring-fill { fill:none; stroke:var(--gold); stroke-width:6; stroke-linecap:round; stroke-dasharray:251.2; stroke-dashoffset:251.2; transition:stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1); }
 .disc-ring-label { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--text3); }
 
+/* ─── INFLOW EARNINGS TYPE DROPDOWN ─── */
+.inflow-et-opt { display:flex; align-items:center; gap:8px; width:100%; padding:8px 14px; background:transparent; border:none; color:#c8c4be; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; text-align:left; transition:background .12s; white-space:nowrap; }
+.inflow-et-opt:hover { background:rgba(255,255,255,0.06); color:#fff; }
+.inflow-et-check { color:#3d8ef0; font-size:11px; width:14px; flex-shrink:0; transition:opacity .15s; }
+
 /* ─── SCROLLBAR ENHANCED ─── */
 * { scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.08) transparent; }
 *::-webkit-scrollbar { width:3px; height:3px; }
@@ -4237,10 +4242,34 @@ tbody tr:last-child td { border-bottom: none; }
           </div>
           <div style="display:flex;align-items:center;gap:8px;">
             <!-- Gross earnings dropdown -->
-            <button onclick="toggleInflowEarningsType(this)" style="display:flex;align-items:center;gap:6px;padding:6px 14px;background:#18181c;border:1px solid rgba(255,255,255,0.11);border-radius:8px;color:#c8c4be;font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.22)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.11)'">
-              <span id="inflow-earnings-type">Gross earnings</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;color:#666;"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
+            <div style="position:relative;" id="inflow-et-wrap">
+              <button onclick="toggleInflowETDropdown(event)" style="display:flex;align-items:center;gap:6px;padding:6px 14px;background:#18181c;border:1px solid rgba(255,255,255,0.11);border-radius:8px;color:#c8c4be;font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.22)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.11)'">
+                <span id="inflow-earnings-type">Gross earnings</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;color:#666;"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div id="inflow-et-dropdown" style="display:none;position:absolute;left:0;top:calc(100% + 6px);background:#18181c;border:1px solid rgba(255,255,255,0.12);border-radius:10px;box-shadow:0 16px 48px rgba(0,0,0,.85);z-index:2000;overflow:hidden;min-width:210px;">
+                <div style="padding:6px 0;">
+                  <button onclick="selectInflowEarningsType('gross')" class="inflow-et-opt" data-val="gross">
+                    <span class="inflow-et-check" id="inflow-et-check-gross">✓</span>
+                    Gross earnings <span style="font-size:10px;color:#555;margin-left:4px;">— tous comptes</span>
+                  </button>
+                  <div style="height:1px;background:rgba(255,255,255,0.06);margin:4px 0;"></div>
+                  <div style="font-size:9px;font-family:'DM Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#444;padding:4px 14px 2px;">Par type de compte</div>
+                  <button onclick="selectInflowEarningsType('challenge')" class="inflow-et-opt" data-val="challenge">
+                    <span class="inflow-et-check" id="inflow-et-check-challenge" style="opacity:0">✓</span>
+                    Challenge
+                  </button>
+                  <button onclick="selectInflowEarningsType('verification')" class="inflow-et-opt" data-val="verification">
+                    <span class="inflow-et-check" id="inflow-et-check-verification" style="opacity:0">✓</span>
+                    Verification
+                  </button>
+                  <button onclick="selectInflowEarningsType('funded')" class="inflow-et-opt" data-val="funded">
+                    <span class="inflow-et-check" id="inflow-et-check-funded" style="opacity:0">✓</span>
+                    Funded
+                  </button>
+                </div>
+              </div>
+            </div>
             <!-- Time tabs: pill group -->
             <div style="display:flex;align-items:center;background:#18181c;border:1px solid rgba(255,255,255,0.10);border-radius:8px;overflow:hidden;">
               <button class="iflow-tab" id="iflow-yesterday" onclick="inflowTab('yesterday',this)" style="padding:6px 16px;background:transparent;border:none;border-right:1px solid rgba(255,255,255,0.08);color:#666;font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;transition:all .15s;white-space:nowrap;">Yesterday</button>
@@ -11888,12 +11917,75 @@ document.addEventListener('click', function(e) {
     }
   };
 
-  // Earnings type toggle (cosmetic)
-  window.toggleInflowEarningsType = function(btn){
-    var el = document.getElementById('inflow-earnings-type');
-    if(!el) return;
-    el.textContent = el.textContent === 'Gross earnings' ? 'Net earnings' : 'Gross earnings';
+  // ── Earnings type dropdown ──────────────────────────────────────────────────
+  var _currentEarningsType = 'gross';
+
+  window.toggleInflowETDropdown = function(e){
+    e.stopPropagation();
+    var dd = document.getElementById('inflow-et-dropdown');
+    if(!dd) return;
+    var open = dd.style.display !== 'none';
+    dd.style.display = open ? 'none' : 'block';
+    if(!open){
+      setTimeout(function(){
+        document.addEventListener('click', function _close(){
+          dd.style.display='none';
+          document.removeEventListener('click',_close);
+        });
+      },0);
+    }
   };
+
+  window.selectInflowEarningsType = function(val){
+    _currentEarningsType = val;
+    var labels = { gross:'Gross earnings', challenge:'Challenge', verification:'Verification', funded:'Funded' };
+    var el = document.getElementById('inflow-earnings-type');
+    if(el) el.textContent = labels[val] || val;
+    ['gross','challenge','verification','funded'].forEach(function(v){
+      var chk = document.getElementById('inflow-et-check-'+v);
+      if(chk) chk.style.opacity = (v===val) ? '1' : '0';
+    });
+    var dd = document.getElementById('inflow-et-dropdown');
+    if(dd) dd.style.display='none';
+    applyInflowEarningsFilter();
+  };
+
+  function getAccType(name){
+    if(!name) return 'other';
+    var n = name.toLowerCase();
+    if(n.indexOf('challenge') !== -1) return 'challenge';
+    if(n.indexOf('verif') !== -1 || n.indexOf('verification') !== -1) return 'verification';
+    if(n.indexOf('fund') !== -1 || n.indexOf('live') !== -1) return 'funded';
+    return 'other';
+  }
+
+  window.applyInflowEarningsFilter = function(){
+    var accs = typeof getAccounts === 'function' ? getAccounts() : [];
+    if(_currentEarningsType === 'gross'){
+      var allTrades = [];
+      accs.forEach(function(acc){
+        var t = typeof loadTradesForAccount === 'function' ? loadTradesForAccount(acc.id) : null;
+        if(t && Array.isArray(t)) allTrades = allTrades.concat(t);
+      });
+      window.ALL_TRADES = allTrades;
+    } else {
+      var filtered = [];
+      accs.forEach(function(acc){
+        if(getAccType(acc.name) === _currentEarningsType){
+          var t = typeof loadTradesForAccount === 'function' ? loadTradesForAccount(acc.id) : null;
+          if(t && Array.isArray(t)) filtered = filtered.concat(t);
+        }
+      });
+      window.ALL_TRADES = filtered;
+    }
+    if(typeof applyDateRange === 'function') applyDateRange();
+    else if(typeof render === 'function') render();
+    setTimeout(fillInflowExtra, 200);
+  };
+
+  // Keep old name for compat
+  window.toggleInflowEarningsType = function(){};
+
 
   // Patch render to fill Drawdown + Profit Factor
   function patchRender(){

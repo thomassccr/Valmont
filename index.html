@@ -6763,23 +6763,21 @@ async function callVM(isTradeAnalysis=false){
     if(!resp.ok){ const e=await resp.json(); throw new Error(e.error?.message||resp.statusText); }
 
     setTyping(false);
-    // Create streaming message bubble
+    // ── Crée le bubble avec avatar visible, texte vide ──
     const streamId = 'stream-'+Date.now();
     const w = document.getElementById('msgs');
     const d = document.createElement('div');
     d.className = 'msg msg-stream';
     d.id = streamId;
-    d.innerHTML = `${getCoachAvatar()}<div class="msg-body"><div class="msg-from">Valmont</div><div class="msg-text fc" id="${streamId}-txt"></div></div>`;
+    d.innerHTML = `${getCoachAvatar()}<div class="msg-body"><div class="msg-from">Valmont</div><div class="msg-text fc" id="${streamId}-txt"><span class="stream-cursor">▋</span></div></div>`;
     w.appendChild(d);
-    // Animate entry
     d.style.opacity='0'; d.style.transform='translateY(8px)';
     requestAnimationFrame(()=>{ d.style.transition='opacity .3s ease, transform .3s ease'; d.style.opacity='1'; d.style.transform='translateY(0)'; });
     scrollD();
 
+    // ── Collecte toute la réponse en silence ──
     const txtEl = document.getElementById(streamId+'-txt');
     let raw = '';
-    let tokenBuffer = '';
-    let lastRender = 0;
     const reader = resp.body.getReader();
     const decoder = new TextDecoder();
 
@@ -6787,33 +6785,38 @@ async function callVM(isTradeAnalysis=false){
       const {done, value} = await reader.read();
       if(done) break;
       const chunk = decoder.decode(value, {stream:true});
-      const lines = chunk.split('\n');
-      for(const line of lines){
+      for(const line of chunk.split('\n')){
         if(!line.startsWith('data: ')) continue;
         const data = line.slice(6).trim();
         if(data === '[DONE]') break;
         try{
           const ev = JSON.parse(data);
           const token = ev.choices?.[0]?.delta?.content;
-          if(token){
-            raw += token;
-            tokenBuffer += token;
-            // Ralentit l'affichage : render max toutes les 60ms (vitesse naturelle)
-            const now = Date.now();
-            if(now - lastRender > 60){
-              txtEl.innerHTML = renderMDStream(raw) + '<span class="stream-cursor">▋</span>';
-              scrollD();
-              lastRender = now;
-              await new Promise(r => setTimeout(r, 30));
-            }
-          }
+          if(token) raw += token;
         }catch(e){}
       }
     }
-    // Render final
-    txtEl.innerHTML = renderMDStream(raw) + '<span class="stream-cursor">▋</span>';
-    // Remove cursor after short pause
-    await new Promise(r => setTimeout(r, 400));
+
+    // ── Typewriter : écrit caractère par caractère ──
+    // Pause initiale avant de commencer à écrire (0.6–1s)
+    await new Promise(r => setTimeout(r, 600 + Math.random() * 400));
+
+    let displayed = '';
+    for(let i = 0; i < raw.length; i++){
+      displayed += raw[i];
+      txtEl.innerHTML = renderMDStream(displayed) + '<span class="stream-cursor">▋</span>';
+      scrollD();
+      // Délai variable : plus lent sur ponctuation/fin de phrase
+      const ch = raw[i];
+      let delay = 18 + Math.random() * 14; // ~18-32ms par caractère
+      if('.!?'.includes(ch)) delay = 280 + Math.random() * 150;
+      else if(',;:'.includes(ch)) delay = 120 + Math.random() * 60;
+      else if(ch === '\n') delay = 80;
+      await new Promise(r => setTimeout(r, delay));
+    }
+
+    // Retire le curseur
+    await new Promise(r => setTimeout(r, 350));
     const cursor = txtEl.querySelector('.stream-cursor');
     if(cursor) cursor.remove();
 

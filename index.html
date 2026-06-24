@@ -9157,6 +9157,46 @@ function loadTradesData(userId) {
   ALL_TRADES = [];
 }
 
+function getEffectiveDashboardTrades() {
+  try {
+    if (typeof window.getAccounts !== 'function' || typeof window.loadTradesForAccount !== 'function') {
+      return Array.isArray(ALL_TRADES) ? ALL_TRADES : [];
+    }
+
+    const filterType = window._currentInflowEarningsType || 'gross';
+    const sel = window._dashboardAccSelection || { mode:'aggregate', filterType:filterType, accountId:null };
+    const allAccs = window.getAccounts() || [];
+    const filteredAccs = allAccs.filter(function(acc) {
+      if (!acc) return false;
+      if (filterType === 'gross') return true;
+      const n = String(acc.name || '').toLowerCase();
+      if (filterType === 'challenge') return n.indexOf('challenge') !== -1;
+      if (filterType === 'verification') return n.indexOf('verif') !== -1 || n.indexOf('verification') !== -1;
+      if (filterType === 'funded') return n.indexOf('fund') !== -1 || n.indexOf('live') !== -1;
+      return false;
+    });
+
+    if (sel.mode === 'single' && sel.accountId) {
+      const acc = filteredAccs.find(function(a){ return a.id === sel.accountId; });
+      if (acc) return window.loadTradesForAccount(acc.id) || [];
+    }
+
+    let merged = [];
+    filteredAccs.forEach(function(acc) {
+      const trades = window.loadTradesForAccount(acc.id) || [];
+      merged = merged.concat(trades.map(function(trade) {
+        const copy = Object.assign({}, trade);
+        copy.__accId = acc.id;
+        copy.__accName = acc.name;
+        return copy;
+      }));
+    });
+    return merged;
+  } catch(e) {
+    return Array.isArray(ALL_TRADES) ? ALL_TRADES : [];
+  }
+}
+
 // ─── OBJECTIF ANNUEL ───────────────────────────────────────────────────────
 function goalKey() { return currentUser ? 'goal_' + currentUser.id : 'goal_guest'; }
 
@@ -9310,7 +9350,7 @@ function formatDay(d) { return d.toLocaleDateString('fr-FR', {weekday:'long', da
 function parseDate(s) { const [y,m,dd]=s.split('-'); return new Date(+y,+m-1,+dd); }
 
 function getTradesInRange(start, end) {
-  return ALL_TRADES.filter(t => {
+  return getEffectiveDashboardTrades().filter(t => {
     const d = parseDate(t.date);
     return d >= start && d <= end;
   });
@@ -9555,7 +9595,7 @@ function buildBarsForView(view, offset) {
     const dayNames = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
     for (let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
       const ds = d.toISOString().split('T')[0];
-      const trades = ALL_TRADES.filter(t => t.date === ds);
+      const trades = getEffectiveDashboardTrades().filter(t => t.date === ds);
       const pnl = trades.reduce((s,t) => s+t.pnl, 0);
       bars.push({
         label: dayNames[(d.getDay()+6)%7],
@@ -9571,7 +9611,7 @@ function buildBarsForView(view, offset) {
     const bars = [];
     for (let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
       const ds = d.toISOString().split('T')[0];
-      const trades = ALL_TRADES.filter(t => t.date === ds);
+      const trades = getEffectiveDashboardTrades().filter(t => t.date === ds);
       const pnl = trades.reduce((s,t) => s+t.pnl, 0);
       bars.push({
         label: d.getDate().toString(),
@@ -9589,7 +9629,7 @@ function buildBarsForView(view, offset) {
     for (let m = 0; m < 12; m++) {
       const ms = new Date(start.getFullYear(), m, 1);
       const me = new Date(start.getFullYear(), m+1, 0, 23,59,59);
-      const trades = ALL_TRADES.filter(t => { const d=parseDate(t.date); return d>=ms&&d<=me; });
+      const trades = getEffectiveDashboardTrades().filter(t => { const d=parseDate(t.date); return d>=ms&&d<=me; });
       const pnl = trades.reduce((s,t) => s+t.pnl, 0);
       bars.push({ label: monthNames[m], fullLabel: monthNames[m]+' '+start.getFullYear(), pnl, hasData: trades.length>0 });
     }
@@ -9607,6 +9647,7 @@ function render() {
 
   if (typeof updateGoalWidget === 'function') updateGoalWidget();
 
+  const allDashboardTrades = getEffectiveDashboardTrades();
   const trades = getTradesInRange(start, end);
 
   // Summary stats
@@ -9655,8 +9696,8 @@ function render() {
   // Stats mini
   renderStats(trades, winRate);
 
-  // Advanced stats — toujours sur ALL_TRADES complet (pas filtré par période)
-  if(typeof renderAdvStats==='function') renderAdvStats(ALL_TRADES || []);
+  // Advanced stats — toujours sur toutes les données visibles selon le filtre courant
+  if(typeof renderAdvStats==='function') renderAdvStats(allDashboardTrades || []);
 
   // Cumulative P&L chart — toujours tous les comptes
   setTimeout(function(){ refreshCumulChart(); }, 40);
@@ -9823,14 +9864,14 @@ function refreshCumulChart() {
     filtered.forEach((acc, i) => {
       const colorIdx = dashAccs.findIndex(a => a.id === acc.id);
       let trades = [];
-      if (acc.id === activeId && window.ALL_TRADES && window.ALL_TRADES.length > 0) {
+      if (!window._dashboardAggregateMode && acc.id === activeId && window.ALL_TRADES && window.ALL_TRADES.length > 0) {
         trades = window.ALL_TRADES;
       } else {
         try {
           const raw = localStorage.getItem('vm_trades_acc_' + acc.id);
           if (raw) trades = JSON.parse(raw) || [];
         } catch(e) {}
-        if (trades.length === 0 && acc.id === activeId) trades = window.ALL_TRADES || [];
+        if (trades.length === 0 && !window._dashboardAggregateMode && acc.id === activeId) trades = window.ALL_TRADES || [];
       }
       // PAS de filtre date — le cumulatif montre tout l'historique
       accData.push({ name: acc.name, color: CUMUL_COLORS[colorIdx % CUMUL_COLORS.length], trades });
@@ -10948,7 +10989,8 @@ document.addEventListener('mousedown', function(e) {
     const end   = window.customRangeEnd;
     if (!start || !end) { if(typeof render==='function') render(); return; }
 
-    const trades = (window.ALL_TRADES||[]).filter(function(t){
+    const allDashboardTrades = getEffectiveDashboardTrades();
+    const trades = (allDashboardTrades||[]).filter(function(t){
       const p=t.date.split('-'); const td=new Date(+p[0],+p[1]-1,+p[2]);
       return td>=start && td<=end;
     });
@@ -11021,7 +11063,7 @@ document.addEventListener('mousedown', function(e) {
     if (typeof renderTable==='function') renderTable(trades);
     if (typeof renderChannels==='function') renderChannels(trades, totalPnl);
     if (typeof renderStats==='function') renderStats(trades, winRate);
-    if (typeof renderAdvStats==='function') renderAdvStats(window.ALL_TRADES || []);
+    if (typeof renderAdvStats==='function') renderAdvStats(allDashboardTrades || []);
   }
 
   document.addEventListener('mousedown', function(e) {
@@ -12232,7 +12274,7 @@ document.addEventListener('click', function(e) {
 
   function fillInflowExtra(){
     try {
-      var trades = window.ALL_TRADES || [];
+      var trades = (typeof getEffectiveDashboardTrades === 'function') ? getEffectiveDashboardTrades() : (window.ALL_TRADES || []);
       if(!trades.length) return;
 
       // Profit Factor
@@ -12277,5 +12319,5 @@ document.addEventListener('click', function(e) {
 })();
 </script>
 
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a10da9388a45d110',t:'MTc4MjMyNDMzMA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

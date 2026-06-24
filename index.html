@@ -4386,17 +4386,16 @@ tbody tr:last-child td { border-bottom: none; }
               <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.06em;color:var(--text3);margin-bottom:4px;">COMMENT EXPORTER DEPUIS FTMO</div>
               <div style="font-size:11px;color:var(--text2);line-height:1.7;">1. <b style="color:var(--text)">trader.ftmo.com</b> → compte → <b style="color:var(--text)">Live MetriX</b><br>2. Section <b style="color:var(--text)">Trading Journal</b><br>3. Bouton <b style="color:var(--text)">Export</b> (bleu, à droite)<br>4. Télécharge le <b style="color:var(--text)">CSV ou Excel</b></div>
             </div>
-            <div id="sync-drop-zone"
-              style="border:1.5px dashed var(--border2);border-radius:8px;padding:18px;text-align:center;cursor:pointer;transition:all .15s;"
-              onclick="document.getElementById('sync-file-input').click()"
+            <label id="sync-drop-zone" for="sync-file-input"
+              style="border:1.5px dashed var(--border2);border-radius:8px;padding:18px;text-align:center;cursor:pointer;transition:all .15s;display:block;"
               ondragover="event.preventDefault();this.style.borderColor='rgba(61,142,240,.6)';this.style.background='rgba(61,142,240,.04)'"
               ondragleave="this.style.borderColor='var(--border2)';this.style.background='transparent'"
               ondrop="event.preventDefault();this.style.borderColor='var(--border2)';this.style.background='transparent';handleSyncFileDrop(event.dataTransfer.files[0])">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:22px;height:22px;color:var(--text3);margin-bottom:6px;display:block;margin-left:auto;margin-right:auto;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               <div id="sync-drop-label" style="font-size:11px;color:var(--text2);">Dépose ton fichier CSV ou Excel ici</div>
               <div style="font-size:10px;color:var(--text3);margin-top:3px;">ou clique pour sélectionner</div>
-              <input id="sync-file-input" type="file" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleSyncFileSelect(this.files[0])">
-            </div>
+              <input id="sync-file-input" type="file" accept=".csv,.xlsx,.xls" style="opacity:0;position:absolute;width:0;height:0;pointer-events:none;" onchange="handleSyncFileSelect(this.files[0])">
+            </label>
             <div id="sync-url-status" style="font-family:'DM Mono',monospace;font-size:9px;min-height:14px;text-align:center;color:var(--text3);"></div>
           </div>
         </div>
@@ -4696,30 +4695,19 @@ tbody tr:last-child td { border-bottom: none; }
         window.switchToAccount = function(acc) {
           window._dashboardAggregateMode = false;
           window._dashboardSourceAccounts = acc ? [acc.id] : [];
-          var curSel = window._dashboardAccSelection || { mode:'aggregate', filterType:getCurrentFilterType(), accountId:null };
-          if (curSel.mode === 'single') {
-            window._dashboardAccSelection = { mode:'single', filterType:getCurrentFilterType(), accountId: acc ? acc.id : null };
-          } else {
-            window._dashboardAccSelection = { mode:'aggregate', filterType:getCurrentFilterType(), accountId:null };
+          // Forcer mode single, puis laisser applyDashboardSelection charger les trades
+          if (acc) {
+            window._dashboardAccSelection = { mode:'single', filterType:getCurrentFilterType(), accountId: acc.id };
+            setAct(acc.id);
           }
-          if (!acc) { window.ALL_TRADES = []; }
-          else {
-            try { var t = JSON.parse(localStorage.getItem(tKey(acc.id))); window.ALL_TRADES = t || []; }
-            catch(e) { window.ALL_TRADES = []; }
-            // Sync legacy key so loadTradesData() finds the right trades after next login
-            try {
-              if(window.currentUser && window.currentUser.id){
-                localStorage.setItem('vm_trades_'+window.currentUser.id, JSON.stringify(window.ALL_TRADES));
-              }
-            } catch(e) {}
-          }
-          // After import: reset to year view so ALL trades are visible immediately
-          // Reset cumul canvas so it resizes correctly on next render
+          // Reset cumul canvas
           if (typeof cumulCanvas !== 'undefined') { cumulCanvas = null; cumulCtx = null; }
           try {
             window.useCustomRange = false;
             var yr = String(new Date().getFullYear());
             if(typeof applyShortcut==='function') applyShortcut('year', yr);
+            // applyDashboardSelection recharge ALL_TRADES depuis localStorage
+            applyDashboardSelection({ mode:'single', accountId: acc ? acc.id : null });
             if(typeof applyDateRange==='function') applyDateRange();
             else if(typeof render==='function') render();
           } catch(e) {
@@ -11532,17 +11520,16 @@ document.addEventListener('DOMContentLoaded', () => {
   <div class="ftmo-modal">
     <h3>Ajouter un compte</h3>
     <p>Exporte depuis <b>FTMO Live MetriX → Trading Journal → Export</b>, puis importe le CSV ou Excel ici.</p>
-    <div id="ftmo-drop-zone"
-      style="border:1.5px dashed var(--border2);border-radius:10px;padding:22px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:10px;"
-      onclick="document.getElementById('ftmo-file-input').click()"
+    <label id="ftmo-drop-zone" for="ftmo-file-input"
+      style="border:1.5px dashed var(--border2);border-radius:10px;padding:22px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:10px;display:block;"
       ondragover="event.preventDefault();this.style.borderColor='rgba(61,142,240,.6)';this.style.background='rgba(61,142,240,.04)'"
       ondragleave="this.style.borderColor='var(--border2)';this.style.background='transparent'"
       ondrop="event.preventDefault();this.style.borderColor='var(--border2)';this.style.background='transparent';handleFtmoFileDrop(event.dataTransfer.files[0])">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:26px;height:26px;color:var(--text3);margin-bottom:8px;display:block;margin-left:auto;margin-right:auto;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       <div id="ftmo-drop-label" style="font-size:12px;color:var(--text2);">Dépose ton fichier CSV ou Excel ici</div>
       <div style="font-size:11px;color:var(--text3);margin-top:4px;">ou clique pour sélectionner</div>
-      <input id="ftmo-file-input" type="file" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFtmoFileSelect(this.files[0])">
-    </div>
+      <input id="ftmo-file-input" type="file" accept=".csv,.xlsx,.xls" style="opacity:0;position:absolute;width:0;height:0;pointer-events:none;" onchange="handleFtmoFileSelect(this.files[0])">
+    </label>
     <input id="ftmo-name-input" type="text" placeholder="Nom du compte (optionnel)" />
     <div class="ftmo-status" id="ftmo-status"></div>
     <div class="ftmo-modal-btns">

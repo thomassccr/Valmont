@@ -4386,17 +4386,16 @@ tbody tr:last-child td { border-bottom: none; }
               <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.06em;color:var(--text3);margin-bottom:4px;">COMMENT EXPORTER DEPUIS FTMO</div>
               <div style="font-size:11px;color:var(--text2);line-height:1.7;">1. <b style="color:var(--text)">trader.ftmo.com</b> → compte → <b style="color:var(--text)">Live MetriX</b><br>2. Section <b style="color:var(--text)">Trading Journal</b><br>3. Bouton <b style="color:var(--text)">Export</b> (bleu, à droite)<br>4. Télécharge le <b style="color:var(--text)">CSV ou Excel</b></div>
             </div>
-            <div id="sync-drop-zone"
+            <label id="sync-drop-zone" for="sync-file-input"
               style="border:1.5px dashed var(--border2);border-radius:8px;padding:18px;text-align:center;cursor:pointer;transition:all .15s;display:block;"
-              ondragover="event.preventDefault();event.stopPropagation();this.style.borderColor='rgba(61,142,240,.6)';this.style.background='rgba(61,142,240,.04)'"
+              ondragover="event.preventDefault();this.style.borderColor='rgba(61,142,240,.6)';this.style.background='rgba(61,142,240,.04)'"
               ondragleave="this.style.borderColor='var(--border2)';this.style.background='transparent'"
-              ondrop="event.preventDefault();event.stopPropagation();this.style.borderColor='var(--border2)';this.style.background='transparent';handleSyncFileDrop(event.dataTransfer.files[0])"
-              onclick="document.getElementById('sync-file-input').click()">
+              ondrop="event.preventDefault();this.style.borderColor='var(--border2)';this.style.background='transparent';handleSyncFileDrop(event.dataTransfer.files[0])">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:22px;height:22px;color:var(--text3);margin-bottom:6px;display:block;margin-left:auto;margin-right:auto;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               <div id="sync-drop-label" style="font-size:11px;color:var(--text2);">Dépose ton fichier CSV ou Excel ici</div>
               <div style="font-size:10px;color:var(--text3);margin-top:3px;">ou clique pour sélectionner</div>
-              <input id="sync-file-input" type="file" accept=".csv,.xlsx,.xls" style="display:none;" onchange="handleSyncFileSelect(this.files[0])">
-            </div>
+              <input id="sync-file-input" type="file" accept=".csv,.xlsx,.xls" style="opacity:0;position:absolute;width:0;height:0;pointer-events:none;" onchange="handleSyncFileSelect(this.files[0])">
+            </label>
             <div id="sync-url-status" style="font-family:'DM Mono',monospace;font-size:9px;min-height:14px;text-align:center;color:var(--text3);"></div>
           </div>
         </div>
@@ -11076,6 +11075,10 @@ document.addEventListener('mousedown', function(e) {
 
   function getRangeForShortcut(key) {
     const now = drpToday();
+    if (key==='today') { return [new Date(now.getFullYear(),now.getMonth(),now.getDate()), new Date(now.getFullYear(),now.getMonth(),now.getDate(),23,59,59)]; }
+    if (key==='yesterday') { const y=new Date(now); y.setDate(y.getDate()-1); return [new Date(y.getFullYear(),y.getMonth(),y.getDate()), new Date(y.getFullYear(),y.getMonth(),y.getDate(),23,59,59)]; }
+    if (key==='week') { const mon=new Date(now); const dow=(mon.getDay()+6)%7; mon.setDate(mon.getDate()-dow); const sun=new Date(mon); sun.setDate(sun.getDate()+6); return [mon,sun]; }
+    if (key==='month') { const s=new Date(now.getFullYear(),now.getMonth(),1); const e=new Date(now.getFullYear(),now.getMonth()+1,0); return [s,e]; }
     if (key==='7d')   { const s=new Date(now); s.setDate(s.getDate()-6); return [s,now]; }
     if (key==='30d')  { const s=new Date(now); s.setDate(s.getDate()-29); return [s,now]; }
     if (key==='90d')  { const s=new Date(now); s.setDate(s.getDate()-89); return [s,now]; }
@@ -11521,17 +11524,16 @@ document.addEventListener('DOMContentLoaded', () => {
   <div class="ftmo-modal">
     <h3>Ajouter un compte</h3>
     <p>Exporte depuis <b>FTMO Live MetriX → Trading Journal → Export</b>, puis importe le CSV ou Excel ici.</p>
-    <div id="ftmo-drop-zone"
-      style="border:1.5px dashed var(--border2);border-radius:10px;padding:22px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:10px;"
-      ondragover="event.preventDefault();event.stopPropagation();this.style.borderColor='rgba(61,142,240,.6)';this.style.background='rgba(61,142,240,.04)'"
+    <label id="ftmo-drop-zone" for="ftmo-file-input"
+      style="border:1.5px dashed var(--border2);border-radius:10px;padding:22px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:10px;display:block;"
+      ondragover="event.preventDefault();this.style.borderColor='rgba(61,142,240,.6)';this.style.background='rgba(61,142,240,.04)'"
       ondragleave="this.style.borderColor='var(--border2)';this.style.background='transparent'"
-      ondrop="event.preventDefault();event.stopPropagation();this.style.borderColor='var(--border2)';this.style.background='transparent';handleFtmoFileDrop(event.dataTransfer.files[0])"
-      onclick="document.getElementById('ftmo-file-input').click()">
+      ondrop="event.preventDefault();this.style.borderColor='var(--border2)';this.style.background='transparent';handleFtmoFileDrop(event.dataTransfer.files[0])">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:26px;height:26px;color:var(--text3);margin-bottom:8px;display:block;margin-left:auto;margin-right:auto;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       <div id="ftmo-drop-label" style="font-size:12px;color:var(--text2);">Dépose ton fichier CSV ou Excel ici</div>
       <div style="font-size:11px;color:var(--text3);margin-top:4px;">ou clique pour sélectionner</div>
-      <input id="ftmo-file-input" type="file" accept=".csv,.xlsx,.xls" style="display:none;" onchange="handleFtmoFileSelect(this.files[0])">
-    </div>
+      <input id="ftmo-file-input" type="file" accept=".csv,.xlsx,.xls" style="opacity:0;position:absolute;width:0;height:0;pointer-events:none;" onchange="handleFtmoFileSelect(this.files[0])">
+    </label>
     <input id="ftmo-name-input" type="text" placeholder="Nom du compte (optionnel)" />
     <div class="ftmo-status" id="ftmo-status"></div>
     <div class="ftmo-modal-btns">
@@ -12532,11 +12534,10 @@ document.addEventListener('click', function(e) {
     btn.style.color = '#3d8ef0';
     btn.style.fontWeight = '600';
 
-    var yr = String(new Date().getFullYear());
-    var shortcuts = {today:'today', yesterday:'yesterday', week:'week', month:'month'};
-    var s = shortcuts[tab] || 'today';
+    var s = {today:'today', yesterday:'yesterday', week:'week', month:'month'}[tab] || 'today';
     if(typeof applyShortcut === 'function'){
-      applyShortcut(s, yr);
+      applyShortcut(s);
+      // applyShortcut set drpSelStart/drpSelEnd, now applyDateRange can render
       if(typeof applyDateRange === 'function') applyDateRange();
     }
   };

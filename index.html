@@ -6770,7 +6770,7 @@ async function callVM(isTradeAnalysis=false){
     const d = document.createElement('div');
     d.className = 'msg msg-stream';
     d.id = streamId;
-    d.innerHTML = `${getCoachAvatar()}<div class="msg-body"><div class="msg-from">Valmont</div><div class="msg-text fc" id="${streamId}-txt"><span class="stream-cursor">▋</span></div></div>`;
+    d.innerHTML = `${getCoachAvatar()}<div class="msg-body"><div class="msg-from">Valmont</div><div class="msg-text fc" id="${streamId}-txt"></div></div>`;
     w.appendChild(d);
     d.style.opacity='0'; d.style.transform='translateY(8px)';
     requestAnimationFrame(()=>{ d.style.transition='opacity .3s ease, transform .3s ease'; d.style.opacity='1'; d.style.transform='translateY(0)'; });
@@ -6798,18 +6798,27 @@ async function callVM(isTradeAnalysis=false){
       }
     }
 
-    // ── Typewriter : écrit caractère par caractère ──
+    // ── Typewriter : écrit caractère par caractère en texte brut ──
     // Pause initiale avant de commencer à écrire (1.2–2s)
     await new Promise(r => setTimeout(r, 1200 + Math.random() * 800));
 
+    // Nettoie le raw des balises internes avant affichage (SESSION_COMPLETE, CHIPS, VERDICT, etc)
+    const displayRaw = raw
+      .replace(/SESSION_COMPLETE[\s\S]*/,'')
+      .replace(/\[VERDICT:[^\]]*\]/g,'')
+      .replace(/\[CHIPS:[^\]]*\]/g,'')
+      .replace(/DATA:\{[\s\S]*?\}/g,'')
+      .replace(/PS\s*:\s*[\d,\s]+/g,'')
+      .trim();
+
     let displayed = '';
-    for(let i = 0; i < raw.length; i++){
-      displayed += raw[i];
-      txtEl.innerHTML = renderMDStream(displayed) + '<span class="stream-cursor">▋</span>';
+    for(let i = 0; i < displayRaw.length; i++){
+      displayed += displayRaw[i];
+      // Affiche en texte brut pendant l'écriture (pas de markdown partiel)
+      txtEl.textContent = displayed;
       scrollD();
-      // Délai variable façon ChatGPT : lent et humain
-      const ch = raw[i];
-      let delay = 35 + Math.random() * 30; // ~35-65ms par caractère
+      const ch = displayRaw[i];
+      let delay = 35 + Math.random() * 30;
       if('.!?'.includes(ch)) delay = 420 + Math.random() * 200;
       else if(',;:'.includes(ch)) delay = 180 + Math.random() * 80;
       else if(ch === '\n') delay = 140 + Math.random() * 60;
@@ -6817,10 +6826,9 @@ async function callVM(isTradeAnalysis=false){
       await new Promise(r => setTimeout(r, delay));
     }
 
-    // Retire le curseur
+    // Render markdown final une fois l'écriture terminée
+    txtEl.innerHTML = renderMD(displayRaw);
     await new Promise(r => setTimeout(r, 350));
-    const cursor = txtEl.querySelector('.stream-cursor');
-    if(cursor) cursor.remove();
 
     S.busy=false;
     if(raw.includes('SESSION_COMPLETE')){

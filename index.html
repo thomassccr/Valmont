@@ -4681,7 +4681,7 @@ tbody tr:last-child td { border-bottom: none; }
         };
 
         // Expose helpers globally so the import functions (outside this IIFE) use the SAME system
-        window.getAccounts           = getAccs;
+        window.getDashAccounts       = getAccs;
         window.saveAccounts          = saveAccs;
         window.getActiveId           = getAct;
         window.setActiveId           = setAct;
@@ -6240,7 +6240,7 @@ function loginAs(user) {
   setTimeout(function() {
     try {
       var activeId = localStorage.getItem('vm_dash_active');
-      var accs = window.getAccounts ? window.getAccounts() : [];
+      var accs = window.getDashAccounts ? window.getDashAccounts() : [];
       if (activeId) {
         var acc = accs.find(function(a){ return a.id === activeId; });
         if (acc) {
@@ -9525,13 +9525,13 @@ function loadTradesData(userId) {
 
 function getEffectiveDashboardTrades() {
   try {
-    if (typeof window.getAccounts !== 'function' || typeof window.loadTradesForAccount !== 'function') {
+    if (typeof window.getDashAccounts !== 'function' || typeof window.loadTradesForAccount !== 'function') {
       return Array.isArray(ALL_TRADES) ? ALL_TRADES : [];
     }
 
     const filterType = window._currentInflowEarningsType || 'gross';
     const sel = window._dashboardAccSelection || { mode:'aggregate', filterType:filterType, accountId:null };
-    const allAccs = window.getAccounts() || [];
+    const allAccs = window.getDashAccounts() || [];
     const filteredAccs = allAccs.filter(function(acc) {
       if (!acc) return false;
       if (filterType === 'gross') return true;
@@ -10756,7 +10756,7 @@ function saveTrade() {
       if (!targetId) { showToast('⚠ Sélectionne un compte pour ajouter un trade','warn','⚠',2600); return; }
       trade.__accId = targetId;
       try {
-        const accs = window.getAccounts ? window.getAccounts() : [];
+        const accs = window.getDashAccounts ? window.getDashAccounts() : [];
         const acc = accs.find(function(a){ return a.id === targetId; });
         if (acc && acc.name) trade.__accName = acc.name;
       } catch(e) {}
@@ -11075,6 +11075,10 @@ document.addEventListener('mousedown', function(e) {
 
   function getRangeForShortcut(key) {
     const now = drpToday();
+    if (key==='today') { return [new Date(now.getFullYear(),now.getMonth(),now.getDate()), new Date(now.getFullYear(),now.getMonth(),now.getDate(),23,59,59)]; }
+    if (key==='yesterday') { const y=new Date(now); y.setDate(y.getDate()-1); return [new Date(y.getFullYear(),y.getMonth(),y.getDate()), new Date(y.getFullYear(),y.getMonth(),y.getDate(),23,59,59)]; }
+    if (key==='week') { const mon=new Date(now); const dow=(mon.getDay()+6)%7; mon.setDate(mon.getDate()-dow); mon.setHours(0,0,0,0); const sun=new Date(mon); sun.setDate(sun.getDate()+6); sun.setHours(23,59,59,999); return [mon,sun]; }
+    if (key==='month') { return [new Date(now.getFullYear(),now.getMonth(),1), new Date(now.getFullYear(),now.getMonth()+1,0,23,59,59)]; }
     if (key==='7d')   { const s=new Date(now); s.setDate(s.getDate()-6); return [s,now]; }
     if (key==='30d')  { const s=new Date(now); s.setDate(s.getDate()-29); return [s,now]; }
     if (key==='90d')  { const s=new Date(now); s.setDate(s.getDate()-89); return [s,now]; }
@@ -11616,7 +11620,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     parseFtmoCSV(file, function(trades) {
       var customName  = document.getElementById('ftmo-name-input').value.trim();
-      var accs        = window.getAccounts();
+      var accs        = window.getDashAccounts();
       var activeId    = window.getActiveId();
       var existingAcc = activeId ? accs.find(function(a){ return a.id === activeId; }) : null;
 
@@ -11863,7 +11867,7 @@ function processSyncFile(file) {
     // Always use window.* to target the TRADING ACCOUNTS system (vm_dash_accounts)
     // NOT the login accounts system (vm_accounts) — using bare names resolves to the wrong scope
     var activeId = window.getActiveId ? window.getActiveId() : localStorage.getItem('vm_dash_active');
-    var accs = window.getAccounts ? window.getAccounts() : [];
+    var accs = window.getDashAccounts ? window.getDashAccounts() : [];
     var existingAcc = activeId ? accs.find(function(a){ return a.id === activeId; }) : null;
 
     // If activeId exists but wasn't found in the list (race condition / stale list),
@@ -12654,7 +12658,7 @@ document.addEventListener('click', function(e) {
       return;
     }
 
-    var accs = typeof getAccounts === 'function' ? getAccounts() : [];
+    var accs = typeof window.getDashAccounts === 'function' ? window.getDashAccounts() : [];
     var filterType = window._currentInflowEarningsType || 'gross';
     if(filterType === 'gross'){
       var allTrades = [];

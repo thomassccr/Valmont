@@ -5573,8 +5573,8 @@ tbody tr:last-child td { border-bottom: none; }
     `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:40px;height:40px;"><circle cx="20" cy="20" r="20" fill="rgba(180,120,60,0.12)"/><text x="20" y="26" text-anchor="middle" font-size="20">🥉</text></svg>`
   ];
 
-  // Static dataset (mirrors FTMO leaderboard as of 24 Jun 2026)
-  const DATASET = [
+  // ─── Static FTMO dataset (fallback when no VALMONT users) ───
+  const FTMO_DATASET = [
     {rank:1,  name:'BeBee8',      country:'SK', profit:118017, equity:518017, gain:30, size:400000},
     {rank:2,  name:'Xing D.',     country:'CN', profit:114293, equity:514293, gain:29, size:400000},
     {rank:3,  name:'MILO1314',    country:'MY', profit:99934,  equity:499934, gain:25, size:400000},
@@ -5607,10 +5607,111 @@ tbody tr:last-child td { border-bottom: none; }
     return '$' + n.toLocaleString('en-US');
   }
 
+  // ─── Read VALMONT users from localStorage and build their leaderboard entries ───
+  function getValmontUsers() {
+    var users = [];
+    try {
+      var raw = localStorage.getItem('vm_dash_accounts');
+      if (!raw) return users;
+      var accounts = JSON.parse(raw);
+      if (!Array.isArray(accounts)) return users;
+
+      var activeAccountId = localStorage.getItem('vm_dash_active') || null;
+
+      accounts.forEach(function(acc) {
+        if (!acc || !acc.id || !acc.name) return;
+
+        // Load trades for this account
+        var trades = [];
+        try {
+          var tradesRaw = localStorage.getItem('vm_trades_acc_' + acc.id);
+          if (tradesRaw) {
+            var parsed = JSON.parse(tradesRaw);
+            if (Array.isArray(parsed)) trades = parsed;
+          }
+        } catch(e) {}
+
+        // Compute total P&L
+        var totalPnl = 0;
+        trades.forEach(function(t) {
+          var v = parseFloat(t && t.pnl);
+          if (!isNaN(v)) totalPnl += v;
+        });
+
+        // Determine account size
+        // 1. If stored on the account, use it
+        // 2. Otherwise infer from trade notional (entry × lots) for a representative trade
+        // 3. Otherwise default to 100k
+        var size = 100000;
+        if (typeof acc.size === 'number' && acc.size > 0) {
+          size = acc.size;
+        } else if (trades.length > 0) {
+          // Find first trade with entry & lots to estimate notional
+          for (var i = 0; i < trades.length; i++) {
+            var t = trades[i];
+            var entry = parseFloat(t.entry);
+            var lots = parseFloat(t.lots);
+            if (!isNaN(entry) && !isNaN(lots) && entry > 0 && lots > 0) {
+              // FTMO instruments: NAS100, US30, US500 use points × $X per point
+              // We'll just use entry × lots × 100 as a rough notional proxy
+              size = Math.round(entry * lots * 100);
+              // Snap to nearest standard FTMO size
+              if (size > 300000) size = 400000;
+              else if (size > 200000) size = 300000;
+              else if (size > 150000) size = 200000;
+              else if (size > 75000) size = 100000;
+              else if (size > 35000) size = 50000;
+              else if (size > 15000) size = 25000;
+              else size = 10000;
+              break;
+            }
+          }
+        }
+
+        var equity = size + totalPnl;
+        var gain = size > 0 ? Math.round((totalPnl / size) * 100) : 0;
+
+        // Determine country (default 🌐 if not set)
+        var country = acc.country || '🌐';
+
+        users.push({
+          rank: 0, // Will be recalculated
+          name: acc.name,
+          country: country,
+          profit: Math.round(totalPnl),
+          equity: Math.round(equity),
+          gain: gain,
+          size: size,
+          isValmontUser: true,
+          isCurrentUser: acc.id === activeAccountId
+        });
+      });
+    } catch (e) {
+      console.error('Error loading VALMONT users for leaderboard:', e);
+    }
+    return users;
+  }
+
+  // Build the full combined dataset — everyone sorted by profit together
+  function buildCombinedDataset() {
+    var valmont = getValmontUsers();
+    var all = valmont.concat(FTMO_DATASET);
+    // Sort globally by profit (highest first) — VALMONT and FTMO users compete equally
+    all.sort(function(a, b) { return b.profit - a.profit; });
+    return all;
+  }
+
   function getFiltered() {
-    const sz = SIZE_MAP[currentSize];
-    if (!sz) return DATASET;
-    return DATASET.filter(d => d.size === sz).map((d,i) => ({...d, rank:i+1}));
+    var combined = buildCombinedDataset();
+    var sz = SIZE_MAP[currentSize];
+    var filtered;
+    if (!sz) {
+      filtered = combined;
+    } else {
+      filtered = combined.filter(function(d) { return d.size === sz; });
+    }
+    // Re-rank
+    return filtered.map(function(d, i) { return Object.assign({}, d, { rank: i + 1 }); });
   }
 
   function renderPodium(data) {
@@ -5621,12 +5722,24 @@ tbody tr:last-child td { border-bottom: none; }
 
     el.innerHTML = top3.map((d,i) => {
       const flag = FLAGS[d.country] || '🌐';
-      return `<div class="lb-podium-card">
+      const valmontBadge = d.isValmontUser
+        ? '<span style="display:inline-flex;align-items:center;font-family:\'DM Mono\',monospace;font-size:8px;letter-spacing:.1em;padding:2px 6px;border-radius:3px;background:rgba(61,142,240,.18);color:#3d8ef0;border:1px solid rgba(61,142,240,.3);margin-left:6px;">VALMONT</span>'
+        : '';
+      const meBadge = d.isCurrentUser
+        ? '<span style="display:inline-flex;align-items:center;font-family:\'DM Mono\',monospace;font-size:8px;letter-spacing:.1em;padding:2px 6px;border-radius:3px;background:rgba(255,200,50,.18);color:#ffc832;border:1px solid rgba(255,200,50,.4);margin-left:4px;">★ MOI</span>'
+        : '';
+      const cardStyle = d.isCurrentUser
+        ? 'background:linear-gradient(135deg,#1a1e2a 0%,#2a2418 100%);border:1px solid rgba(255,200,50,.25);'
+        : 'background:linear-gradient(135deg,#1a1e2a 0%,#1e2440 100%);border:1px solid rgba(255,255,255,.09);';
+      return `<div class="lb-podium-card" style="${cardStyle}border-radius:12px;padding:20px;position:relative;transition:transform .18s,box-shadow .18s;cursor:default;">
         <div class="lb-rank-badge">${d.rank}.</div>
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
           <div>${TROPHY_SVG[i]}</div>
-          <div>
-            <div style="font-size:15px;font-weight:600;color:#e0ddd8;font-family:'DM Sans',sans-serif;">${d.name}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+              <div style="font-size:15px;font-weight:600;color:#e0ddd8;font-family:'DM Sans',sans-serif;overflow:hidden;text-overflow:ellipsis;">${d.name}</div>
+              ${valmontBadge}${meBadge}
+            </div>
             <div style="font-size:12px;color:#888;font-family:'DM Sans',sans-serif;margin-top:2px;">${flag} ${d.country}</div>
           </div>
         </div>
@@ -5660,9 +5773,18 @@ tbody tr:last-child td { border-bottom: none; }
 
     tbody.innerHTML = rows.map(d => {
       const flag = FLAGS[d.country] || '🌐';
-      return `<tr class="lb-tr">
+      const valmontBadge = d.isValmontUser
+        ? '<span style="display:inline-flex;align-items:center;font-family:\'DM Mono\',monospace;font-size:7px;letter-spacing:.1em;padding:1px 5px;border-radius:3px;background:rgba(61,142,240,.18);color:#3d8ef0;border:1px solid rgba(61,142,240,.3);margin-left:6px;vertical-align:middle;">VALMONT</span>'
+        : '';
+      const meBadge = d.isCurrentUser
+        ? '<span style="display:inline-flex;align-items:center;font-family:\'DM Mono\',monospace;font-size:7px;letter-spacing:.1em;padding:1px 5px;border-radius:3px;background:rgba(255,200,50,.2);color:#ffc832;border:1px solid rgba(255,200,50,.4);margin-left:4px;vertical-align:middle;">★ MOI</span>'
+        : '';
+      const nameStyle = d.isCurrentUser
+        ? 'color:#ffc832;font-weight:700;'
+        : 'color:#e0ddd8;';
+      return `<tr class="lb-tr"${d.isCurrentUser ? ' style="background:rgba(255,200,50,.05);"' : ''}>
         <td class="lb-td" style="color:#555;font-size:13px;">${d.rank}.</td>
-        <td class="lb-td">${d.name}</td>
+        <td class="lb-td" style="${nameStyle}">${d.name}${valmontBadge}${meBadge}</td>
         <td class="lb-td">${fmt(d.profit)}</td>
         <td class="lb-td">${fmt(d.equity)}</td>
         <td class="lb-td lb-gain-green" style="font-weight:600;">${d.gain}%</td>
@@ -12575,5 +12697,5 @@ document.addEventListener('click', function(e) {
 })();
 </script>
 
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a10da9388a45d110',t:'MTc4MjMyNDMzMA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a10e2d470e3b9ee9',t:'MTc4MjMyOTczOQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a10da9388a45d110',t:'MTc4MjMyNDMzMA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

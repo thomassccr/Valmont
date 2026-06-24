@@ -1201,7 +1201,7 @@ body::after { content:''; position:fixed; inset:0; background-image:url("data:im
 .dot { width:5px; height:5px; border-radius:50%; background:var(--gold-dim); border:1px solid rgba(61,142,240,.3); animation:blink 1.4s ease-in-out infinite; }
 .dot:nth-child(2){animation-delay:.2s;} .dot:nth-child(3){animation-delay:.4s;}
 @keyframes blink{0%,80%,100%{opacity:.2;transform:scale(.8);}40%{opacity:1;transform:scale(1.1);}}
-.tone-pill { display:none; align-items:center; gap:7px; padding:5px 12px; background:var(--panel); border:1px solid var(--border); border-radius:20px; width:fit-content; margin:0 28px 4px; }
+.tone-pill { display:none !important; visibility:hidden; pointer-events:none; }
 .tone-dot { width:6px; height:6px; border-radius:50%; background:var(--gold); }
 .tone-lbl { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--text3); }
 .chat-foot { flex-shrink:0; padding:8px 16px 14px; max-width:900px; width:100%; margin:0 auto; display:flex; flex-direction:column; gap:6px; }
@@ -6798,20 +6798,21 @@ async function callVM(isTradeAnalysis=false){
     }
 
     // ── Typewriter : écrit caractère par caractère ──
-    // Pause initiale avant de commencer à écrire (0.6–1s)
-    await new Promise(r => setTimeout(r, 600 + Math.random() * 400));
+    // Pause initiale avant de commencer à écrire (1.2–2s)
+    await new Promise(r => setTimeout(r, 1200 + Math.random() * 800));
 
     let displayed = '';
     for(let i = 0; i < raw.length; i++){
       displayed += raw[i];
       txtEl.innerHTML = renderMDStream(displayed) + '<span class="stream-cursor">▋</span>';
       scrollD();
-      // Délai variable : plus lent sur ponctuation/fin de phrase
+      // Délai variable façon ChatGPT : lent et humain
       const ch = raw[i];
-      let delay = 18 + Math.random() * 14; // ~18-32ms par caractère
-      if('.!?'.includes(ch)) delay = 280 + Math.random() * 150;
-      else if(',;:'.includes(ch)) delay = 120 + Math.random() * 60;
-      else if(ch === '\n') delay = 80;
+      let delay = 35 + Math.random() * 30; // ~35-65ms par caractère
+      if('.!?'.includes(ch)) delay = 420 + Math.random() * 200;
+      else if(',;:'.includes(ch)) delay = 180 + Math.random() * 80;
+      else if(ch === '\n') delay = 140 + Math.random() * 60;
+      else if(ch === ' ') delay = 25 + Math.random() * 20;
       await new Promise(r => setTimeout(r, delay));
     }
 

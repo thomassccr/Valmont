@@ -4916,18 +4916,19 @@ tbody tr:last-child td { border-bottom: none; }
           <div class="bar-date" id="bar-date"></div>
         </div>
       </div>
-      <div class="chat-msgs" id="msgs"></div>
-      <div id="typing-row">
-        <div class="avatar coach" style="background:transparent;border:none;overflow:visible;">
-          <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="width:32px;height:32px;display:block;flex-shrink:0;">
-            <rect width="32" height="32" rx="7" fill="#080808" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
-            <polygon points="6,7 13,7 16,20 19,7 26,7 20,25 12,25" fill="#080808"/>
-            <polyline points="6,7 13,7 16,20 19,7 26,7 20,25 12,25 6,7" fill="none" stroke="rgba(61,142,240,0.9)" stroke-width="1.2" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:3px;">
-          <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-          <div id="typing-lbl" style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--text3);text-transform:uppercase;">Valmont analyse…</div>
+      <div class="chat-msgs" id="msgs">
+        <div id="typing-row">
+          <div class="avatar coach" style="background:transparent;border:none;overflow:visible;">
+            <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="width:32px;height:32px;display:block;flex-shrink:0;">
+              <rect width="32" height="32" rx="7" fill="#080808" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+              <polygon points="6,7 13,7 16,20 19,7 26,7 20,25 12,25" fill="#080808"/>
+              <polyline points="6,7 13,7 16,20 19,7 26,7 20,25 12,25 6,7" fill="none" stroke="rgba(61,142,240,0.9)" stroke-width="1.2" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px;">
+            <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+            <div id="typing-lbl" style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--text3);text-transform:uppercase;">Valmont réfléchit…</div>
+          </div>
         </div>
       </div>
       <div class="tone-pill" id="tone-pill">
@@ -7014,21 +7015,25 @@ function addMsg(who,text){
 let _typingTimer = null;
 function setTyping(v){
   const row = document.getElementById('typing-row');
+  const msgs = document.getElementById('msgs');
   const lbl = document.getElementById('typing-lbl');
-  row.style.display = v ? 'flex' : 'none';
-  document.getElementById('send-btn').disabled = v;
   if(v){
+    // Déplace le typing-row à la fin du conteneur msgs
+    msgs.appendChild(row);
+    row.style.display = 'flex';
     scrollD();
     if(lbl){
-      const phases = ['Valmont analyse…','Valmont réfléchit…','Valmont rédige…'];
+      const phases = ['Valmont réfléchit…','Valmont analyse…','Valmont rédige…'];
       let pi = 0;
       lbl.textContent = phases[0];
       clearInterval(_typingTimer);
       _typingTimer = setInterval(()=>{ pi=(pi+1)%phases.length; lbl.textContent=phases[pi]; }, 1800);
     }
   } else {
+    row.style.display = 'none';
     clearInterval(_typingTimer);
   }
+  document.getElementById('send-btn').disabled = v;
 }
 
 function viewSession(s){

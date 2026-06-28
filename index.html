@@ -8454,20 +8454,14 @@ async function fetchMktData(force = false) {
   const groqMktFetch = (async () => {
     try {
       const today = new Date().toISOString().split('T')[0];
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
-        body: JSON.stringify({
-          model: 'llama-3.1-8b-instant',
-          max_tokens: 150,
-          temperature: 0,
-          messages: [{ role: 'user', content: `Today is ${today}. Give me approximate current market prices for: 1) S&P 500 index (SPX) 2) Nasdaq 100 index (NDX) 3) WTI Crude Oil per barrel. Reply ONLY with valid JSON, no text: {"spx":{"price":5900,"pct":-0.3},"ndx":{"price":21500,"pct":-0.8},"oil":{"price":68.50,"pct":-0.3}}` }]
-        }),
-        signal: AbortSignal.timeout(10000)
+      const r = await vmFetch({
+        model: 'llama-3.1-8b-instant',
+        max_tokens: 150,
+        messages: [{ role: 'user', content: `Today is ${today}. Give me approximate current market prices for: 1) S&P 500 index (SPX) 2) Nasdaq 100 index (NDX) 3) WTI Crude Oil per barrel. Reply ONLY with valid JSON, no text: {"spx":{"price":5900,"pct":-0.3},"ndx":{"price":21500,"pct":-0.8},"oil":{"price":68.50,"pct":-0.3}}` }]
       });
-      if (!res.ok) return;
-      const data = await res.json();
-      const text = (data.choices?.[0]?.message?.content || '').trim();
+      if (!r || !r.ok) return;
+      const rdata = await r.json();
+      const text = (rdata?.content?.[0]?.text || '').trim();
       const match = text.match(/\{[\s\S]*\}/);
       if (!match) return;
       const j = JSON.parse(match[0]);
@@ -8480,7 +8474,7 @@ async function fetchMktData(force = false) {
       if (j.oil?.price && isFinite(j.oil.price) && j.oil.price > 20 && j.oil.price < 300) {
         _mktData['CL=F'] = { price: j.oil.price, pct: j.oil.pct || 0, chg: 0, spark: makeSpark(j.oil.price, j.oil.pct || 0) };
       }
-    } catch(e) {}
+    } catch(e) { console.error('groqMktFetch error:', e); }
   })();
 
   await Promise.allSettled([binanceFetch, indicesFetch, groqMktFetch, oilFetch]);

@@ -936,7 +936,7 @@ body::after { content:''; position:fixed; inset:0; background-image:url("data:im
 .login-field-wrap { position:relative; margin-bottom:14px; animation:fadeUp .5s .4s ease both; }
 .login-label {
   font-size:9px; letter-spacing:.2em;
-  text-transform:uppercase; color:var(--text3);
+  text-transform:uppercase; color:#ffffff;
   text-align:left; margin-bottom:8px;
   font-family:'DM Mono',monospace;
   display:block;
@@ -996,6 +996,13 @@ body::after { content:''; position:fixed; inset:0; background-image:url("data:im
 }
 @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
 @keyframes fadeUp { from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);} }
+
+/* ── AUTH TABS (login / register) ── */
+.auth-tabs { display:flex; gap:0; margin-bottom:22px; border-bottom:1px solid var(--border2); }
+.auth-tab { flex:1; padding:9px 0; background:none; border:none; cursor:pointer; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--text3); transition:color .2s; position:relative; }
+.auth-tab.active { color:#fff; }
+.auth-tab.active::after { content:''; position:absolute; bottom:-1px; left:0; right:0; height:1px; background:var(--gold); }
+.auth-tab:hover:not(.active) { color:var(--text2); }
 
 /* SIDEBAR */
 .sidebar { width:58px; flex-shrink:0; background:var(--sidebar); border-right:1px solid var(--border); display:flex; flex-direction:column; height:100vh; position:fixed; left:0; top:0; z-index:10; transition:width .25s cubic-bezier(.4,0,.2,1); }
@@ -4033,20 +4040,26 @@ tbody tr:last-child td { border-bottom: none; }
     <div class="login-logo">VALMONT</div>
     <div class="login-sub">Remember why you started</div>
 
-    <!-- Step 1 : identifiant + mot de passe -->
+    <!-- Tabs connexion / inscription -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Connexion</button>
+      <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Créer un compte</button>
+    </div>
+
+    <!-- Step 1 : email + mot de passe (connexion) -->
     <div id="login-step-pw">
       <div class="login-field-wrap">
-        <label class="login-label">Identifiant</label>
+        <label class="login-label">Adresse e-mail</label>
         <div class="login-input-wrap">
-          <svg class="login-input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <input class="login-input" id="id-in" type="text" placeholder="Votre identifiant" autocomplete="off">
+          <svg class="login-input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+          <input class="login-input" id="id-in" type="email" placeholder="votre@email.com" autocomplete="email">
         </div>
       </div>
       <div class="login-field-wrap" style="margin-top:12px;">
         <label class="login-label">Mot de passe</label>
         <div class="login-input-wrap">
           <svg class="login-input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <input class="login-input" id="pw-in" type="password" placeholder="••••••••" autocomplete="off">
+          <input class="login-input" id="pw-in" type="password" placeholder="••••••••" autocomplete="current-password">
           <button class="login-toggle" tabindex="-1" onclick="togglePw()" title="Afficher">
             <svg id="pw-eye" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
@@ -4055,18 +4068,35 @@ tbody tr:last-child td { border-bottom: none; }
       <button class="login-btn" onclick="doLogin()">ENTRER</button>
     </div>
 
-    <!-- Step 2 : premier prénom (nouveaux users seulement) -->
-    <div id="login-step-name" style="display:none;">
-      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;color:var(--text3);margin-bottom:18px;line-height:1.7;text-align:center;">Bienvenue. Comment<br>souhaitez-vous être appelé ?</div>
+    <!-- Formulaire création de compte -->
+    <div id="login-step-register" style="display:none;">
       <div class="login-field-wrap">
-        <label class="login-label">Votre prénom</label>
+        <label class="login-label">Prénom</label>
         <div class="login-input-wrap">
           <svg class="login-input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <input class="login-input" id="name-in" type="text" placeholder="Prénom" autocomplete="off" style="padding-left:42px;">
+          <input class="login-input" id="reg-name-in" type="text" placeholder="Votre prénom" autocomplete="given-name">
         </div>
       </div>
-      <button class="login-btn" onclick="doSetName()">CONFIRMER</button>
+      <div class="login-field-wrap" style="margin-top:12px;">
+        <label class="login-label">Adresse e-mail</label>
+        <div class="login-input-wrap">
+          <svg class="login-input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+          <input class="login-input" id="reg-email-in" type="email" placeholder="votre@email.com" autocomplete="email">
+        </div>
+      </div>
+      <div class="login-field-wrap" style="margin-top:12px;">
+        <label class="login-label">Mot de passe</label>
+        <div class="login-input-wrap">
+          <svg class="login-input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input class="login-input" id="reg-pw-in" type="password" placeholder="••••••••" autocomplete="new-password">
+          <button class="login-toggle" tabindex="-1" onclick="toggleRegPw()" title="Afficher">
+            <svg id="reg-pw-eye" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <button class="login-btn" onclick="doRegister()">CRÉER MON COMPTE</button>
     </div>
+
 
     <div class="login-error" id="login-err"></div>
 
@@ -6385,21 +6415,58 @@ function doLogout() {
   document.getElementById('pw-in').value = '';
   document.getElementById('login-err').textContent = '';
   document.getElementById('login-step-pw').style.display = '';
-  document.getElementById('login-step-name').style.display = 'none';
+  document.getElementById('login-step-register').style.display = 'none';
+  document.getElementById('tab-login').classList.add('active');
+  document.getElementById('tab-register').classList.remove('active');
   renderAccountsList();
   requestAnimationFrame(() => { ls.style.transition = 'opacity .4s ease'; ls.style.opacity = '1'; });
+}
+
+function switchAuthTab(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('tab-login').classList.toggle('active', isLogin);
+  document.getElementById('tab-register').classList.toggle('active', !isLogin);
+  document.getElementById('login-step-pw').style.display = isLogin ? '' : 'none';
+  document.getElementById('login-step-register').style.display = isLogin ? 'none' : '';
+  document.getElementById('login-err').textContent = '';
+}
+
+function toggleRegPw() {
+  const inp = document.getElementById('reg-pw-in');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function doRegister() {
+  const name = (document.getElementById('reg-name-in')?.value || '').trim();
+  const email = (document.getElementById('reg-email-in')?.value || '').trim().toLowerCase();
+  const pw = (document.getElementById('reg-pw-in')?.value || '').trim();
+  const err = document.getElementById('login-err');
+  err.textContent = '';
+
+  if (!name) { err.textContent = "Merci d'entrer votre prénom."; return; }
+  if (!email || !email.includes('@')) { err.textContent = "Adresse e-mail invalide."; return; }
+  if (pw.length < 6) { err.textContent = "Mot de passe trop court (6 caractères minimum)."; return; }
+
+  const accounts = getAccounts();
+  const existing = accounts.find(a => a.email === email);
+  if (existing) { err.textContent = "Un compte existe déjà avec cette adresse."; return; }
+
+  const newUser = { id: 'user_' + Date.now(), name: name, email: email, pw: btoa(pw), isBoss: false };
+  accounts.push(newUser);
+  saveAccounts(accounts);
+  loginAs(newUser);
 }
 
 let _pendingPwType = null; // 'boss' ou 'user'
 
 function doLogin() {
-  const id = (document.getElementById('id-in')?.value || '').trim();
+  const email = (document.getElementById('id-in')?.value || '').trim().toLowerCase();
   const pw = document.getElementById('pw-in').value.trim();
   const err = document.getElementById('login-err');
   err.textContent = '';
 
-  if (!id) {
-    err.textContent = "Merci d'entrer votre identifiant.";
+  if (!email) {
+    err.textContent = "Merci d'entrer votre adresse e-mail.";
     document.getElementById('id-in').focus();
     const box = document.querySelector('.login-box');
     box.style.animation = 'none'; box.offsetHeight;
@@ -6407,15 +6474,15 @@ function doLogin() {
     return;
   }
 
-  // ── ADMIN BYPASS : thomassccr + mot de passe boss → accès Elite direct sans paiement ──
-  if (id === 'thomassccr' && pw === PW_BOSS) {
+  // ── ADMIN BYPASS : thomassccr@valmont.com + mot de passe boss → accès Elite direct ──
+  if (email === 'thomassccr@valmont.com' && pw === PW_BOSS) {
     _pendingPwType = 'boss';
     localStorage.setItem(PLAN_KEY, 'elite');
     localStorage.setItem('vm_admin_bypass', '1');
     const accounts = getAccounts();
     let boss = accounts.find(a => a.isBoss);
     if (!boss) {
-      boss = { id: 'boss', name: 'Thomas', isBoss: true };
+      boss = { id: 'boss', name: 'Thomas', email: 'thomassccr@valmont.com', isBoss: true };
       accounts.unshift(boss);
       saveAccounts(accounts);
     } else {
@@ -6428,11 +6495,10 @@ function doLogin() {
 
   if (pw === PW_BOSS) {
     _pendingPwType = 'boss';
-    // Le boss a toujours le même compte — on cherche ou crée
     const accounts = getAccounts();
     let boss = accounts.find(a => a.isBoss);
     if (!boss) {
-      boss = { id: 'boss', name: 'Mr. Cicero', isBoss: true };
+      boss = { id: 'boss', name: 'Mr. Cicero', email: email, isBoss: true };
       accounts.unshift(boss);
       saveAccounts(accounts);
     }
@@ -6442,28 +6508,38 @@ function doLogin() {
 
   if (pw === PW_USER) {
     _pendingPwType = 'user';
-    // Vérifier si des comptes user existent déjà → afficher choix
     const accounts = getAccounts().filter(a => !a.isBoss);
     if (accounts.length > 0) {
-      // Afficher liste des comptes + option créer nouveau
       renderAccountsList(true);
       return;
     }
-    // Nouveau user → demander prénom
-    document.getElementById('login-step-pw').style.display = 'none';
-    document.getElementById('login-step-name').style.display = '';
-    setTimeout(() => document.getElementById('name-in').focus(), 50);
+    switchAuthTab('register');
+    if (document.getElementById('reg-email-in')) document.getElementById('reg-email-in').value = email;
     return;
   }
 
-  err.textContent = 'Mot de passe incorrect.';
-  const box = document.querySelector('.login-box');
-  box.style.animation = 'none'; box.offsetHeight;
-  box.style.animation = 'loginShake .35s ease';
+  // ── Authentification par email + mot de passe personnalisé ──
+  const accounts = getAccounts();
+  const user = accounts.find(a => a.email === email);
+  if (!user) {
+    err.textContent = 'Aucun compte trouvé avec cette adresse.';
+    const box = document.querySelector('.login-box');
+    box.style.animation = 'none'; box.offsetHeight;
+    box.style.animation = 'loginShake .35s ease';
+    return;
+  }
+  if (user.pw && atob(user.pw) !== pw) {
+    err.textContent = 'Mot de passe incorrect.';
+    const box = document.querySelector('.login-box');
+    box.style.animation = 'none'; box.offsetHeight;
+    box.style.animation = 'loginShake .35s ease';
+    return;
+  }
+  loginAs(user);
 }
 
 function doSetName() {
-  const name = document.getElementById('name-in').value.trim();
+  const name = (document.getElementById('reg-name-in')?.value || '').trim();
   if (!name) { document.getElementById('login-err').textContent = "Merci d'entrer un prénom."; return; }
   const accounts = getAccounts();
   const newUser = { id: 'user_' + Date.now(), name: name, isBoss: false };
@@ -6504,7 +6580,7 @@ function renderAccountsList(afterPwSuccess) {
   const userAccounts = allAccounts.filter(a => !a.isBoss);
   if (afterPwSuccess && userAccounts.length > 0) {
     document.getElementById('login-step-pw').style.display = 'none';
-    document.getElementById('login-step-name').style.display = 'none';
+    document.getElementById('login-step-register').style.display = 'none';
   }
 
   // Afficher tous les comptes (boss + users) s'il en existe
@@ -6543,10 +6619,10 @@ function renderAccountsList(afterPwSuccess) {
 
     btn.onclick = () => {
       if (u.isBoss) {
-        // Pré-remplir identifiant + mot de passe admin et connecter directement
+        // Pré-remplir email + mot de passe admin et connecter directement
         const idIn = document.getElementById('id-in');
         const pwIn = document.getElementById('pw-in');
-        if (idIn) idIn.value = 'thomassccr';
+        if (idIn) idIn.value = u.email || 'thomassccr@valmont.com';
         if (pwIn) pwIn.value = PW_BOSS;
         // Connexion directe
         doLogin();
@@ -6575,8 +6651,7 @@ function renderAccountsList(afterPwSuccess) {
       '<div class="lac-info"><div class="lac-name" style="color:var(--text2)">Nouveau compte</div></div>';
     newBtn.onclick = () => {
       wrap.innerHTML = '';
-      document.getElementById('login-step-name').style.display = '';
-      setTimeout(() => document.getElementById('name-in').focus(), 50);
+      switchAuthTab('register');
     };
     wrap.appendChild(newBtn);
   }
@@ -6785,7 +6860,9 @@ document.head.appendChild(shakeStyle);
 
 document.getElementById('id-in')?.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('pw-in').focus();});
 document.getElementById('pw-in').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
-document.getElementById('name-in').addEventListener('keydown',e=>{if(e.key==='Enter')doSetName();});
+document.getElementById('reg-name-in')?.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('reg-email-in').focus();});
+document.getElementById('reg-email-in')?.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('reg-pw-in').focus();});
+document.getElementById('reg-pw-in')?.addEventListener('keydown',e=>{if(e.key==='Enter')doRegister();});
 
 // ─── CLEANUP: remove any trading accounts that accidentally ended up in vm_accounts ───
 (function cleanupLoginAccounts() {

@@ -8419,62 +8419,71 @@ async function fetchMktData(force = false) {
     } catch(e) { console.warn('Binance fetch error:', e); }
   })();
 
-  // ── 2. NAS100 + SPX500 via Yahoo Finance + allorigins proxy ───────────────
-  const indicesFetch = (async () => {
-    const pairs = [
-      { symbol: '^NDX',  sym: 'NQ=F' },   // Nasdaq 100 (exact) — ^IXIC = Composite, souvent bloqué
-      { symbol: '^GSPC', sym: 'ES=F' },
+  // ── 2. SPX500 via Yahoo Finance ──────────────────────────────────────────────
+  async function fetchYahooSymbol(rawSym) {
+    const sym = rawSym.replace(/[=^]/g, s => s === '=' ? '%3D' : '%5E');
+    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1h&range=1d`;
+    const proxies = [
+      `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`,
+      `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
     ];
-    await Promise.allSettled(pairs.map(async ({ symbol, sym }) => {
+    for (const proxy of proxies) {
       try {
-        const url   = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1h&range=1d`;
-        const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-        const res   = await fetch(proxy, { signal: AbortSignal.timeout(12000) });
-        if (!res.ok) return;
-        const outer = await res.json();
-        if (!outer.contents) return;
-        const j     = JSON.parse(outer.contents);
-        const meta  = j?.chart?.result?.[0]?.meta;
-        if (!meta) return;
+        const res = await fetch(proxy, { signal: AbortSignal.timeout(10000) });
+        if (!res.ok) continue;
+        const text = await res.text();
+        let j;
+        try { const w = JSON.parse(text); j = w.contents ? JSON.parse(w.contents) : w; }
+        catch { continue; }
+        const meta = j?.chart?.result?.[0]?.meta;
+        if (!meta) continue;
         const price = meta.regularMarketPrice || meta.previousClose;
-        if (!price) return;
-        const prev  = meta.chartPreviousClose || meta.previousClose || price;
-        const pct   = ((price - prev) / prev) * 100;
+        if (!price) continue;
+        const prev   = meta.chartPreviousClose || meta.previousClose || price;
+        const pct    = ((price - prev) / prev) * 100;
         const closes = (j?.chart?.result?.[0]?.indicators?.quote?.[0]?.close || []).filter(v => v != null);
-        _mktData[sym] = { price, pct, chg: price - prev, spark: closes.length > 1 ? closes : makeSpark(price, pct) };
+        return { price, pct, chg: price - prev, spark: closes.length > 1 ? closes : makeSpark(price, pct) };
       } catch(e) {}
-    }));
-  })();
+    }
+    return null;
+  }
 
-  // ── 3. OIL via Groq (estimation calibrée avec date du jour) ───────────────
-  const oilFetch = (async () => {
+  // ── 3. NAS100 + SPX500 + OIL via Groq (Yahoo proxy instable) ───────────────
+  const indicesFetch = Promise.resolve();
+  const oilFetch = Promise.resolve();
+  const groqMktFetch = (async () => {
     try {
       const today = new Date().toISOString().split('T')[0];
       const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
         body: JSON.stringify({
-          model: 'llama-3.1-8b-instant',  // modèle rapide pour une simple estimation
-          max_tokens: 60,
+          model: 'llama-3.1-8b-instant',
+          max_tokens: 150,
           temperature: 0,
-          messages: [{ role: 'user', content: `Today is ${today}. What is the current WTI crude oil price per barrel in USD? Reply ONLY with valid JSON like: {"price":68.50,"pct":-0.3}` }]
+          messages: [{ role: 'user', content: `Today is ${today}. Give me approximate current market prices for: 1) S&P 500 index (SPX) 2) Nasdaq 100 index (NDX) 3) WTI Crude Oil per barrel. Reply ONLY with valid JSON, no text: {"spx":{"price":5900,"pct":-0.3},"ndx":{"price":21500,"pct":-0.8},"oil":{"price":68.50,"pct":-0.3}}` }]
         }),
-        signal: AbortSignal.timeout(8000)
+        signal: AbortSignal.timeout(10000)
       });
       if (!res.ok) return;
       const data = await res.json();
-      let text = (data.choices?.[0]?.message?.content || '').trim();
-      // Extraire le JSON même si Groq ajoute du texte autour
-      const match = text.match(/\{[^}]+\}/);
+      const text = (data.choices?.[0]?.message?.content || '').trim();
+      const match = text.match(/\{[\s\S]*\}/);
       if (!match) return;
       const j = JSON.parse(match[0]);
-      if (j.price && isFinite(j.price) && j.price > 30 && j.price < 200) {
-        _mktData['CL=F'] = { price: j.price, pct: j.pct || 0, chg: 0, spark: makeSpark(j.price, j.pct || 0) };
+      if (j.spx?.price && isFinite(j.spx.price) && j.spx.price > 1000) {
+        _mktData['ES=F'] = { price: j.spx.price, pct: j.spx.pct || 0, chg: 0, spark: makeSpark(j.spx.price, j.spx.pct || 0) };
+      }
+      if (j.ndx?.price && isFinite(j.ndx.price) && j.ndx.price > 5000) {
+        _mktData['NQ=F'] = { price: j.ndx.price, pct: j.ndx.pct || 0, chg: 0, spark: makeSpark(j.ndx.price, j.ndx.pct || 0) };
+      }
+      if (j.oil?.price && isFinite(j.oil.price) && j.oil.price > 20 && j.oil.price < 300) {
+        _mktData['CL=F'] = { price: j.oil.price, pct: j.oil.pct || 0, chg: 0, spark: makeSpark(j.oil.price, j.oil.pct || 0) };
       }
     } catch(e) {}
   })();
 
-  await Promise.allSettled([binanceFetch, indicesFetch, oilFetch]);
+  await Promise.allSettled([binanceFetch, indicesFetch, groqMktFetch, oilFetch]);
 
   _mktLastFetch = Date.now();
   renderMktGrid();
@@ -8570,12 +8579,14 @@ function mktForceRefresh() { fetchMktData(true); }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 function initMktSnapshot() {
-  renderMktGrid(); // show skeletons immediately
-  fetchMktData(true);
+  renderMktGrid(); // show existing data or skeletons immediately
+  // Only force-fetch if no recent data (avoid wiping displayed data on login)
+  const dataAge = Date.now() - (_mktLastFetch || 0);
+  if (dataAge > 60000 && !_mktFetching) fetchMktData(true);
   clearInterval(_mktInterval);
   clearInterval(_mktClockTick);
-  _mktInterval  = setInterval(() => fetchMktData(), 300000); // data: toutes les 5 min (Groq)
-  _mktClockTick = setInterval(mktTickClock, 1000);           // clock: every 1s
+  _mktInterval  = setInterval(() => fetchMktData(), 300000);
+  _mktClockTick = setInterval(mktTickClock, 1000);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

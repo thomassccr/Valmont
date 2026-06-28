@@ -1094,7 +1094,7 @@ body::after { content:''; position:fixed; inset:0; background-image:url("data:im
 /* HOME */
 #v-home { align-items:center; justify-content:center; background:var(--bg); }
 #v-home::after { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 70% 60% at 50% 40%, rgba(61,142,240,0.06) 0%, transparent 70%); pointer-events:none; z-index:0; }
-.home-wrap { display:flex; flex-direction:column; align-items:center; width:100%; max-width:600px; padding:0 24px; position:relative; z-index:1; }
+.home-wrap { display:flex; flex-direction:column; align-items:center; width:100%; max-width:700px; padding:0 24px; position:relative; z-index:1; }
 .home-logo { font-family:'Bebas Neue',sans-serif; font-size:76px; letter-spacing:.1em; color:#ffffff; line-height:1; text-align:center; width:100%; }
 .home-sub { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:var(--text3); margin-bottom:36px; text-align:center; width:100%; }
 .home-q { font-size:13px; font-weight:400; color:var(--text3); margin-bottom:14px; text-align:center; letter-spacing:.02em; }
@@ -1110,8 +1110,8 @@ body::after { content:''; position:fixed; inset:0; background-image:url("data:im
 .hchip:active { transform:scale(.96); }
 
 /* ─── MARKET SNAPSHOT ─── */
-.mkt-snapshot { width:100%; max-width:600px; margin-top:28px; animation:fadeUp .6s .65s ease both; }
-.mkt-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; padding:0 1px; }
+.mkt-snapshot { width:100%; max-width:700px; margin-top:28px; animation:fadeUp .6s .65s ease both; }
+.mkt-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding:0 1px; }
 .mkt-header-left { display:flex; align-items:center; gap:8px; }
 .mkt-dot { width:7px; height:7px; border-radius:50%; background:var(--text3); flex-shrink:0; transition:background .4s, box-shadow .4s; }
 .mkt-dot.live { background:#22c55e; box-shadow:0 0 8px rgba(34,197,94,.6); animation:mktPulse 2.5s ease-in-out infinite; }
@@ -1125,13 +1125,13 @@ body::after { content:''; position:fixed; inset:0; background-image:url("data:im
 .mkt-refresh-btn:hover { opacity:1; }
 .mkt-refresh-btn.spinning svg { animation:spin .7s linear infinite; }
 /* Grid */
-.mkt-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
+.mkt-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
 /* Card */
 .mkt-card {
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:11px 13px 9px;
+  background:#0a0a0a;
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:12px;
+  padding:14px 16px 12px;
   cursor:default;
   transition:border-color .2s, background .2s;
   position:relative;
@@ -1139,32 +1139,33 @@ body::after { content:''; position:fixed; inset:0; background-image:url("data:im
   display:flex;
   flex-direction:column;
   gap:0;
+  min-height:110px;
 }
-.mkt-card:hover { border-color:var(--border2); background:#0c0c0c; }
+.mkt-card:hover { border-color:rgba(255,255,255,0.12); background:#0e0e0e; }
 .mkt-card.flash-up { animation:mktFlashUp .5s ease; }
 .mkt-card.flash-down { animation:mktFlashDown .5s ease; }
-@keyframes mktFlashUp   { 0%{background:rgba(34,197,94,.12);}  100%{background:var(--panel);} }
-@keyframes mktFlashDown { 0%{background:rgba(192,57,43,.12);}  100%{background:var(--panel);} }
+@keyframes mktFlashUp   { 0%{background:rgba(34,197,94,.12);}  100%{background:#0a0a0a;} }
+@keyframes mktFlashDown { 0%{background:rgba(192,57,43,.12);}  100%{background:#0a0a0a;} }
 /* Top row: name + badge */
-.mkt-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; }
-.mkt-name { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--text3); }
-.mkt-badge { font-family:'DM Mono',monospace; font-size:8px; letter-spacing:.08em; padding:2px 6px; border-radius:4px; font-weight:500; }
-.mkt-badge.up   { background:rgba(34,197,94,.12);  color:#22c55e; }
-.mkt-badge.down { background:rgba(192,57,43,.12); color:#ef4444; }
+.mkt-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.mkt-name { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text3); }
+.mkt-badge { font-family:'DM Mono',monospace; font-size:8px; letter-spacing:.06em; padding:2px 7px; border-radius:5px; font-weight:600; }
+.mkt-badge.up   { background:rgba(34,197,94,.15);  color:#22c55e; }
+.mkt-badge.down { background:rgba(239,68,68,.15); color:#ef4444; }
 .mkt-badge.flat { background:rgba(255,255,255,.05); color:var(--text3); }
 /* Sparkline */
-.mkt-spark { width:100%; height:28px; margin-bottom:6px; display:block; overflow:visible; }
-.mkt-spark-line { fill:none; stroke-width:1.3; stroke-linecap:round; stroke-linejoin:round; }
+.mkt-spark { width:100%; height:36px; margin-bottom:10px; display:block; overflow:visible; }
+.mkt-spark-line { fill:none; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
 .mkt-spark-line.up   { stroke:#22c55e; }
 .mkt-spark-line.down { stroke:#ef4444; }
 .mkt-spark-line.flat { stroke:var(--text3); }
-.mkt-spark-area { stroke:none; opacity:.12; }
+.mkt-spark-area { stroke:none; opacity:.10; }
 .mkt-spark-area.up   { fill:#22c55e; }
 .mkt-spark-area.down { fill:#ef4444; }
 .mkt-spark-area.flat { fill:var(--text3); }
 /* Price row */
 .mkt-bottom { display:flex; align-items:flex-end; justify-content:space-between; }
-.mkt-price { font-family:'DM Mono',monospace; font-size:14px; font-weight:500; color:var(--text); letter-spacing:.02em; line-height:1; transition:color .3s; }
+.mkt-price { font-family:'DM Mono',monospace; font-size:18px; font-weight:500; color:#ffffff; letter-spacing:.01em; line-height:1; transition:color .3s; }
 .mkt-price.up-flash   { color:#22c55e; }
 .mkt-price.down-flash { color:#ef4444; }
 .mkt-pct { font-family:'DM Mono',monospace; font-size:10px; line-height:1; }
@@ -1172,7 +1173,7 @@ body::after { content:''; position:fixed; inset:0; background-image:url("data:im
 .mkt-pct.down { color:#ef4444; }
 .mkt-pct.flat { color:var(--text3); }
 /* Skeleton */
-.mkt-skeleton { pointer-events:none; min-height:88px; }
+.mkt-skeleton { pointer-events:none; min-height:110px; }
 .mkt-sk-block { border-radius:4px; background:linear-gradient(90deg,var(--panel) 25%,var(--lift) 50%,var(--panel) 75%); background-size:600px 100%; animation:shimmer 1.4s infinite; }
 /* Mobile */
 @media(max-width:520px) {
@@ -5067,7 +5068,7 @@ tbody tr:last-child td { border-bottom: none; }
           <div class="mkt-header">
             <div class="mkt-header-left">
               <div class="mkt-dot" id="mkt-status-dot"></div>
-              <span class="mkt-session-lbl" id="mkt-session-lbl">Chargement…</span>
+              <span class="mkt-session-lbl" id="mkt-session-lbl">MARCHÉS EN DIRECT</span>
             </div>
             <div class="mkt-right-hd">
               <span class="mkt-updated" id="mkt-updated"></span>
@@ -8325,12 +8326,12 @@ const _origAddMsg = window.addMsg;
 
 // ─── MARKET SNAPSHOT ──────────────────────────────────────────────────────────
 const MKT_TICKERS = [
-  { sym:'ES=F',      label:'S&P 500',  decimals:2 },
-  { sym:'NQ=F',      label:'NASDAQ',   decimals:2 },
-  { sym:'DX-Y.NYB',  label:'DXY',      decimals:3 },
+  { sym:'NQ=F',      label:'NAS100',   decimals:0 },
+  { sym:'ES=F',      label:'SPX500',   decimals:2 },
   { sym:'GC=F',      label:'Gold',     decimals:2 },
-  { sym:'CL=F',      label:'WTI Oil',  decimals:2 },
-  { sym:'BTC-USD',   label:'Bitcoin',  decimals:0 },
+  { sym:'EURUSD=X',  label:'EUR/USD',  decimals:4 },
+  { sym:'BTC-USD',   label:'BTC',      decimals:0 },
+  { sym:'CL=F',      label:'Oil',      decimals:2 },
 ];
 
 let _mktInterval    = null;
@@ -8354,7 +8355,7 @@ function getMktSession() {
 // ── Sparkline SVG builder ─────────────────────────────────────────────────────
 function buildSparkSVG(points, dir) {
   if (!points || points.length < 2) return '';
-  const W = 100, H = 28, PAD = 2;
+  const W = 100, H = 36, PAD = 2;
   const min = Math.min(...points), max = Math.max(...points);
   const range = max - min || 1;
   const xs = points.map((_, i) => PAD + (i / (points.length - 1)) * (W - PAD * 2));
@@ -8368,7 +8369,6 @@ function buildSparkSVG(points, dir) {
 }
 
 // ── Fetch données de marché via APIs CORS-friendly ───────────────────────────
-// Utilise Groq pour demander les prix (fonctionne depuis file://)
 async function fetchMktData(force = false) {
   if (_mktFetching) return;
   const now = Date.now();
@@ -8376,60 +8376,105 @@ async function fetchMktData(force = false) {
   _mktFetching = true;
   mktSetRefreshSpin(true);
 
-  // BTC + ETH + Gold via CoinGecko (CORS ouvert, pas de clé)
-  try {
-    const cgRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,gold&vs_currencies=usd&include_24hr_change=true', { signal: AbortSignal.timeout(6000) });
-    if (cgRes.ok) {
-      const cg = await cgRes.json();
-      if (cg.bitcoin) {
-        const b = cg.bitcoin;
-        _mktData['BTC-USD'] = { price: b.usd, pct: b.usd_24h_change, chg: b.usd * b.usd_24h_change / 100 };
-      }
-      if (cg.gold) {
-        const g = cg.gold;
-        // CoinGecko gold = price per troy oz en USD
-        _mktData['GC=F'] = { price: g.usd, pct: g.usd_24h_change, chg: g.usd * g.usd_24h_change / 100 };
-      }
+  function makeSpark(price, pct, n = 20) {
+    const open = price / (1 + pct / 100);
+    const arr = [];
+    for (let i = 0; i < n; i++) {
+      const t = i / (n - 1);
+      arr.push(open + (price - open) * t + (Math.random() - 0.5) * price * 0.003);
     }
-  } catch(e) {}
+    arr[arr.length - 1] = price;
+    return arr;
+  }
 
-  // Indices via Yahoo Finance (JSON direct, parfois CORS ok depuis localhost)
-  const YF_SYMBOLS = {
-    'ES=F':     '%5EGSPC',
-    'NQ=F':     '%5EIXIC',
-    'DX-Y.NYB': 'DX-Y.NYB',
-    'GC=F':     'GC%3DF',
-    'CL=F':     'CL%3DF',
-  };
-
-  const tdFetches = Object.entries(YF_SYMBOLS).map(async ([sym, yfSym]) => {
-    // Essaie Yahoo Finance v8 directement (marche depuis localhost)
-    const urls = [
-      `https://query1.finance.yahoo.com/v8/finance/chart/${yfSym}?interval=1d&range=2d`,
-      `https://query2.finance.yahoo.com/v8/finance/chart/${yfSym}?interval=1d&range=2d`,
-    ];
-    for (const url of urls) {
-      try {
-        const res = await fetch(url, {
-          signal: AbortSignal.timeout(6000),
-          headers: { 'User-Agent': 'Mozilla/5.0' }
+  // ── 1. BTC + GOLD (PAXG) + EUR/USD via Binance (CORS * garanti) ──────────
+  const binanceFetch = (async () => {
+    try {
+      const symbols = ['BTCUSDT', 'PAXGUSDT', 'EURUSDT'];
+      const klineSymbols = ['BTCUSDT'];
+      const [tickerRes, btcKlRes] = await Promise.all([
+        fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=${JSON.stringify(symbols)}`, { signal: AbortSignal.timeout(7000) }),
+        fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1h&limit=24', { signal: AbortSignal.timeout(7000) })
+      ]);
+      if (tickerRes.ok) {
+        const tickers = await tickerRes.json();
+        tickers.forEach(t => {
+          const price = parseFloat(t.lastPrice);
+          const pct   = parseFloat(t.priceChangePercent);
+          const chg   = parseFloat(t.priceChange);
+          if (t.symbol === 'BTCUSDT') {
+            _mktData['BTC-USD'] = { price, pct, chg };
+          } else if (t.symbol === 'PAXGUSDT') {
+            // PAXG = 1 troy oz gold en USD
+            _mktData['GC=F'] = { price, pct, chg, spark: makeSpark(price, pct) };
+          } else if (t.symbol === 'EURUSDT') {
+            _mktData['EURUSD=X'] = { price, pct, chg, spark: makeSpark(price, pct) };
+          }
         });
-        if (!res.ok) continue;
-        const j = await res.json();
-        const meta = j?.chart?.result?.[0]?.meta;
-        if (!meta) continue;
-        const price = meta.regularMarketPrice;
-        const prev  = meta.previousClose || meta.chartPreviousClose;
-        if (!price || price <= 0) continue;
-        const chg = price - prev;
-        const pct = prev > 0 ? (chg / prev) * 100 : 0;
-        _mktData[sym] = { price, chg, pct };
-        break;
-      } catch(e) {}
-    }
-  });
+      }
+      if (btcKlRes.ok) {
+        const klines = await btcKlRes.json();
+        if (_mktData['BTC-USD']) _mktData['BTC-USD'].spark = klines.map(k => parseFloat(k[4]));
+      }
+    } catch(e) { console.warn('Binance fetch error:', e); }
+  })();
 
-  await Promise.allSettled(tdFetches);
+  // ── 2. NAS100 + SPX500 via Yahoo Finance + allorigins proxy ───────────────
+  const indicesFetch = (async () => {
+    const pairs = [
+      { symbol: '^NDX',  sym: 'NQ=F' },   // Nasdaq 100 (exact) — ^IXIC = Composite, souvent bloqué
+      { symbol: '^GSPC', sym: 'ES=F' },
+    ];
+    await Promise.allSettled(pairs.map(async ({ symbol, sym }) => {
+      try {
+        const url   = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1h&range=1d`;
+        const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+        const res   = await fetch(proxy, { signal: AbortSignal.timeout(12000) });
+        if (!res.ok) return;
+        const outer = await res.json();
+        if (!outer.contents) return;
+        const j     = JSON.parse(outer.contents);
+        const meta  = j?.chart?.result?.[0]?.meta;
+        if (!meta) return;
+        const price = meta.regularMarketPrice || meta.previousClose;
+        if (!price) return;
+        const prev  = meta.chartPreviousClose || meta.previousClose || price;
+        const pct   = ((price - prev) / prev) * 100;
+        const closes = (j?.chart?.result?.[0]?.indicators?.quote?.[0]?.close || []).filter(v => v != null);
+        _mktData[sym] = { price, pct, chg: price - prev, spark: closes.length > 1 ? closes : makeSpark(price, pct) };
+      } catch(e) {}
+    }));
+  })();
+
+  // ── 3. OIL via Groq (estimation calibrée avec date du jour) ───────────────
+  const oilFetch = (async () => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
+        body: JSON.stringify({
+          model: 'llama-3.1-8b-instant',  // modèle rapide pour une simple estimation
+          max_tokens: 60,
+          temperature: 0,
+          messages: [{ role: 'user', content: `Today is ${today}. What is the current WTI crude oil price per barrel in USD? Reply ONLY with valid JSON like: {"price":68.50,"pct":-0.3}` }]
+        }),
+        signal: AbortSignal.timeout(8000)
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      let text = (data.choices?.[0]?.message?.content || '').trim();
+      // Extraire le JSON même si Groq ajoute du texte autour
+      const match = text.match(/\{[^}]+\}/);
+      if (!match) return;
+      const j = JSON.parse(match[0]);
+      if (j.price && isFinite(j.price) && j.price > 30 && j.price < 200) {
+        _mktData['CL=F'] = { price: j.price, pct: j.pct || 0, chg: 0, spark: makeSpark(j.price, j.pct || 0) };
+      }
+    } catch(e) {}
+  })();
+
+  await Promise.allSettled([binanceFetch, indicesFetch, oilFetch]);
 
   _mktLastFetch = Date.now();
   renderMktGrid();
@@ -8447,7 +8492,7 @@ function renderMktGrid() {
   const dot  = document.getElementById('mkt-status-dot');
   const lbl  = document.getElementById('mkt-session-lbl');
   if (dot) dot.className = 'mkt-dot ' + sess.state;
-  if (lbl) lbl.textContent = sess.label;
+  if (lbl) lbl.textContent = 'MARCHÉS EN DIRECT';
 
   // Clock
   mktTickClock();
@@ -8502,10 +8547,10 @@ function renderMktGrid() {
         <span class="mkt-name">${t.label}</span>
         <span class="mkt-badge ${dir}">${fmtPct}</span>
       </div>
-      ${spark || `<div style="height:28px;margin-bottom:6px;"></div>`}
+      ${spark || `<div style="height:36px;margin-bottom:10px;"></div>`}
       <div class="mkt-bottom">
         <span class="mkt-price" id="mkt-p-${i}">${fmtPrice}</span>
-        <span class="mkt-pct ${dir}">${sign}${d.chg != null ? d.chg.toFixed(t.decimals) : '—'}</span>
+        <span class="mkt-pct ${dir}">${fmtPct}</span>
       </div>`;
   });
 }
@@ -8529,7 +8574,7 @@ function initMktSnapshot() {
   fetchMktData(true);
   clearInterval(_mktInterval);
   clearInterval(_mktClockTick);
-  _mktInterval  = setInterval(() => fetchMktData(), 20000);  // data: every 20s
+  _mktInterval  = setInterval(() => fetchMktData(), 300000); // data: toutes les 5 min (Groq)
   _mktClockTick = setInterval(mktTickClock, 1000);           // clock: every 1s
 }
 

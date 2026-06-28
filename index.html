@@ -104,31 +104,7 @@ body::after { content:''; position:fixed; inset:0; background-image:url("data:im
 .drp-day-headers { display:grid; grid-template-columns:repeat(7,1fr); gap:0; margin-bottom:2px; }
 .drp-day-hdr { text-align:center; font-family:'DM Sans',sans-serif; font-size:11px; color:#555; font-weight:500; padding:4px 0; }
 
-/* ─── SIDEBAR GOAL WIDGET ─── */
-.sb-goal-wrap { margin:4px 8px; padding:10px; border-radius:10px; background:transparent; border:1px solid transparent; cursor:pointer; transition:all .18s; }
-.sb-goal-wrap:hover { background:var(--lift); border-color:var(--border); }
-.sidebar:not(.expanded) .sb-goal-wrap { display:flex; justify-content:center; padding:10px; margin:4px 0; border-radius:0; border:none; background:transparent; }
-.sidebar:not(.expanded) .sb-goal-expanded { display:none; }
-.sidebar:not(.expanded) .sb-goal-icon { display:flex; align-items:center; justify-content:center; color:var(--text3); width:20px; height:20px; }
-.sidebar:not(.expanded) .sb-goal-icon svg { width:20px; height:20px; }
-.sidebar:not(.expanded) .sb-goal-wrap:hover { background:var(--lift); }
-.sb-goal-icon { display:none; }
-.sb-goal-expanded { display:flex; flex-direction:column; gap:6px; }
-.sb-goal-header { display:flex; align-items:center; justify-content:space-between; }
-.sb-goal-title { font-family:'DM Mono',monospace; font-size:8px; letter-spacing:.18em; text-transform:uppercase; color:var(--text3); }
-.sb-goal-edit { font-size:11px; color:var(--text3); opacity:0; transition:opacity .15s; }
-.sb-goal-wrap:hover .sb-goal-edit { opacity:1; }
-.sb-goal-amounts { display:flex; align-items:baseline; gap:4px; }
-.sb-goal-current { font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--text); letter-spacing:.04em; }
-.sb-goal-sep { font-family:'DM Mono',monospace; font-size:10px; color:var(--text3); }
-.sb-goal-target { font-family:'DM Mono',monospace; font-size:10px; color:var(--text3); }
-.sb-goal-track { height:3px; background:var(--border); border-radius:2px; overflow:hidden; }
-.sb-goal-fill { height:100%; border-radius:2px; background:var(--gold); transition:width 1.2s cubic-bezier(.4,0,.2,1); }
-.sb-goal-pct { font-family:'DM Mono',monospace; font-size:8px; color:var(--text3); letter-spacing:.1em; }
 
-/* ─── GOAL EDIT POPUP ─── */
-.sb-goal-popup { position:fixed; left:70px; top:50%; transform:translateY(-50%); width:260px; background:var(--panel); border:1px solid var(--border2); border-radius:12px; box-shadow:var(--shadow-md); z-index:500; padding:18px; display:flex; flex-direction:column; gap:14px; }
-.sidebar.expanded ~ * .sb-goal-popup, .sidebar.expanded .sb-goal-popup { left:calc(var(--sw) + 10px); }
 
 /* ─── SPINNING RING LOGO ─── */
 .sb-logo-wrap { position:relative; width:36px; height:36px; flex-shrink:0; cursor:pointer; }
@@ -1362,130 +1338,7 @@ textarea::placeholder { color:var(--text3); }
 
 
 
-/* ROADMAP VIEW (home) */
-.rm-header {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:18px 32px 14px; border-bottom:1px solid var(--border);
-  flex-shrink:0;
-}
-.rm-title-block { display:flex; flex-direction:column; gap:3px; }
-.rm-title { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:.14em; color:var(--gold); }
-.rm-subtitle { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--text3); }
-.rm-body { flex:1; overflow-y:auto; padding:36px 40px 80px; }
-.rm-body::-webkit-scrollbar { width:3px; }
-.rm-body::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
 
-/* Progress summary */
-.goals-summary-card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin-bottom:40px; max-width:540px; margin-left:auto; margin-right:auto; }
-.gsc-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-.gsc-label { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.14em; color:var(--text3); }
-.gsc-pct { font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--gold); letter-spacing:.06em; }
-.gsc-track { height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-bottom:10px; }
-.gsc-fill { height:100%; background:linear-gradient(90deg,var(--gold),#60b0ff); border-radius:2px; transition:width 1.2s ease; }
-.gsc-next { font-size:11px; color:var(--text2); line-height:1.6; }
-.gsc-next strong { color:var(--gold2); }
-
-/* AI advice */
-.goals-advice { background:var(--panel); border:1px solid var(--border2); border-radius:10px; padding:16px 18px; margin-bottom:48px; max-width:540px; margin-left:auto; margin-right:auto; }
-.ga-label { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.18em; color:var(--gold); margin-bottom:8px; }
-.ga-text { font-size:12px; color:var(--text2); line-height:1.75; }
-.ga-loading { display:flex; align-items:center; gap:8px; font-family:'DM Mono',monospace; font-size:10px; color:var(--text3); }
-.ga-dot { width:5px; height:5px; border-radius:50%; background:var(--gold); animation:blink 1.2s infinite; }
-.ga-dot:nth-child(2){animation-delay:.2s}.ga-dot:nth-child(3){animation-delay:.4s}
-@keyframes blink{0%,100%{opacity:.2}50%{opacity:1}}
-
-/* ALTERNATING TIMELINE */
-.timeline {
-  position:relative;
-  max-width:880px;
-  margin:0 auto;
-  padding:0 0 40px;
-}
-/* Central vertical line */
-.timeline::before {
-  content:'';
-  position:absolute;
-  left:50%; top:0; bottom:0;
-  width:2px;
-  background:linear-gradient(to bottom, transparent, rgba(255,255,255,0.18) 5%, rgba(255,255,255,0.18) 95%, transparent);
-  transform:translateX(-50%);
-}
-
-.goals-phase-label {
-  font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.22em;
-  text-transform:uppercase; color:var(--text3);
-  text-align:center; position:relative; z-index:2;
-  margin:32px 0 24px;
-  display:flex; align-items:center; gap:14px;
-}
-.goals-phase-label::before,
-.goals-phase-label::after {
-  content:''; flex:1; height:1px; background:var(--border);
-}
-.goals-phase-label:first-child { margin-top:0; }
-
-/* Each jalon row */
-.jalon {
-  display:grid;
-  grid-template-columns:1fr 30px 1fr;
-  gap:0;
-  margin-bottom:32px;
-  align-items:start;
-  position:relative;
-}
-
-/* LEFT side content */
-.jalon-left {
-  padding:0 28px 0 0;
-  text-align:right;
-}
-
-/* RIGHT side content */
-.jalon-right {
-  padding:0 0 0 28px;
-  text-align:left;
-}
-
-/* Center dot column */
-.jalon-center {
-  display:flex; flex-direction:column; align-items:center; position:relative; z-index:2;
-  padding-top:0;
-}
-.jalon-dot {
-  width:14px; height:14px; border-radius:50%;
-  flex-shrink:0;
-  background:#fff;
-  border:2px solid #fff;
-  position:relative; z-index:3;
-  margin-top:6px;
-}
-.jalon-dot.done { background:#fff; border-color:#fff; box-shadow:0 0 0 3px rgba(255,255,255,0.12); }
-.jalon-dot.next { background:#fff; border-color:#fff; box-shadow:0 0 10px rgba(255,255,255,0.4), 0 0 0 3px rgba(255,255,255,0.12); }
-.jalon-dot.upcoming { background:transparent; border-color:rgba(255,255,255,0.3); }
-
-/* Content card */
-.jalon-card {
-  background:var(--panel); border:1px solid var(--border);
-  border-radius:10px; padding:14px 16px;
-  transition:border-color .2s;
-}
-.jalon-card:hover { border-color:var(--border2); }
-.jalon-card.next { border-color:rgba(61,142,240,0.14); background:rgba(61,142,240,0.03); }
-
-.jalon-header { display:flex; align-items:center; gap:8px; margin-bottom:5px; flex-wrap:wrap; }
-.jalon-left .jalon-header { justify-content:flex-end; }
-.jalon-right .jalon-header { justify-content:flex-start; }
-.jalon-date { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.1em; color:var(--text3); }
-.jalon-badge { font-family:'DM Mono',monospace; font-size:8px; letter-spacing:.1em; padding:2px 7px; border-radius:4px; }
-.jalon-badge.done { background:rgba(61,142,240,.1); color:var(--gold); }
-.jalon-badge.next { background:rgba(61,142,240,0.10); color:#8a8680; }
-.jalon-badge.upcoming { background:rgba(255,255,255,.04); color:var(--text3); }
-.jalon-name { font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; color:var(--text); line-height:1.3; }
-.jalon-payout { font-family:'DM Mono',monospace; font-size:10px; color:var(--gold2); margin-top:3px; }
-.jalon-desc { font-size:11px; color:var(--text3); line-height:1.7; margin-top:6px; max-height:0; overflow:hidden; transition:max-height .35s ease; }
-.jalon-desc.open { max-height:300px; }
-.jalon-toggle { font-family:'DM Mono',monospace; font-size:9px; color:var(--text3); cursor:pointer; margin-top:5px; letter-spacing:.08em; display:inline-block; }
-.jalon-toggle:hover { color:var(--gold); }
 
 
 
@@ -3185,43 +3038,6 @@ tbody tr:last-child td { border-bottom: none; }
 .ftmo-btn-import:disabled { opacity:.5; cursor:not-allowed; }
 .ftmo-status { font-family:'DM Mono',monospace; font-size:10px; color:var(--text2); margin-top:8px; min-height:16px; }
 
-/* ─── NOYAUX VIEW ─── */
-#v-noyaux { position:relative; background:var(--bg); overflow:hidden; }
-#noyaux-canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
-.noyaux-topbar { position:absolute; top:0; left:0; right:0; height:52px; display:flex; align-items:center; padding:0 24px; gap:16px; border-bottom:1px solid var(--border); z-index:10; background:rgba(10,10,10,0.85); backdrop-filter:blur(12px); }
-.noyaux-topbar-title { font-family:'Bebas Neue',sans-serif; font-size:17px; letter-spacing:.1em; color:#7ab8ff; }
-.noyaux-topbar-sep { width:1px; height:18px; background:rgba(61,142,240,0.2); }
-.noyaux-topbar-sub { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:rgba(61,142,240,0.4); }
-.noyaux-add-btn { margin-left:auto; display:flex; align-items:center; gap:7px; padding:7px 14px; border-radius:8px; background:rgba(61,142,240,0.1); border:1px solid rgba(61,142,240,0.25); color:#7ab8ff; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.12em; cursor:pointer; transition:all .18s; }
-.noyaux-add-btn:hover { background:rgba(61,142,240,0.2); border-color:rgba(61,142,240,0.5); color:#aad4ff; }
-.noyaux-add-btn svg { width:12px; height:12px; }
-/* Node tooltip */
-.noyaux-tooltip { position:absolute; pointer-events:none; z-index:20; opacity:0; transition:opacity .18s; }
-.noyaux-tooltip-inner { background:rgba(8,12,28,0.92); border:1px solid rgba(61,142,240,0.35); border-radius:10px; padding:10px 14px; max-width:220px; backdrop-filter:blur(16px); }
-.noyaux-tooltip-type { font-family:'DM Mono',monospace; font-size:8px; letter-spacing:.2em; text-transform:uppercase; color:rgba(61,142,240,0.6); margin-bottom:4px; }
-.noyaux-tooltip-title { font-size:13px; color:#c8e0ff; font-weight:500; margin-bottom:4px; }
-.noyaux-tooltip-body { font-family:'DM Mono',monospace; font-size:10px; color:rgba(140,180,220,0.7); line-height:1.5; }
-/* Noyaux modal */
-.noyaux-modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:6000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(8px); }
-.noyaux-modal { background:var(--panel); border:1px solid rgba(61,142,240,0.3); border-radius:16px; padding:26px; width:380px; max-width:92vw; box-shadow:0 0 60px rgba(61,142,240,0.1), 0 20px 60px rgba(0,0,0,.6); }
-.noyaux-modal h3 { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:.1em; color:#7ab8ff; margin-bottom:16px; }
-.noyaux-type-row { display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap; }
-.noyaux-type-btn { flex:1; min-width:60px; padding:6px 0; border-radius:7px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:rgba(140,160,190,0.7); font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.1em; cursor:pointer; transition:all .15s; text-align:center; }
-.noyaux-type-btn:hover { border-color:rgba(61,142,240,0.3); color:#7ab8ff; }
-.noyaux-type-btn.sel { background:rgba(61,142,240,0.15); border-color:rgba(61,142,240,0.5); color:#7ab8ff; }
-.noyaux-modal input, .noyaux-modal textarea { width:100%; background:rgba(255,255,255,0.04); border:1px solid rgba(61,142,240,0.2); border-radius:8px; padding:10px 13px; color:#c8e0ff; font-family:'DM Mono',monospace; font-size:11px; outline:none; transition:border-color .15s; resize:none; margin-bottom:10px; }
-.noyaux-modal input::placeholder, .noyaux-modal textarea::placeholder { color:rgba(100,140,180,0.4); }
-.noyaux-modal input:focus, .noyaux-modal textarea:focus { border-color:rgba(61,142,240,0.55); }
-.noyaux-modal textarea { height:80px; }
-.noyaux-modal-btns { display:flex; gap:8px; justify-content:flex-end; margin-top:6px; }
-.noyaux-modal-btns button { padding:8px 18px; border-radius:8px; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.1em; cursor:pointer; transition:all .15s; border:none; }
-.nm-cancel { background:transparent; border:1px solid rgba(255,255,255,0.1) !important; color:rgba(140,160,190,0.6); }
-.nm-cancel:hover { color:#c8e0ff; }
-.nm-save { background:rgba(61,142,240,0.85); color:#030810; font-weight:700; }
-.nm-save:hover { background:#5fa6f8; }
-.nm-del { background:rgba(192,57,43,0.15); border:1px solid rgba(192,57,43,0.3) !important; color:#e05a4a; margin-right:auto; }
-.nm-del:hover { background:rgba(192,57,43,0.28); }
-
 /* ═══════════════════════════════════════════
    MOBILE DASHBOARD — OPTIMISATIONS COMPLÈTES
 ═══════════════════════════════════════════ */
@@ -3575,10 +3391,6 @@ tbody tr:last-child td { border-bottom: none; }
   <div id="mobile-more-sheet">
     <div class="mob-sheet-handle"></div>
     <div class="mob-sheet-title">Navigation</div>
-    <button class="mob-sheet-btn" onclick="mobNav('goals');closeMobileMore()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      Mes Objectifs
-    </button>
     <button class="mob-sheet-btn" onclick="mobNav('risk');closeMobileMore()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       Gestion du Risque
@@ -3962,7 +3774,6 @@ tbody tr:last-child td { border-bottom: none; }
           <div class="pr-feat"><span class="pr-feat-icon">✦</span>Session Review</div>
           <div class="pr-feat dim"><span class="pr-feat-icon locked">✦</span>Calculateur de position</div>
           <div class="pr-feat dim"><span class="pr-feat-icon locked">✦</span>Gestion du risque</div>
-          <div class="pr-feat dim"><span class="pr-feat-icon locked">✦</span>Mes Objectifs</div>
           <div class="pr-feat dim"><span class="pr-feat-icon locked">✦</span>Dashboard performance</div>
           <div class="pr-feat dim"><span class="pr-feat-icon locked">✦</span>Ma Stratégie</div>
         </div>
@@ -3986,7 +3797,6 @@ tbody tr:last-child td { border-bottom: none; }
           <div class="pr-feat"><span class="pr-feat-icon">✦</span>Session Review</div>
           <div class="pr-feat"><span class="pr-feat-icon">✦</span>Calculateur de position</div>
           <div class="pr-feat"><span class="pr-feat-icon">✦</span>Gestion du risque</div>
-          <div class="pr-feat"><span class="pr-feat-icon">✦</span>Mes Objectifs</div>
           <div class="pr-feat dim"><span class="pr-feat-icon locked">✦</span>Dashboard performance</div>
           <div class="pr-feat dim"><span class="pr-feat-icon locked">✦</span>Ma Stratégie</div>
         </div>
@@ -4010,7 +3820,6 @@ tbody tr:last-child td { border-bottom: none; }
           <div class="pr-feat"><span class="pr-feat-icon">✦</span>Session Review</div>
           <div class="pr-feat"><span class="pr-feat-icon">✦</span>Calculateur de position</div>
           <div class="pr-feat"><span class="pr-feat-icon">✦</span>Gestion du risque</div>
-          <div class="pr-feat"><span class="pr-feat-icon">✦</span>Mes Objectifs</div>
           <div class="pr-feat"><span class="pr-feat-icon">✦</span>Dashboard performance</div>
           <div class="pr-feat"><span class="pr-feat-icon">✦</span>Ma Stratégie</div>
         </div>
@@ -4150,10 +3959,6 @@ tbody tr:last-child td { border-bottom: none; }
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         <span>Session Review</span><span class="nav-tooltip">Session Review</span>
       </button>
-      <button class="nav-btn" id="nb-goals" onclick="showV('goals');renderGoals();">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        <span>Mes Objectifs</span><span class="nav-tooltip">Objectifs</span>
-      </button>
       <button class="nav-btn" id="nb-risk" onclick="showV('risk');initRisk();">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         <span>Gestion du risque</span><span class="nav-tooltip">Risque</span>
@@ -4162,35 +3967,10 @@ tbody tr:last-child td { border-bottom: none; }
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         <span>Dashboard</span><span class="nav-tooltip">Dashboard</span>
       </button>
-      <button class="nav-btn" id="nb-noyaux" onclick="showV('noyaux');initNoyaux();">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="5" cy="5" r="1.5" fill="currentColor" stroke="none" opacity=".6"/><circle cx="19" cy="5" r="1.5" fill="currentColor" stroke="none" opacity=".6"/><circle cx="5" cy="19" r="1.5" fill="currentColor" stroke="none" opacity=".6"/><circle cx="19" cy="19" r="1.5" fill="currentColor" stroke="none" opacity=".6"/></svg>
-        <span>Noyaux</span><span class="nav-tooltip">Noyaux</span>
-      </button>
       <button class="nav-btn" id="nb-strategy" onclick="openStrategy();">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
         <span>Ma Stratégie</span><span class="nav-tooltip">Stratégie</span>
       </button>
-      <!-- OBJECTIF ANNUEL -->
-      <div class="sb-goal-wrap" id="sb-goal-wrap" onclick="openGoalEdit()" title="Objectif annuel">
-        <div class="sb-goal-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/></svg>
-        </div>
-        <div class="sb-goal-expanded">
-          <div class="sb-goal-header">
-            <span class="sb-goal-title">OBJECTIF 2026</span>
-            <span class="sb-goal-edit">✎</span>
-          </div>
-          <div class="sb-goal-amounts">
-            <span class="sb-goal-current" id="sb-goal-current">$0</span>
-            <span class="sb-goal-sep">/</span>
-            <span class="sb-goal-target" id="sb-goal-target">—</span>
-          </div>
-          <div class="sb-goal-track">
-            <div class="sb-goal-fill" id="sb-goal-fill" style="width:0%"></div>
-          </div>
-          <div class="sb-goal-pct" id="sb-goal-pct">0%</div>
-        </div>
-      </div>
     </nav>
 
     <div class="sb-section">Historique</div>
@@ -5022,26 +4802,6 @@ tbody tr:last-child td { border-bottom: none; }
   <div class="tt-val" id="tt-val"></div>
   <div class="tt-cum" id="tt-cum"></div>
 </div>
-    <!-- NOYAUX -->
-    <div id="v-noyaux" class="view">
-      <div class="noyaux-topbar">
-        <div class="noyaux-topbar-title">Noyaux</div>
-        <div class="noyaux-topbar-sep"></div>
-        <div class="noyaux-topbar-sub">Mémoire Vivante</div>
-        <button class="noyaux-add-btn" onclick="noyauxOpenAdd()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Nouveau nœud
-        </button>
-      </div>
-      <canvas id="noyaux-canvas"></canvas>
-      <div class="noyaux-tooltip" id="noyaux-tooltip">
-        <div class="noyaux-tooltip-inner">
-          <div class="noyaux-tooltip-type" id="ntt-type"></div>
-          <div class="noyaux-tooltip-title" id="ntt-title"></div>
-          <div class="noyaux-tooltip-body" id="ntt-body"></div>
-        </div>
-      </div>
-    </div>
 
     <!-- HOME -->
     <div id="v-home" class="view on" style="position:relative;">
@@ -5082,16 +4842,6 @@ tbody tr:last-child td { border-bottom: none; }
       </div>
     </div>
 
-    <!-- ROADMAP VIEW -->
-    <div id="v-goals" class="view">
-      <div class="rm-header">
-        <div class="rm-title-block">
-          <div class="rm-title">◈ Roadmap — Mr. Cicero</div>
-          <div class="rm-subtitle">Objectifs &amp; jalons trading · FTMO</div>
-        </div>
-      </div>
-      <div class="rm-body" id="rm-body"></div>
-    </div>
     <!-- BRIEFING -->
     <div id="v-briefing" class="view">
       <!-- Top bar -->
@@ -5918,8 +5668,8 @@ let selectedPlan = localStorage.getItem(PLAN_KEY) || 'pro';
 
 const PLAN_FEATURES = {
   free:  ['home','briefing','chat'],
-  pro:   ['home','briefing','chat','goals','risk'],
-  elite: ['home','briefing','chat','goals','risk','dashboard','noyaux','strategy'],
+  pro:   ['home','briefing','chat','risk'],
+  elite: ['home','briefing','chat','risk','dashboard','strategy'],
 };
 
 function prSelect(plan) {
@@ -5966,9 +5716,9 @@ function prContinue() {
 
 // ─── CHECKOUT ───
 const CO_PLAN_DATA = {
-  free:  { name:'Free', price:'0', priceNum:0, cents:'', feats:['Chat IA Trading','Morning Briefing','Session Review'], locked:['Calculateur de position','Gestion du risque','Mes Objectifs','Dashboard performance','Ma Stratégie'], promo:null },
-  pro:   { name:'Pro', price:'22', priceNum:22, cents:'', feats:['Chat IA Trading','Morning Briefing','Session Review','Calculateur de position','Gestion du risque','Mes Objectifs'], locked:['Dashboard performance','Ma Stratégie'], promo:"Jusqu'au 31 mai, profitez d'un accès complet à toutes les fonctionnalités Pro." },
-  elite: { name:'Elite ✦', price:'39', priceNum:39, cents:'.99', feats:['Chat IA Trading','Morning Briefing','Session Review','Calculateur de position','Gestion du risque','Mes Objectifs','Dashboard performance','Ma Stratégie'], locked:[], promo:null },
+  free:  { name:'Free', price:'0', priceNum:0, cents:'', feats:['Chat IA Trading','Morning Briefing','Session Review'], locked:['Calculateur de position','Gestion du risque','Dashboard performance','Ma Stratégie'], promo:null },
+  pro:   { name:'Pro', price:'22', priceNum:22, cents:'', feats:['Chat IA Trading','Morning Briefing','Session Review','Calculateur de position','Gestion du risque'], locked:['Dashboard performance','Ma Stratégie'], promo:"Jusqu'au 31 mai, profitez d'un accès complet à toutes les fonctionnalités Pro." },
+  elite: { name:'Elite ✦', price:'39', priceNum:39, cents:'.99', feats:['Chat IA Trading','Morning Briefing','Session Review','Calculateur de position','Gestion du risque','Dashboard performance','Ma Stratégie'], locked:[], promo:null },
 };
 
 let checkoutPlan = 'pro';
@@ -6244,7 +5994,7 @@ function applyPlanRestrictions() {
   if (isAdmin) localStorage.setItem(PLAN_KEY, 'elite');
   const plan = isAdmin ? 'elite' : (localStorage.getItem(PLAN_KEY) || 'free');
   const allowed = PLAN_FEATURES[plan] || PLAN_FEATURES.free;
-  const allViews = ['home','briefing','chat','goals','risk','dashboard','noyaux','strategy'];
+  const allViews = ['home','briefing','chat','risk','dashboard','strategy'];
   allViews.forEach(v => {
     const btn = document.getElementById('nb-' + v);
     if (!btn) return;
@@ -6257,10 +6007,8 @@ function applyPlanRestrictions() {
         home: "showV('home')",
         briefing: "showV('briefing');loadBriefing()",
         chat: "showV('chat');ensureChat()",
-        goals: "showV('goals');renderGoals()",
         risk: "showV('risk');initRisk()",
         dashboard: "showV('dashboard');ensureChartInit();setView(currentView||'week')",
-        noyaux: "showV('noyaux');initNoyaux()",
         strategy: "showV('strategy');initStrategy()"
       };
       if (onclickMap[v]) btn.setAttribute('onclick', onclickMap[v]);
@@ -6895,12 +6643,7 @@ function showV(n){
   const btn = document.getElementById('nb-'+n);
   if(view) view.classList.add('on');
   if(btn) btn.classList.add('active');
-  // Pause/resume neural canvas based on visibility
-  if(n === 'noyaux'){
-    if(typeof window.initNoyaux === 'function') window.initNoyaux();
-  } else {
-    if(typeof window._stopNoyauxCanvas === 'function') window._stopNoyauxCanvas();
-  }
+
 }
 
 // PROFILE
@@ -7021,150 +6764,6 @@ function resetChat(){
   const now=new Date();
   document.getElementById('bar-date').textContent=now.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'short'})+' '+now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
   document.getElementById('user-ta').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}},{once:true});
-}
-
-// GOALS DATA (synced from Google Calendar)
-const GOALS_DATA = [
-  { id:1, emoji:'🟢', title:'1er payout 10K$ reçu · challenge 50K$ lancé', date:'2026-06-10', phase:'PHASE 1 — JUIN 2026', payout:'~795$ net (France 56%)', desc:'Payout 10K reçu. Base réelle : WR 57% + RR 1:2 visé → expectancy 0.71R/trade → 1 420$ brut/mois → 795$ net après FTMO 20% + URSSAF 30%. Challenge 50K$ acheté immédiatement (345€). Règle absolue : laisser le trade aller au TP ou au SL — ne pas fermer manuellement. 1 trade/jour max.' },
-  { id:2, emoji:'🟢', title:'1er 50K$ funded · 2 challenges 50K$ lancés', date:'2026-08-15', phase:'PHASE 2 — AOÛT 2026', payout:'~3 976$ net/compte (France 56%)', desc:'1er 50K$ funded. WR 57% + RR 1:2 → 7 100$ brut/mois → 3 976$ net France. Challenge 50K remboursé (345€). 2 nouveaux challenges 50K$ lancés sur le payout (2×345€). Priorité absolue : valider que le RR 1:2 est tenu — si RR réalisé retombe sous 1.5 sur 10 trades → stop scaling, revenir au journal.' },
-  { id:3, emoji:'🟢', title:'3×50K$ actifs · challenge 100K$ lancé', date:'2026-10-01', phase:'PHASE 2 — OCT. 2026', payout:'~11 928$ net/mois (France 56%)', desc:'3 comptes 50K$ actifs via STT. Brut 21 300$/mois → net 11 928$ France. Challenge 100K$ lancé (540€). Expectancy totale : 3 × 355$/trade × 20j = 21 300$/mois brut. Vérifier que STT réplique correctement le signal sur les 3 comptes avant chaque trade. Max drawdown global -3% → stop tous les comptes.' },
-  { id:4, emoji:'🔵', title:'100K$ actif · 8 comptes en rotation · switch Dubai', date:'2026-12-01', phase:'PHASE 3 — DÉC. 2026', payout:'~22 645$ net/mois (France 56%)', desc:'1 compte 100K$ + 2×50K$ actifs. Brut 40 440$/mois → net 22 645$ France. Challenge 200K$ lancé (1 080€). Dernier mois régime France. Préparer la structure juridique Dubai — résidence fiscale, compte bancaire, Emirates ID. Le switch janvier 2027 vaut +60% de revenus sur le même volume.' },
-  { id:5, emoji:'🟡', title:'SWITCH DUBAI · FTMO 90% · 0% impôt · game changer', date:'2027-01-01', phase:'PHASE 4 — SWITCH FISCAL', payout:'Net réel = 90% du brut FTMO', desc:'Résidence Dubai effective. FTMO passe à 90% de profit share. 0% imposition locale. Même volume de trading = 60% de revenus supplémentaires overnight. Exemple immédiat : 1×200K$ + 2×50K$ = 42 030$ net/mois vs 23 537$ sous régime France. Ce jalon seul accélère la roadmap de 4–5 mois.' },
-  { id:6, emoji:'🟠', title:'2×200K$ actifs · 67 590$ net/mois · Dubai', date:'2027-02-01', phase:'PHASE 4 — SCALING DUBAI', payout:'~67 590$ net/mois', desc:'2 comptes 200K$ + 1×100K$ actifs. WR 57% + RR 1:2 → brut 75 100$/mois → net 67 590$ Dubai (FTMO 10% seulement). Challenge 200K$ #3 lancé (1 080€). Risk total : 5 000$/trade sur 3 comptes. Règle : si un trade dépasse -3% global → stop journée sur TOUS les comptes simultanément via STT.' },
-  { id:7, emoji:'🟠', title:'3×200K$ actifs · 76 680$ net/mois · objectif en vue', date:'2027-03-01', phase:'PHASE 4 — SCALING DUBAI', payout:'~76 680$ net/mois', desc:'3 comptes 200K$ actifs. Brut 85 200$/mois → net 76 680$ Dubai. Challenge 200K$ #4 lancé (1 080€). Risk total : 6 000$/trade. À ce stade : 1 trade = 4 260$ espéré net. Discipline maximale — un trade hors plan coûte 3× le coût d\'avant. WR rolling 20 trades doit rester ≥ 54% pour maintenir l\'expectancy positive avec RR 1:2.' },
-  { id:8, emoji:'🏆', title:'4×200K$ ACTIFS · 800K$ géré · 102 240$ NET/MOIS', date:'2027-04-15', phase:'PHASE 5 — OBJECTIF ATTEINT', payout:'~102 240$ net/mois', desc:'OBJECTIF 100K$/MOIS ATTEINT. 4 × 200K$ = 800 000$ géré. WR 57% + RR 1:2 → brut 113 600$/mois → net 102 240$ après FTMO 10% + rotation challenges (2×1 080€). Signal unique sur 4 comptes via STT. Risk total = 8 000$/trade. Seulement 4 comptes nécessaires grâce au RR 1:2 — vs 6 avec RR 0.9 avant.' },
-  { id:9, emoji:'🔵', title:'CHECKPOINT · 500 000$+ cumulés', date:'2027-08-01', phase:'PHASE 5 — CHECKPOINT', payout:'500 000$+ cumulés', desc:'Vérifier : WR rolling ≥ 55% sur 30 derniers trades, RR réalisé ≥ 1.8, 4 comptes 200K$ actifs, max daily loss respectée, journaux à jour. Coût total challenges depuis le début : ~12 000€ (100% remboursés). Projection fin 2027 : ~1 000 000$ cumulés.' },
-  { id:10, emoji:'🏆', title:'1 000 000$ ATTEINT · OBJECTIF ACCOMPLI', date:'2027-11-01', phase:'PHASE 5 — OBJECTIF FINAL', payout:'1 000 000$+ cumulés', desc:'Ce jour marque la fin de la roadmap construite à 17 ans. Ce n\'est pas de la chance. C\'est 17 mois d\'exécution sans compromis. 10K$ → 800K$ géré. WR 57% prouvé, RR 1:2 tenu. France → Dubai. 56% net → 90% net. 4 comptes suffisent là où d\'autres en auraient eu besoin de 10. Journal sans exception. Zéro revenge trading. Zéro fermeture manuelle avant TP.' }
-];
-
-let goalsAdviceLoaded = false;
-let goalsAdviceText = '';
-
-function getJalonStatus(dateStr){
-  const now = new Date();
-  const d = new Date(dateStr);
-  if(d < now) return 'done';
-  // "next" = prochain jalon non encore atteint
-  const futureJalons = GOALS_DATA.filter(j => new Date(j.date) >= now);
-  if(futureJalons.length && futureJalons[0].date === dateStr) return 'next';
-  return 'upcoming';
-}
-
-
-function renderGoals(){
-  const body = document.getElementById('rm-body');
-  const now = new Date();
-  const doneCount = GOALS_DATA.filter(j => new Date(j.date) < now).length;
-  const pct = Math.round((doneCount / GOALS_DATA.length) * 100);
-  const nextJalon = GOALS_DATA.find(j => new Date(j.date) >= now);
-  const daysToNext = nextJalon ? Math.ceil((new Date(nextJalon.date) - now) / 86400000) : 0;
-
-  let html = '';
-
-  // Progress card
-  html += `<div class="goals-summary-card">
-    <div class="gsc-top"><span class="gsc-label">PROGRESSION ROADMAP</span><span class="gsc-pct">${doneCount}/${GOALS_DATA.length}</span></div>
-    <div class="gsc-track"><div class="gsc-fill" id="gsc-fill" style="width:0%"></div></div>
-    <div class="gsc-next">${nextJalon ? `Prochain jalon dans <strong>${daysToNext} jours</strong> — <strong>${nextJalon.title}</strong>` : '🏆 Tous les jalons sont atteints.'}</div>
-  </div>`;
-
-  // AI advice card
-  html += `<div class="goals-advice" id="goals-advice-card">
-    <div class="ga-label">◈ ANALYSE VALMONT — CONSEILS PERSONNALISÉS</div>
-    <div id="goals-advice-content">${goalsAdviceLoaded
-      ? `<div class="ga-text">${goalsAdviceText}</div>`
-      : `<div class="ga-loading"><div class="ga-dot"></div><div class="ga-dot"></div><div class="ga-dot"></div><span style="margin-left:4px">Analyse en cours...</span></div>`
-    }</div>
-  </div>`;
-
-  // Alternating timeline
-  html += `<div class="timeline">`;
-  let currentPhase = '';
-  GOALS_DATA.forEach((j, i) => {
-    const status = getJalonStatus(j.date);
-    if(j.phase !== currentPhase){
-      currentPhase = j.phase;
-      html += `<div class="goals-phase-label">${j.phase}</div>`;
-    }
-    const d = new Date(j.date);
-    const dateLabel = d.toLocaleDateString('fr-FR',{month:'short',year:'numeric'});
-    const badgeLabel = status==='done' ? '✓ Atteint' : status==='next' ? '⬡ Prochain' : '○ À venir';
-    const isLeft = i % 2 === 0; // even → card on left, odd → card on right
-    const cardHtml = `<div class="jalon-card ${status}">
-        <div class="jalon-header">
-          <span class="jalon-date">${dateLabel}</span>
-          <span class="jalon-badge ${status}">${badgeLabel}</span>
-        </div>
-        <div class="jalon-name">${j.title}</div>
-        <div class="jalon-payout">${j.payout}</div>
-        <div class="jalon-desc" id="jdesc-${j.id}">${j.desc}</div>
-        <span class="jalon-toggle" onclick="toggleJalon(${j.id})">▸ Détails</span>
-      </div>`;
-
-    if(isLeft){
-      html += `<div class="jalon">
-        <div class="jalon-left">${cardHtml}</div>
-        <div class="jalon-center"><div class="jalon-dot ${status}"></div></div>
-        <div class="jalon-right"></div>
-      </div>`;
-    } else {
-      html += `<div class="jalon">
-        <div class="jalon-left"></div>
-        <div class="jalon-center"><div class="jalon-dot ${status}"></div></div>
-        <div class="jalon-right">${cardHtml}</div>
-      </div>`;
-    }
-  });
-  html += `</div>`;
-
-  body.innerHTML = html;
-  setTimeout(() => {
-    const fill = document.getElementById('gsc-fill');
-    if(fill) fill.style.width = pct + '%';
-  }, 120);
-
-  if(!goalsAdviceLoaded) loadGoalsAdvice();
-}
-
-function toggleJalon(id){
-  const desc = document.getElementById('jdesc-'+id);
-  const toggle = desc.nextElementSibling;
-  const isOpen = desc.classList.toggle('open');
-  toggle.textContent = isOpen ? '▾ Réduire' : '▸ Détails';
-}
-
-async function loadGoalsAdvice(){
-  const now = new Date();
-  const doneCount = GOALS_DATA.filter(j => new Date(j.date) < now).length;
-  const nextJalon = GOALS_DATA.find(j => new Date(j.date) >= now);
-  const daysToNext = nextJalon ? Math.ceil((new Date(nextJalon.date) - now) / 86400000) : 0;
-  const dateStr = now.toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
-
-  const prompt = `Tu es le coach mental et analyste de trading de Mr. Cicero, 17 ans, trader sérieux.
-Date du jour : ${dateStr}
-Sa roadmap comporte 10 jalons de Juin 2026 à Novembre 2027, objectif final : 1 000 000$ cumulés via trading FTMO. Stratégie réelle : WR 57% prouvé sur données réelles + RR 1:2 réalisé visé (était 0.91, objectif 2.0) → expectancy 0.71R/trade. 10K→50K direct, multi-comptes parallèles via STT, 100% autofinancé. Fiscalité France 56% net jusqu'en déc. 2026, Dubai 90% net à partir de jan. 2027. Objectif atteint avec seulement 4×200K$ (vs 6 avec l'ancien RR) grâce au RR 1:2.
-
-SITUATION ACTUELLE :
-- ${doneCount} jalon(s) sur 10 atteint(s)
-- Prochain jalon dans ${daysToNext} jours : "${nextJalon?.title || 'Aucun'}" (${nextJalon?.payout || ''})
-- ${nextJalon?.desc || ''}
-
-Sa routine quotidienne au calendrier : réveil 7h + affirmations, lecture mindset 30min, prépa marché, école, gym, trading session NYC, backtest/journal, douche froide, auto-review, prière.
-
-Donne 3 conseils ULTRA CONCRETS et PERSONNALISÉS pour qu'il reste dans la direction de ses objectifs. Chaque conseil doit être court (2-3 lignes max), direct, percutant. Fais référence à des éléments précis de sa roadmap. Réponds en français. Format : conseil 1 → conseil 2 → conseil 3 (séparés par des retours à la ligne, sans titres génériques).`;
-
-  try{
-    const r = await vmFetch({model:GROQ_MODEL,max_tokens:400,messages:[{role:'user',content:prompt}]});
-    const d = await r.json();
-    const text = d.content?.[0]?.text || '';
-    goalsAdviceText = text.replace(/\n\n/g,'</p><p style="margin-top:8px">').replace(/\n/g,'<br>');
-    goalsAdviceLoaded = true;
-    const el = document.getElementById('goals-advice-content');
-    if(el) el.innerHTML = `<div class="ga-text"><p>${goalsAdviceText}</p></div>`;
-  } catch(e){
-    const el = document.getElementById('goals-advice-content');
-    if(el) el.innerHTML = `<div class="ga-text" style="color:var(--text3)">Erreur de connexion. Relance la vue pour réessayer.</div>`;
-  }
 }
 
 // STRATEGY
@@ -7413,10 +7012,6 @@ function sysPr(isTradeAnalysis=false){
   const now = new Date();
   const ds = now.toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
   const ts = now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-  const doneCount = GOALS_DATA.filter(j => new Date(j.date) < now).length;
-  const nextJalon = GOALS_DATA.find(j => new Date(j.date) >= now);
-  const daysToNext = nextJalon ? Math.ceil((new Date(nextJalon.date) - now) / 86400000) : 0;
-  const goalsCtx = `ROADMAP : Objectif 1 000 000$ via FTMO (Juin 2026 → Nov. 2027). Stats réelles : WR 57%, RR 1:2 visé, expectancy 0.71R. Multi-comptes STT, 10K→50K direct, France 56% net → Dubai 90% net jan. 2027. Objectif 100K$/mois = 4×200K$ suffisent. Jalons : ${GOALS_DATA.map(j=>`[${j.date}] ${j.title}`).join(' | ')}. Progression : ${doneCount}/10. Prochain : "${nextJalon?.title||'Aucun'}" dans ${daysToNext} jours.`;
   const userName = currentUser ? currentUser.name : 'Trader';
   const isBoss = currentUser && currentUser.isBoss;
   const bossContext = isBoss ? `\n⚠️ UTILISATEUR IDENTIFIÉ : Tu parles au PROPRIÉTAIRE et créateur de VALMONT, Mr. Cicero lui-même. Traite-le avec le plus grand respect, sois parfaitement aligné sur ses objectifs, rappelle-lui ses jalons avec précision, et adapte ton coaching pour un niveau d'exigence maximum. Il est le boss — tu es son outil le plus précieux.` : '';
@@ -7429,7 +7024,6 @@ ${bossContext}${userContext}
 
 ${strategyToText()}
 
-${goalsCtx}
 
 TON RÔLE : Analyser la capture de trade envoyée et déterminer si ${userName} a respecté son plan de trading.
 
@@ -7455,12 +7049,6 @@ Date : ${ds} | Heure : ${ts}
 ${bossContext}${userContext}
 
 ${strategyToText()}
-
-ROADMAP (Juin 2026 → Nov. 2027) :
-Objectif final : 1 000 000$ cumulés via comptes FTMO. Stats réelles : WR 57% + RR 1:2 → expectancy 0.71R/trade. 10K→50K direct, multi-comptes STT, 100% autofinancé. France 56% net → Dubai 90% net (jan. 2027). 4×200K$ suffisent pour 102K$ net/mois.
-Jalons : ${GOALS_DATA.map(j=>`[${j.date}] ${j.title} (${j.payout})`).join(' | ')}
-Progression : ${doneCount}/10 jalons atteints. Prochain jalon : "${nextJalon?.title||'Aucun'}" dans ${daysToNext} jours. Contexte : ${nextJalon?.desc||''}
-${isBoss ? 'Routine quotidienne : réveil 7h + affirmations, lecture mindset 30min, prépa marché, école, gym, trading NYC, backtest/journal, douche froide, auto-review, prière, sommeil ≥7h, 2L eau/jour.' : ''}
 
 TON RÔLE : Mener une review post-session naturelle, comme une vraie conversation entre un coach et son trader. PAS de questions dans un ordre mécanique — adapte-toi à ce que dit ${userName}. Rebondis sur ses réponses, détecte les émotions implicites (frustration, ego, peur, satisfaction), et guide-le naturellement vers toutes les informations importantes.
 
@@ -7919,7 +7507,6 @@ function showSumm(){
   const d=S.summary||{}; buildStats(d); buildIns(d);
   document.getElementById('summ-sec').style.display='block';
   if(S.summary)saveSession(S.summary); scrollD();
-  if(typeof updateGoalWidget==='function') updateGoalWidget();
 }
 function buildStats(d){
   const g=document.getElementById('stats-grid');
@@ -8590,7 +8177,7 @@ function initMktSnapshot() {
 const _origShowV = showV;
 window.showV = function(n){
   _origShowV(n);
-  const names={home:'Accueil',dashboard:'Dashboard',briefing:'Morning Briefing',chat:'Session Review',goals:'Mes Objectifs',risk:'Gestion du Risque'};
+  const names={home:'Accueil',dashboard:'Dashboard',briefing:'Morning Briefing',chat:'Session Review',risk:'Gestion du Risque'};
   if (n === 'dashboard' && typeof renderAccTabs === 'function') setTimeout(renderAccTabs, 50);
   if (n === 'dashboard' && typeof refreshCumulChart === 'function') setTimeout(refreshCumulChart, 120);
   if (n === 'home') setTimeout(initMktSnapshot, 80);
@@ -9461,7 +9048,6 @@ function mobNav(view) {
     case 'dashboard': showV('dashboard'); setTimeout(()=>{ensureChartInit();setView(currentView||'week');},30); break;
     case 'chat':      showV('chat'); if(typeof ensureChat==='function') ensureChat(); break;
     case 'briefing':  showV('briefing'); if(typeof loadBriefing==='function') loadBriefing(); break;
-    case 'goals':     showV('goals'); if(typeof renderGoals==='function') renderGoals(); break;
     case 'risk':      showV('risk'); if(typeof initRisk==='function') initRisk(); break;
     case 'calendar':  showV('calendar'); if(typeof renderCalendar==='function') renderCalendar(); break;
   }
@@ -9758,123 +9344,6 @@ function getEffectiveDashboardTrades() {
   } catch(e) {
     return Array.isArray(ALL_TRADES) ? ALL_TRADES : [];
   }
-}
-
-// ─── OBJECTIF ANNUEL ───────────────────────────────────────────────────────
-function goalKey() { return currentUser ? 'goal_' + currentUser.id : 'goal_guest'; }
-
-function getGoalTarget() {
-  try { return parseFloat(localStorage.getItem(goalKey())) || 0; } catch(e) { return 0; }
-}
-
-function saveGoalTarget(val) {
-  try { localStorage.setItem(goalKey(), val); } catch(e) {}
-}
-
-function getGoalCurrent() {
-  // Somme des P&L de toutes les sessions de l'année en cours
-  if (!currentUser) return 0;
-  try {
-    const sess = JSON.parse(localStorage.getItem(getStorageKey(currentUser.id)) || '[]');
-    const year = new Date().getFullYear().toString();
-    return sess.reduce((total, s) => {
-      const pnl = s.sum?.pnl;
-      if (!pnl) return total;
-      // Parse "+450$", "-200$", "450", etc.
-      const num = parseFloat(String(pnl).replace(/[^0-9.\-]/g, ''));
-      if (isNaN(num)) return total;
-      // Filtre sur l'année
-      const sessionYear = (s.date || '').split('/').pop() || (s.label || '').split('/').pop();
-      if (sessionYear && !sessionYear.includes(year.slice(2))) return total;
-      return total + num;
-    }, 0);
-  } catch(e) { return 0; }
-}
-
-function updateGoalWidget() {
-  const target  = getGoalTarget();
-  const current = getGoalCurrent();
-  const pct     = target > 0 ? Math.min(100, Math.round(current / target * 100)) : 0;
-
-  const fmtVal = v => {
-    const abs = Math.abs(v);
-    const str = abs >= 1000 ? '$' + (abs/1000).toFixed(1) + 'k' : '$' + Math.round(abs);
-    return v < 0 ? '-' + str : str;
-  };
-
-  const elCur  = document.getElementById('sb-goal-current');
-  const elTgt  = document.getElementById('sb-goal-target');
-  const elFill = document.getElementById('sb-goal-fill');
-  const elPct  = document.getElementById('sb-goal-pct');
-
-  if (elCur)  elCur.textContent  = fmtVal(current);
-  if (elTgt)  elTgt.textContent  = target > 0 ? fmtVal(target) : 'Définir';
-  if (elFill) elFill.style.width = pct + '%';
-  if (elPct)  elPct.textContent  = target > 0 ? pct + '% de l\'objectif' : 'Cliquer pour définir';
-}
-
-function openGoalEdit() {
-  // Remove existing popup
-  const existing = document.getElementById('goal-edit-popup');
-  if (existing) { existing.remove(); return; }
-
-  const target = getGoalTarget();
-  const popup = document.createElement('div');
-  popup.id = 'goal-edit-popup';
-  popup.className = 'sb-goal-popup';
-  popup.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);">Objectif 2026</div>
-      <button onclick="document.getElementById('goal-edit-popup').remove()" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:15px;line-height:1;padding:0 2px;">✕</button>
-    </div>
-    <div>
-      <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">P&L cible ($)</div>
-      <input id="goal-input" type="number" value="${target || ''}" placeholder="ex: 200000" step="1000"
-        style="width:100%;background:rgba(0,0,0,.5);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:18px;padding:9px 12px;outline:none;box-sizing:border-box;transition:border .15s;"
-        onfocus="this.style.borderColor='rgba(61,142,240,.5)'"
-        onblur="this.style.borderColor='var(--border2)'"
-        onkeydown="if(event.key==='Enter'){saveGoalEdit();}"
-      >
-      <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--text3);margin-top:5px;letter-spacing:.06em;">Revenu net total sur l'année</div>
-    </div>
-    <button onclick="saveGoalEdit()" style="width:100%;padding:9px;border-radius:8px;background:transparent;border:1px solid rgba(61,142,240,0.45);color:#3d8ef0;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:all .15s;" onmouseover="this.style.background='rgba(61,142,240,0.1)'" onmouseout="this.style.background='transparent'">Enregistrer</button>
-  `;
-
-  document.body.appendChild(popup);
-
-  // Position: next to sidebar
-  const sidebar = document.querySelector('.sidebar');
-  const sw = sidebar ? sidebar.getBoundingClientRect().width : 58;
-  popup.style.left = (sw + 12) + 'px';
-
-  setTimeout(() => {
-    const inp = document.getElementById('goal-input');
-    if (inp) { inp.focus(); inp.select(); }
-  }, 50);
-
-  // Close on outside click
-  setTimeout(() => {
-    document.addEventListener('mousedown', function closeGoalPopup(e) {
-      const p = document.getElementById('goal-edit-popup');
-      if (p && !p.contains(e.target) && !document.getElementById('sb-goal-wrap')?.contains(e.target)) {
-        p.remove();
-        document.removeEventListener('mousedown', closeGoalPopup);
-      }
-    });
-  }, 100);
-}
-
-function saveGoalEdit() {
-  const inp = document.getElementById('goal-input');
-  if (!inp) return;
-  const val = parseFloat(inp.value);
-  if (!isNaN(val) && val > 0) {
-    saveGoalTarget(val);
-    updateGoalWidget();
-    if (typeof showToast === 'function') showToast('✦ Objectif mis à jour', 'success', '✦', 2000);
-  }
-  const p = document.getElementById('goal-edit-popup');
-  if (p) p.remove();
 }
 
 // ─── STATE ───
@@ -10208,7 +9677,6 @@ function render() {
   const { start, end, label } = getPeriodRange(currentView, currentOffset);
   document.getElementById('period-label').textContent = label;
 
-  if (typeof updateGoalWidget === 'function') updateGoalWidget();
 
   const allDashboardTrades = getEffectiveDashboardTrades();
   const trades = getTradesInRange(start, end);
@@ -12113,610 +11581,8 @@ document.addEventListener('click', function(e) {
 });
 </script>
 
-<!-- ─── NOYAUX MODAL ─── -->
-<div id="noyaux-modal-bg" class="noyaux-modal-bg" style="display:none" onclick="if(event.target===this)noyauxClose()">
-  <div class="noyaux-modal">
-    <h3 id="nm-title">Nouveau nœud</h3>
-    <div class="noyaux-type-row">
-      <button class="noyaux-type-btn sel" data-t="citation" onclick="nmSelType('citation')">Citation</button>
-      <button class="noyaux-type-btn" data-t="mot" onclick="nmSelType('mot')">Mot</button>
-      <button class="noyaux-type-btn" data-t="règle" onclick="nmSelType('règle')">Règle</button>
-      <button class="noyaux-type-btn" data-t="note" onclick="nmSelType('note')">Note</button>
-      <button class="noyaux-type-btn" data-t="objectif" onclick="nmSelType('objectif')">Objectif</button>
-    </div>
-    <input id="nm-inp-title" placeholder="Titre / mot clé" maxlength="60"/>
-    <textarea id="nm-inp-body" placeholder="Contenu (optionnel)…"></textarea>
-    <div class="noyaux-modal-btns">
-      <button class="nm-del" id="nm-del-btn" style="display:none" onclick="noyauxDelete()">Supprimer</button>
-      <button class="nm-cancel" onclick="noyauxClose()">Annuler</button>
-      <button class="nm-save" onclick="noyauxSave()">Enregistrer</button>
-    </div>
-  </div>
-</div>
 
-<script>
-// ═══════════════════════════════════════════════════════
-// NOYAUX ENGINE — Jarvis-style reactive particle nucleus
-// ═══════════════════════════════════════════════════════
-(function(){
-  const STORE = 'vm_noyaux_v2';
-  let nodes = [], editId = null, editType = 'citation';
-  let canvas, ctx, W, H, raf, running = false;
-  let hoveredIdx = -1;
-  let mouseX = -9999, mouseY = -9999;
-  let clickWaves = [];
-  const T0 = performance.now();
 
-  // Physics per node
-  let phys = [];
-
-  // ── Type palette
-  const TP = {
-    citation:  { h:210, name:'Citation' },
-    mot:       { h:195, name:'Mot' },
-    règle:     { h:225, name:'Règle' },
-    note:      { h:185, name:'Note' },
-    objectif:  { h:240, name:'Objectif' },
-  };
-  function tc(type, a){ const h=(TP[type]||TP.citation).h; return `hsla(${h},85%,65%,${a})`; }
-  function tf(type, a){ const h=(TP[type]||TP.citation).h; return `hsla(${h},70%,45%,${a})`; }
-
-  // ── Storage
-  function load(){ try{ nodes=JSON.parse(localStorage.getItem(STORE)||'[]'); }catch(e){ nodes=[]; } }
-  function save(){ localStorage.setItem(STORE, JSON.stringify(nodes)); }
-  function genId(){ return 'nq'+Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
-
-  // ── Init physics for each node
-  function initPhys(){
-    const n = nodes.length;
-    phys = nodes.map((_,i)=>{
-      const base = (2*Math.PI/Math.max(n,1))*i;
-      return {
-        angle: base,
-        speed: 0.0018 + Math.random()*0.0012,
-        dir:   Math.random()<0.5 ? 1 : -1,
-        orbitIdx: Math.floor(Math.random()*3), // 0=inner 1=mid 2=outer
-        pulseOffset: Math.random()*Math.PI*2,
-        breathOffset: Math.random()*Math.PI*2,
-        scale: 1,
-        scaleTarget: 1,
-        // sub-filament children (visual tendrils from this node)
-        tendrils: Array.from({length:3+Math.floor(Math.random()*3)},(_,j)=>({
-          angle: Math.random()*Math.PI*2,
-          len: 20+Math.random()*40,
-          speed: (Math.random()-0.5)*0.04,
-        })),
-      };
-    });
-  }
-
-  // ── Canvas setup
-  function setup(){
-    canvas = document.getElementById('noyaux-canvas');
-    if(!canvas) return;
-    ctx = canvas.getContext('2d');
-    resize();
-    canvas.addEventListener('mousemove', onHover);
-    canvas.addEventListener('mouseleave', onLeave);
-    canvas.addEventListener('click', onClick);
-    window.addEventListener('resize', resize);
-  }
-
-  function resize(){
-    if(!canvas) return;
-    const r = canvas.parentElement.getBoundingClientRect();
-    W = canvas.width  = r.width  * devicePixelRatio;
-    H = canvas.height = r.height * devicePixelRatio;
-    canvas.style.width  = r.width+'px';
-    canvas.style.height = r.height+'px';
-  }
-
-  const CX = ()=> W/2;
-  const CY = ()=> H/2 + 26*devicePixelRatio; // shift for topbar
-
-  // ── Orbit radii (3 rings)
-  function orbitR(idx){
-    const base = Math.min(W,H)*0.5 - 60*devicePixelRatio;
-    return base * [0.35, 0.62, 0.88][idx] || base*0.62;
-  }
-
-  function nodeWorld(i){
-    const p = phys[i];
-    const r = orbitR(p.orbitIdx);
-    return {
-      x: CX() + Math.cos(p.angle)*r,
-      y: CY() + Math.sin(p.angle)*r,
-    };
-  }
-
-  // ── Main render loop
-  function loop(){
-    if(!running){ raf=null; return; }
-    raf = requestAnimationFrame(loop);
-    const t = (performance.now()-T0)/1000;
-    if(!ctx) return;
-    ctx.clearRect(0,0,W,H);
-
-    const dpr = devicePixelRatio;
-    const cx = CX(), cy = CY();
-
-    // Update physics
-    phys.forEach((p,i)=>{
-      p.angle += p.speed * p.dir;
-      p.tendrils.forEach(td => td.angle += td.speed);
-      // Scale animation
-      p.scale += (p.scaleTarget - p.scale)*0.12;
-      // Hovered node grows
-      p.scaleTarget = (i === hoveredIdx) ? 1.5 : 1;
-    });
-
-    // ── 1. Background deep glow
-    const bgGlow = ctx.createRadialGradient(cx,cy,0,cx,cy,Math.min(W,H)*0.5);
-    bgGlow.addColorStop(0,'rgba(20,50,120,0.18)');
-    bgGlow.addColorStop(0.4,'rgba(10,25,70,0.10)');
-    bgGlow.addColorStop(1,'transparent');
-    ctx.beginPath(); ctx.arc(cx,cy,Math.min(W,H)*0.5,0,Math.PI*2);
-    ctx.fillStyle=bgGlow; ctx.fill();
-
-    // ── 2. Orbit rings (3 subtle rings)
-    [0,1,2].forEach(ri=>{
-      const r = orbitR(ri);
-      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
-      ctx.strokeStyle=`rgba(61,142,240,${0.05+ri*0.02})`;
-      ctx.setLineDash([4*dpr,10*dpr]);
-      ctx.lineWidth=0.6*dpr; ctx.stroke();
-      ctx.setLineDash([]);
-    });
-
-    // ── 3. Node filaments (curved lines from core to nodes, then tendrils)
-    nodes.forEach((n,i)=>{
-      if(!phys[i]) return;
-      const pos = nodeWorld(i);
-      const isHov = i===hoveredIdx;
-      const pulse = 0.5+0.5*Math.sin(t*2+phys[i].pulseOffset);
-      const baseA = isHov ? 0.8 : 0.2+0.15*pulse;
-
-      // Main filament — Bezier with branching midpoint
-      const ctrlDist = orbitR(phys[i].orbitIdx)*0.45;
-      const perpAngle = phys[i].angle + Math.PI/2;
-      const cpx = cx + Math.cos(perpAngle)*ctrlDist*0.5 + (pos.x-cx)*0.4;
-      const cpy = cy + Math.sin(perpAngle)*ctrlDist*0.5 + (pos.y-cy)*0.4;
-
-      // Gradient along filament
-      const fGrad = ctx.createLinearGradient(cx,cy,pos.x,pos.y);
-      fGrad.addColorStop(0, tc(n.type, isHov ? 0.6 : 0.25));
-      fGrad.addColorStop(0.6, tc(n.type, isHov ? 0.45 : 0.18));
-      fGrad.addColorStop(1, tc(n.type, isHov ? 0.9 : 0.4));
-
-      ctx.beginPath();
-      ctx.moveTo(cx,cy);
-      ctx.quadraticCurveTo(cpx,cpy,pos.x,pos.y);
-      ctx.strokeStyle = fGrad;
-      ctx.lineWidth = isHov ? 1.8*dpr : 0.8*dpr;
-      ctx.stroke();
-
-      // Sub-tendrils from node
-      phys[i].tendrils.forEach(td=>{
-        const tlen = td.len * dpr * phys[i].scale * (isHov?1.3:1);
-        const tx2 = pos.x + Math.cos(td.angle)*tlen;
-        const ty2 = pos.y + Math.sin(td.angle)*tlen;
-        ctx.beginPath();
-        ctx.moveTo(pos.x, pos.y);
-        ctx.lineTo(tx2,ty2);
-        ctx.strokeStyle = tc(n.type, isHov ? 0.35 : 0.1);
-        ctx.lineWidth = 0.5*dpr;
-        ctx.stroke();
-        // Tendril tip dot
-        ctx.beginPath(); ctx.arc(tx2,ty2, 1*dpr,0,Math.PI*2);
-        ctx.fillStyle = tc(n.type, isHov ? 0.5 : 0.15);
-        ctx.fill();
-      });
-
-      // Inter-node connections (connect nearby nodes on same orbit)
-      nodes.forEach((n2,j)=>{
-        if(j<=i||!phys[j]) return;
-        const p2 = nodeWorld(j);
-        const dist = Math.hypot(pos.x-p2.x, pos.y-p2.y);
-        const maxDist = orbitR(1)*0.65;
-        if(dist < maxDist){
-          const alpha = (1-dist/maxDist)*0.12;
-          ctx.beginPath(); ctx.moveTo(pos.x,pos.y); ctx.lineTo(p2.x,p2.y);
-          ctx.strokeStyle = `rgba(100,160,255,${alpha})`;
-          ctx.lineWidth = 0.5*dpr; ctx.stroke();
-        }
-      });
-    });
-
-    // ── 4. Node circles
-    nodes.forEach((n,i)=>{
-      if(!phys[i]) return;
-      const pos = nodeWorld(i);
-      const isHov = i===hoveredIdx;
-      const s = phys[i].scale;
-      const R = NODE_R(i)*s;
-      const pulse = 0.5+0.5*Math.sin(t*2.5+phys[i].pulseOffset);
-
-      // Outer glow ring
-      if(isHov || pulse > 0.7){
-        const gr = ctx.createRadialGradient(pos.x,pos.y,0,pos.x,pos.y,R*3.5);
-        gr.addColorStop(0, tc(n.type, 0.35*s));
-        gr.addColorStop(0.5, tc(n.type, 0.12));
-        gr.addColorStop(1,'transparent');
-        ctx.beginPath(); ctx.arc(pos.x,pos.y,R*3.5,0,Math.PI*2);
-        ctx.fillStyle=gr; ctx.fill();
-      }
-
-      // Node body
-      const bodyGr = ctx.createRadialGradient(pos.x-R*0.3,pos.y-R*0.3,0,pos.x,pos.y,R);
-      bodyGr.addColorStop(0, tc(n.type,0.95));
-      bodyGr.addColorStop(0.6, tf(n.type,0.8));
-      bodyGr.addColorStop(1, tf(n.type,0.4));
-      ctx.beginPath(); ctx.arc(pos.x,pos.y,R,0,Math.PI*2);
-      ctx.fillStyle = bodyGr; ctx.fill();
-      ctx.strokeStyle = tc(n.type, isHov ? 1 : 0.7);
-      ctx.lineWidth = isHov ? 1.5*dpr : 1*dpr; ctx.stroke();
-
-      // Rotating inner ring
-      ctx.save(); ctx.translate(pos.x,pos.y); ctx.rotate(t*1.2*(phys[i].dir||1));
-      ctx.beginPath(); ctx.arc(0,0,R*0.55, 0, Math.PI*1.4);
-      ctx.strokeStyle = tc(n.type, 0.5);
-      ctx.lineWidth = 0.7*dpr; ctx.stroke();
-      ctx.restore();
-
-      // Label
-      ctx.font = `${isHov ? 11 : 9.5}px 'DM Mono', monospace`;
-      ctx.textAlign='center';
-      ctx.fillStyle = isHov ? '#c8e6ff' : 'rgba(140,190,240,0.65)';
-      const lbl = n.title.length>10 ? n.title.slice(0,9)+'…' : n.title;
-      ctx.fillText(lbl, pos.x, pos.y + R + 12*dpr);
-    });
-
-    // ── 5. Core nucleus
-    drawCore(cx, cy, t, dpr);
-  }
-
-  function NODE_R(i){
-    return (8 + (nodes[i]?.body?.length>0 ? 2:0)) * devicePixelRatio;
-  }
-
-  // ── Particle sphere state
-  const _globe = (function(){
-    const N = 5200; // sweet spot: visually dense, GPU-friendly
-    const golden = Math.PI*(3-Math.sqrt(5));
-    const pts = [];
-    for(let i=0;i<N;i++){
-      const y   = 1-(i/(N-1))*2;
-      const rxy = Math.sqrt(Math.max(0,1-y*y));
-      const th  = golden*i;
-      const bx0 = rxy*Math.cos(th), by0 = y, bz0 = rxy*Math.sin(th);
-      const nRad = 0.72 + Math.pow(Math.random(),1.4)*0.52;
-      pts.push({
-        bx: bx0*nRad, by: by0*nRad, bz: bz0*nRad,
-        ox: (Math.random()-0.5)*4,
-        oy: (Math.random()-0.5)*4,
-        oz: (Math.random()-0.5)*4,
-        ex: (Math.random()-0.5)*2,
-        ey: (Math.random()-0.5)*2,
-        ez: (Math.random()-0.5)*1.2,
-        nAmp:   0.07 + Math.random()*0.20,
-        nPhase: Math.random()*Math.PI*2,
-        nFreq:  0.5  + Math.random()*2.8,
-        shimPhase: Math.random()*Math.PI*2,
-        shimSpeed: 0.5+Math.random()*1.2,
-        dotSize:   0.5+Math.random()*0.6,
-        bright:    Math.random()<0.10,
-        outer:     nRad > 1.05,
-      });
-    }
-    // Pre-allocated projection arrays (avoid GC per frame)
-    const psx    = new Float32Array(N);
-    const psy    = new Float32Array(N);
-    const pz     = new Float32Array(N);
-    const pdepth = new Float32Array(N);
-    const palpha = new Float32Array(N);
-    const prad   = new Float32Array(N);
-    const pidx   = new Int32Array(N);   // sorted indices
-    return { pts, N, psx,psy,pz,pdepth,palpha,prad,pidx,
-             rotX:0.3, rotY:0, introT:0, introDone:false, explodeT:0 };
-  })();
-
-  function drawCore(cx,cy,t,dpr){
-    const PI2 = Math.PI*2;
-    const Rcompact  = Math.min(W,H) * 0.075;
-    const Rdisperse = Math.min(W,H) * 1.40;
-
-    // ── Mouse
-    const mxc = mouseX*dpr - cx;
-    const myc = mouseY*dpr - cy;
-    const hovered = Math.hypot(mxc,myc) < Rcompact * 1.8;
-
-    // ── Intro
-    if(!_globe.introDone){
-      _globe.introT = Math.min(1, _globe.introT + 0.045);
-      if(_globe.introT >= 1) _globe.introDone = true;
-    }
-    const iT = _globe.introT;
-    const iE = iT < 0.5 ? 4*iT*iT*iT : 1-Math.pow(-2*iT+2,3)/2;
-
-    // ── Explode
-    const eTarget = (_globe.introDone && hovered) ? 1 : 0;
-    _globe.explodeT += (eTarget - _globe.explodeT) * (hovered ? 0.06 : 0.10);
-    const eT = _globe.explodeT;
-    const eE = eT*eT*(3-2*eT); // smoothstep — computed ONCE outside loop
-    const compactW = 1 - eE;
-
-    // ── Rotation
-    _globe.rotY += 0.004 * (1 - eT*0.7);
-    _globe.rotX += 0.0007 * (1 - eT*0.7);
-    const cosX=Math.cos(_globe.rotX), sinX=Math.sin(_globe.rotX);
-    const cosY=Math.cos(_globe.rotY), sinY=Math.sin(_globe.rotY);
-    const introA = Math.min(1, iE*1.6);
-
-    // ── Project (tight loop — no object allocation)
-    const { pts, N, psx,psy,pz,pdepth,palpha,prad,pidx } = _globe;
-    for(let i=0;i<N;i++){
-      const p = pts[i];
-
-      const ux = p.ox + (p.bx - p.ox)*iE;
-      const uy = p.oy + (p.by - p.oy)*iE;
-      const uz = p.oz + (p.bz - p.oz)*iE;
-
-      // Single harmonic wave (1 sin per particle — 3× faster than before)
-      const wave = Math.sin(t*p.nFreq + p.nPhase) * p.nAmp * compactW;
-      const rs   = 1 + wave;
-
-      const wx = ux*Rcompact*rs + p.ex*Rdisperse*eE;
-      const wy = uy*Rcompact*rs + p.ey*Rdisperse*eE;
-      const wz = uz*Rcompact*rs + p.ez*Rdisperse*eE*0.9;
-
-      const rx1 = wx*cosY - wz*sinY;
-      const rz1 = wx*sinY + wz*cosY;
-      const ry2 = wy*cosX - rz1*sinX;
-      const rz2 = wy*sinX + rz1*cosX;
-
-      psx[i] = cx + rx1;
-      psy[i] = cy + ry2;
-      pz[i]  = rz2;
-
-      const depth = Math.max(0, Math.min(1, (rz2/(Rcompact*1.35)+1)*0.5));
-      const shim  = 0.45+0.55*Math.sin(t*p.shimSpeed+p.shimPhase);
-      const outerF = p.outer ? 0.5 : 1.0;
-      pdepth[i] = depth;
-      palpha[i] = (0.08 + 0.92*depth)*shim*introA*outerF;
-      prad[i]   = p.dotSize*(0.35+0.65*depth)*dpr;
-      pidx[i]   = i;
-    }
-
-    // Sort by Z (typed sort on indices — avoids object allocation)
-    // Use a simple insertion-friendly approach for nearly-sorted data
-    pidx.sort((a,b)=>pz[a]-pz[b]);
-
-    // ── Filaments (only compact, thin loop)
-    if(eT < 0.20 && _globe.introDone){
-      const ca    = (1 - eT/0.20) * 0.08;
-      const thresh = Rcompact * 0.55;
-      const t2    = thresh*thresh;
-      ctx.lineWidth = 0.25*dpr;
-      ctx.strokeStyle = `rgba(120,200,255,${ca})`;
-      ctx.beginPath();
-      const step = 5; // skip every 5 — fast approximation
-      for(let ii=0;ii<N;ii+=step){
-        const i=pidx[ii]; if(pz[i]<=0) continue;
-        for(let jj=ii+step;jj<N;jj+=step){
-          const j=pidx[jj]; if(pz[j]<=0) continue;
-          const dx=psx[i]-psx[j], dy=psy[i]-psy[j];
-          if(dx*dx+dy*dy < t2){
-            ctx.moveTo(psx[i],psy[i]); ctx.lineTo(psx[j],psy[j]);
-          }
-        }
-      }
-      ctx.stroke();
-    }
-
-    // ── BATCHED DOT RENDERING — zero save/restore, zero shadowBlur
-    // Pass 1: soft glow rings (large radius, very transparent) — one path per alpha bucket
-    const BUCKETS = 5;
-    const glowBuckets = [null,null,null,null,null]; // will be paths
-    for(let b=0;b<BUCKETS;b++){
-      const aMin = b/BUCKETS, aMax = (b+1)/BUCKETS;
-      const aMid = (aMin+aMax)*0.5;
-      ctx.globalAlpha = aMid * 0.12; // very soft glow
-      ctx.fillStyle = 'rgba(160,210,255,1)';
-      ctx.beginPath();
-      for(let ii=0;ii<N;ii++){
-        const i=pidx[ii];
-        const a = palpha[i];
-        if(a < aMin || a >= aMax) continue;
-        const r = prad[i]*2.8; // glow radius
-        ctx.moveTo(psx[i]+r, psy[i]);
-        ctx.arc(psx[i],psy[i],r,0,PI2);
-      }
-      ctx.fill();
-    }
-
-    // Pass 2: medium halo — same bucket approach
-    for(let b=0;b<BUCKETS;b++){
-      const aMin = b/BUCKETS, aMax = (b+1)/BUCKETS;
-      const aMid = (aMin+aMax)*0.5;
-      ctx.globalAlpha = aMid * 0.30;
-      ctx.fillStyle = 'rgba(190,225,255,1)';
-      ctx.beginPath();
-      for(let ii=0;ii<N;ii++){
-        const i=pidx[ii];
-        const a = palpha[i];
-        if(a < aMin || a >= aMax) continue;
-        const r = prad[i]*1.6;
-        ctx.moveTo(psx[i]+r, psy[i]);
-        ctx.arc(psx[i],psy[i],r,0,PI2);
-      }
-      ctx.fill();
-    }
-
-    // Pass 3: solid core dots
-    for(let b=0;b<BUCKETS;b++){
-      const aMin = b/BUCKETS, aMax = (b+1)/BUCKETS;
-      const aMid = (aMin+aMax)*0.5;
-      ctx.globalAlpha = Math.min(1, aMid * 1.0);
-      ctx.fillStyle = 'rgba(210,238,255,1)';
-      ctx.beginPath();
-      for(let ii=0;ii<N;ii++){
-        const i=pidx[ii];
-        const a = palpha[i];
-        if(a < aMin || a >= aMax) continue;
-        const r = prad[i];
-        ctx.moveTo(psx[i]+r, psy[i]);
-        ctx.arc(psx[i],psy[i],r,0,PI2);
-      }
-      ctx.fill();
-    }
-
-    // Pass 4: bright star cores (white center, separate pass)
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = 'rgba(255,255,255,1)';
-    ctx.beginPath();
-    for(let i=0;i<N;i++){
-      if(!pts[i].bright) continue;
-      const r = prad[i]*0.5;
-      ctx.moveTo(psx[i]+r, psy[i]);
-      ctx.arc(psx[i],psy[i],r,0,PI2);
-    }
-    ctx.fill();
-
-    ctx.globalAlpha = 1; // reset
-
-    // ── Tendrils to orbit nodes
-    nodes.forEach((_,ni)=>{
-      if(!phys[ni]) return;
-      const pos=nodeWorld(ni);
-      const ang=Math.atan2(pos.y-cy,pos.x-cx);
-      const dist=Math.hypot(pos.x-cx,pos.y-cy);
-      const coreEdge=Rcompact*0.92;
-      if(dist<coreEdge) return;
-      const ng=ctx.createLinearGradient(cx+Math.cos(ang)*coreEdge,cy+Math.sin(ang)*coreEdge,pos.x,pos.y);
-      ng.addColorStop(0,'rgba(80,160,255,0.20)');
-      ng.addColorStop(1,'rgba(80,160,255,0.0)');
-      ctx.beginPath();
-      ctx.moveTo(cx+Math.cos(ang)*coreEdge,cy+Math.sin(ang)*coreEdge);
-      ctx.lineTo(pos.x,pos.y);
-      ctx.strokeStyle=ng; ctx.lineWidth=0.5*dpr; ctx.stroke();
-      const frac=((t*0.38+ni*0.37)%1);
-      const px2=cx+Math.cos(ang)*(coreEdge+(dist-coreEdge)*frac);
-      const py2=cy+Math.sin(ang)*(coreEdge+(dist-coreEdge)*frac);
-      ctx.beginPath(); ctx.arc(px2,py2,1.5*dpr,0,PI2);
-      ctx.fillStyle=`rgba(140,210,255,${0.8*(1-frac)})`; ctx.fill();
-    });
-
-    void 0;
-  }
-
-  // ── Interaction
-  function hitTest(ex,ey){
-    const dpr=devicePixelRatio;
-    for(let i=0;i<nodes.length;i++){
-      if(!phys[i]) continue;
-      const p=nodeWorld(i);
-      const R=NODE_R(i)*phys[i].scale;
-      if(Math.hypot(ex*dpr-p.x, ey*dpr-p.y) < R*2) return i;
-    }
-    return -1;
-  }
-
-  function onHover(e){
-    if(!canvas) return;
-    const rect=canvas.getBoundingClientRect();
-    const ex=e.clientX-rect.left, ey=e.clientY-rect.top;
-    mouseX=ex; mouseY=ey;
-    const i=hitTest(ex,ey);
-    hoveredIdx=i;
-    canvas.style.cursor=i>=0?'pointer':'default';
-    const tip=document.getElementById('noyaux-tooltip');
-    if(!tip) return;
-    if(i>=0){
-      const n=nodes[i];
-      document.getElementById('ntt-type').textContent=(TP[n.type]||TP.citation).name;
-      document.getElementById('ntt-title').textContent=n.title;
-      document.getElementById('ntt-body').textContent=n.body||'';
-      tip.style.opacity='1';
-      tip.style.left=(ex+18)+'px';
-      tip.style.top=(ey-10)+'px';
-    } else {
-      tip.style.opacity='0';
-    }
-  }
-  function onLeave(){ hoveredIdx=-1; mouseX=-9999; mouseY=-9999; const t=document.getElementById('noyaux-tooltip'); if(t) t.style.opacity='0'; }
-  function onClick(e){
-    const rect=canvas.getBoundingClientRect();
-    const ex=e.clientX-rect.left, ey=e.clientY-rect.top;
-    const i=hitTest(ex,ey);
-    if(i>=0) noyauxOpenEdit(nodes[i].id);
-  }
-
-  // ── Start/stop with view visibility
-  window.initNoyaux = function(){
-    if(!canvas){ setup(); }
-    load(); initPhys();
-    if(!running){ running=true; loop(); }
-    if(!canvas) setTimeout(()=>{ setup(); load(); initPhys(); running=true; loop(); },100);
-  };
-  function stopNoyaux(){ running=false; if(raf){ cancelAnimationFrame(raf); raf=null; } }
-  window._stopNoyauxCanvas = stopNoyaux;
-
-  // Patch showV to stop animation when leaving
-  const _origShowV = window.showV;
-  window.showV = function(n){
-    if(n!=='noyaux') stopNoyaux();
-    if(_origShowV) _origShowV(n);
-  };
-
-  // ── Modal API
-  window.noyauxOpenAdd = function(){
-    editId=null; editType='citation';
-    document.getElementById('nm-title').textContent='Nouveau nœud';
-    document.getElementById('nm-inp-title').value='';
-    document.getElementById('nm-inp-body').value='';
-    document.getElementById('nm-del-btn').style.display='none';
-    document.querySelectorAll('.noyaux-type-btn').forEach(b=>b.classList.toggle('sel',b.dataset.t==='citation'));
-    document.getElementById('noyaux-modal-bg').style.display='flex';
-    setTimeout(()=>document.getElementById('nm-inp-title').focus(),80);
-  };
-  window.noyauxOpenEdit = function(id){
-    const n=nodes.find(x=>x.id===id); if(!n) return;
-    editId=id; editType=n.type;
-    document.getElementById('nm-title').textContent='Modifier le nœud';
-    document.getElementById('nm-inp-title').value=n.title;
-    document.getElementById('nm-inp-body').value=n.body||'';
-    document.getElementById('nm-del-btn').style.display='block';
-    document.querySelectorAll('.noyaux-type-btn').forEach(b=>b.classList.toggle('sel',b.dataset.t===n.type));
-    document.getElementById('noyaux-modal-bg').style.display='flex';
-    setTimeout(()=>document.getElementById('nm-inp-title').focus(),80);
-  };
-  window.noyauxClose = function(){
-    document.getElementById('noyaux-modal-bg').style.display='none';
-  };
-  window.nmSelType = function(t){
-    editType=t;
-    document.querySelectorAll('.noyaux-type-btn').forEach(b=>b.classList.toggle('sel',b.dataset.t===t));
-  };
-  window.noyauxSave = function(){
-    const title=document.getElementById('nm-inp-title').value.trim();
-    if(!title) return;
-    const body=document.getElementById('nm-inp-body').value.trim();
-    if(editId){
-      const n=nodes.find(x=>x.id===editId);
-      if(n){n.title=title;n.body=body;n.type=editType;}
-    } else {
-      nodes.push({id:genId(),title,body,type:editType,createdAt:Date.now()});
-      initPhys();
-    }
-    save(); noyauxClose();
-    if(typeof showToast==='function') showToast('✦','Nœud enregistré','success');
-  };
-  window.noyauxDelete = function(){
-    if(!editId||!confirm('Supprimer ce nœud ?')) return;
-    nodes=nodes.filter(x=>x.id!==editId);
-    save(); initPhys(); noyauxClose();
-  };
-</script>
 <!-- ── INFLOW ENHANCEMENTS ── -->
 <script>
 (function(){

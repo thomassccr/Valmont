@@ -6474,19 +6474,20 @@ function doLogin() {
     return;
   }
 
-  // ── ADMIN BYPASS : thomassccr@valmont.com + mot de passe boss → accès Elite direct ──
-  if (email === 'thomassccr@valmont.com' && pw === PW_BOSS) {
+  // ── ADMIN BYPASS : t49.cicero@gmail.com + mot de passe boss → accès Elite direct ──
+  if (email === 't49.cicero@gmail.com' && pw === PW_BOSS) {
     _pendingPwType = 'boss';
     localStorage.setItem(PLAN_KEY, 'elite');
     localStorage.setItem('vm_admin_bypass', '1');
     const accounts = getAccounts();
     let boss = accounts.find(a => a.isBoss);
     if (!boss) {
-      boss = { id: 'boss', name: 'Thomas', email: 'thomassccr@valmont.com', isBoss: true };
+      boss = { id: 'boss', name: 'Thomas', email: 't49.cicero@gmail.com', isBoss: true };
       accounts.unshift(boss);
       saveAccounts(accounts);
     } else {
       boss.name = 'Thomas';
+      boss.email = 't49.cicero@gmail.com';
       saveAccounts(accounts);
     }
     loginAs(boss);
@@ -6622,7 +6623,7 @@ function renderAccountsList(afterPwSuccess) {
         // Pré-remplir email + mot de passe admin et connecter directement
         const idIn = document.getElementById('id-in');
         const pwIn = document.getElementById('pw-in');
-        if (idIn) idIn.value = u.email || 'thomassccr@valmont.com';
+        if (idIn) idIn.value = u.email || 't49.cicero@gmail.com';
         if (pwIn) pwIn.value = PW_BOSS;
         // Connexion directe
         doLogin();

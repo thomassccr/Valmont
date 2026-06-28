@@ -8454,27 +8454,27 @@ async function fetchMktData(force = false) {
   const groqMktFetch = (async () => {
     try {
       const today = new Date().toISOString().split('T')[0];
-      const r = await vmFetch({
-        model: 'llama-3.1-8b-instant',
-        max_tokens: 150,
-        messages: [{ role: 'user', content: `Today is ${today}. Give me approximate current market prices for: 1) S&P 500 index (SPX) 2) Nasdaq 100 index (NDX) 3) WTI Crude Oil per barrel. Reply ONLY with valid JSON, no text: {"spx":{"price":5900,"pct":-0.3},"ndx":{"price":21500,"pct":-0.8},"oil":{"price":68.50,"pct":-0.3}}` }]
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          max_tokens: 150,
+          temperature: 0,
+          messages: [{ role: 'user', content: 'Return ONLY a JSON object with current approximate market prices, no explanation, no markdown: {"spx":{"price":5900,"pct":-0.3},"ndx":{"price":21500,"pct":-0.8},"oil":{"price":68.50,"pct":-0.3}}' }]
+        }),
+        signal: AbortSignal.timeout(10000)
       });
-      if (!r || !r.ok) return;
-      const rdata = await r.json();
-      const text = (rdata?.content?.[0]?.text || '').trim();
-      const match = text.match(/\{[\s\S]*\}/);
-      if (!match) return;
+      if (!res.ok) { console.warn('groqMkt HTTP', res.status); return; }
+      const data = await res.json();
+      const text = (data.choices?.[0]?.message?.content || '').trim();
+      const match = text.match(/\{[^{}]*\}/);
+      if (!match) { console.warn('groqMkt no JSON in:', text); return; }
       const j = JSON.parse(match[0]);
-      if (j.spx?.price && isFinite(j.spx.price) && j.spx.price > 1000) {
-        _mktData['ES=F'] = { price: j.spx.price, pct: j.spx.pct || 0, chg: 0, spark: makeSpark(j.spx.price, j.spx.pct || 0) };
-      }
-      if (j.ndx?.price && isFinite(j.ndx.price) && j.ndx.price > 5000) {
-        _mktData['NQ=F'] = { price: j.ndx.price, pct: j.ndx.pct || 0, chg: 0, spark: makeSpark(j.ndx.price, j.ndx.pct || 0) };
-      }
-      if (j.oil?.price && isFinite(j.oil.price) && j.oil.price > 20 && j.oil.price < 300) {
-        _mktData['CL=F'] = { price: j.oil.price, pct: j.oil.pct || 0, chg: 0, spark: makeSpark(j.oil.price, j.oil.pct || 0) };
-      }
-    } catch(e) { console.error('groqMktFetch error:', e); }
+      if (j.spx?.price > 1000)  _mktData['ES=F'] = { price: +j.spx.price, pct: +(j.spx.pct||0), chg: 0, spark: makeSpark(+j.spx.price, +(j.spx.pct||0)) };
+      if (j.ndx?.price > 5000)  _mktData['NQ=F'] = { price: +j.ndx.price, pct: +(j.ndx.pct||0), chg: 0, spark: makeSpark(+j.ndx.price, +(j.ndx.pct||0)) };
+      if (j.oil?.price > 20)    _mktData['CL=F'] = { price: +j.oil.price, pct: +(j.oil.pct||0), chg: 0, spark: makeSpark(+j.oil.price, +(j.oil.pct||0)) };
+    } catch(e) { console.error('groqMktFetch:', e); }
   })();
 
   await Promise.allSettled([binanceFetch, indicesFetch, groqMktFetch, oilFetch]);

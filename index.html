@@ -8419,30 +8419,36 @@ async function fetchMktData(force = false) {
     } catch(e) { console.warn('Binance fetch error:', e); }
   })();
 
-  // ── 2. NAS100 + SPX500 via Yahoo Finance + allorigins proxy ───────────────
+  // ── 2. NAS100 + SPX500 via Yahoo Finance (futures NQ=F / ES=F, même logique que CL=F) ──
   const indicesFetch = (async () => {
     const pairs = [
-      { symbol: '^NDX',  sym: 'NQ=F' },   // Nasdaq 100 (exact) — ^IXIC = Composite, souvent bloqué
-      { symbol: '^GSPC', sym: 'ES=F' },
+      { yahooSym: 'NQ%3DF', sym: 'NQ=F' },  // NQ=F encodé comme CL=F qui marche
+      { yahooSym: 'ES%3DF', sym: 'ES=F' },
     ];
-    await Promise.allSettled(pairs.map(async ({ symbol, sym }) => {
-      try {
-        const url   = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1h&range=1d`;
-        const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-        const res   = await fetch(proxy, { signal: AbortSignal.timeout(12000) });
-        if (!res.ok) return;
-        const outer = await res.json();
-        if (!outer.contents) return;
-        const j     = JSON.parse(outer.contents);
-        const meta  = j?.chart?.result?.[0]?.meta;
-        if (!meta) return;
-        const price = meta.regularMarketPrice || meta.previousClose;
-        if (!price) return;
-        const prev  = meta.chartPreviousClose || meta.previousClose || price;
-        const pct   = ((price - prev) / prev) * 100;
-        const closes = (j?.chart?.result?.[0]?.indicators?.quote?.[0]?.close || []).filter(v => v != null);
-        _mktData[sym] = { price, pct, chg: price - prev, spark: closes.length > 1 ? closes : makeSpark(price, pct) };
-      } catch(e) {}
+    await Promise.allSettled(pairs.map(async ({ yahooSym, sym }) => {
+      const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSym}?interval=1h&range=1d`;
+      const proxies = [
+        'https://api.allorigins.win/get?url=' + encodeURIComponent(yahooUrl),
+        'https://corsproxy.io/?' + encodeURIComponent(yahooUrl),
+      ];
+      for (const proxy of proxies) {
+        try {
+          const res = await fetch(proxy, { signal: AbortSignal.timeout(10000) });
+          if (!res.ok) continue;
+          const text = await res.text();
+          let j;
+          try { const w = JSON.parse(text); j = w.contents ? JSON.parse(w.contents) : w; } catch { continue; }
+          const meta = j?.chart?.result?.[0]?.meta;
+          if (!meta) continue;
+          const price = meta.regularMarketPrice || meta.previousClose;
+          if (!price) continue;
+          const prev  = meta.chartPreviousClose || meta.previousClose || price;
+          const pct   = ((price - prev) / prev) * 100;
+          const closes = (j?.chart?.result?.[0]?.indicators?.quote?.[0]?.close || []).filter(v => v != null);
+          _mktData[sym] = { price, pct, chg: price - prev, spark: closes.length > 1 ? closes : makeSpark(price, pct) };
+          return;
+        } catch(e) {}
+      }
     }));
   })();
 

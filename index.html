@@ -2159,6 +2159,67 @@ textarea::placeholder { color:var(--text3); }
 .cal-cell-trades {
   font-family:'DM Mono',monospace; font-size:10px; color:rgba(255,255,255,.4);
 }
+.cal-cell-meta {
+  font-family:'DM Mono',monospace; font-size:9px; color:rgba(255,255,255,.35);
+  letter-spacing:.04em;
+}
+.cal-cell.weekend { background:rgba(255,255,255,.01); }
+.cal-cell.weekend .cal-cell-num { color:var(--text3); opacity:.5; }
+
+/* ─── CALENDAR DAY PANEL ─── */
+.cal-day-panel {
+  position:absolute; right:0; top:0; bottom:0;
+  width:340px; background:var(--panel);
+  border-left:1px solid var(--border2);
+  display:flex; flex-direction:column;
+  z-index:50; box-shadow:-8px 0 32px rgba(0,0,0,.6);
+  animation:panelSlideIn .2s ease;
+}
+@keyframes panelSlideIn { from{transform:translateX(20px);opacity:0} to{transform:translateX(0);opacity:1} }
+#v-calendar { position:relative; }
+.cdp-header {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  padding:20px 20px 16px; border-bottom:1px solid var(--border); flex-shrink:0;
+}
+.cdp-date { font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; color:var(--text); text-transform:capitalize; }
+.cdp-sub { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--text3); margin-top:3px; }
+.cdp-close { background:transparent; border:none; color:var(--text3); cursor:pointer; font-size:16px; padding:0; line-height:1; transition:color .15s; }
+.cdp-close:hover { color:var(--text); }
+.cdp-stats-row {
+  display:grid; grid-template-columns:repeat(4,1fr);
+  padding:16px 20px; gap:12px; border-bottom:1px solid var(--border); flex-shrink:0;
+}
+.cdp-stat { display:flex; flex-direction:column; align-items:center; gap:4px; }
+.cdp-stat-val { font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:.06em; color:var(--text); }
+.cdp-stat-val.pos { color:#3dba88; }
+.cdp-stat-val.neg { color:#e05a4a; }
+.cdp-stat-lbl { font-family:'DM Mono',monospace; font-size:7px; letter-spacing:.18em; text-transform:uppercase; color:var(--text3); text-align:center; }
+.cdp-trades-title {
+  font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--text3); padding:14px 20px 8px; flex-shrink:0;
+}
+.cdp-trades-list { flex:1; overflow-y:auto; padding:0 12px 20px; }
+.cdp-trades-list::-webkit-scrollbar { width:2px; }
+.cdp-trades-list::-webkit-scrollbar-thumb { background:var(--border2); }
+.cdp-trade {
+  background:var(--lift); border:1px solid var(--border);
+  border-radius:8px; padding:12px 14px; margin-bottom:8px;
+  transition:border-color .15s;
+}
+.cdp-trade:hover { border-color:var(--border2); }
+.cdp-trade.win { border-left:3px solid rgba(61,186,136,.5); }
+.cdp-trade.loss { border-left:3px solid rgba(192,57,43,.5); }
+.cdp-trade-top { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.cdp-trade-sym { font-family:'DM Mono',monospace; font-size:12px; font-weight:500; color:var(--text); flex:1; }
+.cdp-trade-dir { font-family:'DM Mono',monospace; font-size:8px; letter-spacing:.14em; padding:2px 6px; border-radius:3px; }
+.cdp-trade-dir.buy, .cdp-trade-dir.long  { background:rgba(61,186,136,.12); color:#3dba88; }
+.cdp-trade-dir.sell,.cdp-trade-dir.short { background:rgba(192,57,43,.12); color:#e05a4a; }
+.cdp-trade-pnl { font-family:'DM Mono',monospace; font-size:13px; font-weight:600; }
+.cdp-trade-pnl.pos { color:#3dba88; }
+.cdp-trade-pnl.neg { color:#e05a4a; }
+.cdp-trade-details { display:flex; gap:12px; flex-wrap:wrap; }
+.cdp-trade-details span { font-family:'DM Mono',monospace; font-size:9px; color:var(--text3); letter-spacing:.04em; }
+.cdp-trade-details strong { color:var(--text2); font-weight:500; }
 
 .cal-footer-note {
   text-align:center; padding:10px;
@@ -5181,6 +5242,12 @@ tbody tr:last-child td { border-bottom: none; }
             Monthly stats: <span class="cal-stat-val" id="cal-monthly-stat">$0.00</span>
           </div>
           <div class="cal-stat-item">
+            WR: <span class="cal-stat-val neutral" id="cal-monthly-wr">—</span>
+          </div>
+          <div class="cal-stat-item">
+            Trades: <span class="cal-stat-val neutral" id="cal-monthly-trades">0</span>
+          </div>
+          <div class="cal-stat-item">
             Trading days: <span class="cal-stat-val neutral" id="cal-trading-days">0</span>
           </div>
         </div>
@@ -5204,7 +5271,7 @@ tbody tr:last-child td { border-bottom: none; }
         <div class="cal-grid" id="cal-grid"></div>
       </div>
 
-      <div class="cal-footer-note">The trades are in the platform time which might differ from CE(S)T</div>
+      <div class="cal-footer-note">Les trades sont dans le fuseau horaire de la plateforme</div>
     </div>
 
     <div id="v-leaderboard" class="view" style="background:#111115;overflow:hidden;">
@@ -8803,28 +8870,15 @@ function obFinish() {
 
 // ─── TRADING CALENDAR ───
 // Initialize to May 2026 (matching screenshot data)
-let calYear = 2026;
-let calMonth = 4; // May (0-indexed)
-
-// Trade data: keyed by "YYYY-M-D"
-const CAL_TRADES = {
-  '2026-4-4':  { pnl:  93.00, trades: 1 },
-  '2026-4-7':  { pnl:  70.15, trades: 1 },
-  '2026-4-8':  { pnl: -165.00, trades: 1 },
-  '2026-4-11': { pnl: -144.40, trades: 1 },
-  '2026-4-13': { pnl:  434.70, trades: 1 },
-  '2026-4-14': { pnl: -267.50, trades: 2 },
-  '2026-4-15': { pnl: -191.10, trades: 1 },
-  '2026-4-18': { pnl:   19.50, trades: 1 },
-  '2026-4-20': { pnl:  238.20, trades: 1 },
-  '2026-4-21': { pnl:  473.00, trades: 1 },
-  '2026-4-26': { pnl:  427.70, trades: 1 },
-};
+// ─── TRADING CALENDAR — CONNECTED TO DASHBOARD ───────────────────────────────
+const now_cal = new Date();
+let calYear  = now_cal.getFullYear();
+let calMonth = now_cal.getMonth();
 
 function calGoToday() {
-  const now = new Date();
-  calYear = now.getFullYear();
-  calMonth = now.getMonth();
+  const n = new Date();
+  calYear  = n.getFullYear();
+  calMonth = n.getMonth();
   renderCalendar();
 }
 function calPrev() {
@@ -8838,81 +8892,207 @@ function calNext() {
   renderCalendar();
 }
 
+// Build a per-day map from live dashboard trades
+function buildCalTradeMap() {
+  const trades = (typeof getEffectiveDashboardTrades === 'function')
+    ? getEffectiveDashboardTrades()
+    : (window.ALL_TRADES || []);
+  const map = {};
+  trades.forEach(t => {
+    const raw = t.date || t.closeTime || '';
+    if (!raw) return;
+    // Normalise to YYYY-MM-DD
+    const ds = raw.length >= 10 ? raw.slice(0,10) : raw;
+    const parts = ds.split('-');
+    if (parts.length < 3) return;
+    const key = parts[0] + '-' + parseInt(parts[1],10) + '-' + parseInt(parts[2],10);
+    const pnl = parseFloat(t.pnl || t.profit || 0);
+    if (!map[key]) map[key] = { pnl: 0, trades: 0, wins: 0, tradeList: [] };
+    map[key].pnl    += pnl;
+    map[key].trades += 1;
+    if (pnl > 0) map[key].wins += 1;
+    map[key].tradeList.push(t);
+  });
+  return map;
+}
+
 function renderCalendar() {
   const grid = document.getElementById('cal-grid');
   if (!grid) return;
   grid.innerHTML = '';
 
-  const now = new Date();
+  const now    = new Date();
   const monthNames = ['January','February','March','April','May','June',
                       'July','August','September','October','November','December'];
   document.getElementById('cal-month-label').textContent = monthNames[calMonth] + ' ' + calYear;
 
-  // First day of month (0=Sun, adjust to Mon-start)
+  // Build live trade map
+  const CAL_TRADES = buildCalTradeMap();
+
+  // First weekday of month (Mon=0)
   const firstDay = new Date(calYear, calMonth, 1);
-  let startDow = firstDay.getDay(); // 0=Sun
-  startDow = startDow === 0 ? 6 : startDow - 1; // Mon=0
+  let startDow = firstDay.getDay();
+  startDow = startDow === 0 ? 6 : startDow - 1;
 
-  // Last day of month
-  const lastDay = new Date(calYear, calMonth + 1, 0).getDate();
-
-  // Total cells: 6 rows × 7 cols = 42
   const totalCells = 42;
   let dayNum = 1 - startDow;
-
-  let monthPnl = 0;
-  let tradingDays = 0;
+  let monthPnl = 0, tradingDays = 0, monthWins = 0, monthTrades = 0;
 
   for (let i = 0; i < totalCells; i++) {
     const cell = document.createElement('div');
     cell.className = 'cal-cell';
 
-    const cellDate = new Date(calYear, calMonth, dayNum);
+    const cellDate       = new Date(calYear, calMonth, dayNum);
     const isCurrentMonth = cellDate.getMonth() === calMonth;
-    const isToday = cellDate.getFullYear() === now.getFullYear() &&
-                    cellDate.getMonth()    === now.getMonth() &&
-                    cellDate.getDate()     === now.getDate();
+    const isToday        = cellDate.getFullYear() === now.getFullYear() &&
+                           cellDate.getMonth()    === now.getMonth()    &&
+                           cellDate.getDate()     === now.getDate();
+    const isWeekend      = cellDate.getDay() === 0 || cellDate.getDay() === 6;
 
     if (!isCurrentMonth) cell.classList.add('other-month');
-    if (isToday) cell.classList.add('today');
+    if (isToday)         cell.classList.add('today');
+    if (isWeekend)       cell.classList.add('weekend');
 
     const numDiv = document.createElement('div');
     numDiv.className = 'cal-cell-num';
     numDiv.textContent = cellDate.getDate();
     cell.appendChild(numDiv);
 
-    // Check for trade data
-    const key = cellDate.getFullYear() + '-' + cellDate.getMonth() + '-' + cellDate.getDate();
+    const key   = cellDate.getFullYear() + '-' + cellDate.getMonth() + '-' + cellDate.getDate();
     const trade = CAL_TRADES[key];
+
     if (trade && isCurrentMonth) {
-      monthPnl += trade.pnl;
-      tradingDays++;
+      monthPnl    += trade.pnl;
+      tradingDays += 1;
+      monthWins   += trade.wins;
+      monthTrades += trade.trades;
+
+      const isPos = trade.pnl >= 0;
       const contentDiv = document.createElement('div');
-      contentDiv.className = 'cal-cell-content ' + (trade.pnl >= 0 ? 'pos' : 'neg');
+      contentDiv.className = 'cal-cell-content ' + (isPos ? 'pos' : 'neg');
+
       const pnlDiv = document.createElement('div');
       pnlDiv.className = 'cal-cell-pnl';
-      pnlDiv.textContent = (trade.pnl >= 0 ? '+$' : '-$') + Math.abs(trade.pnl).toFixed(2);
-      const trDiv = document.createElement('div');
-      trDiv.className = 'cal-cell-trades';
-      trDiv.textContent = 'Trades: ' + trade.trades;
+      pnlDiv.textContent = (isPos ? '+$' : '-$') + Math.abs(trade.pnl).toFixed(2);
+
+      const metaDiv = document.createElement('div');
+      metaDiv.className = 'cal-cell-meta';
+      const wr = trade.trades > 0 ? Math.round((trade.wins / trade.trades) * 100) : 0;
+      metaDiv.textContent = trade.trades + ' trade' + (trade.trades > 1 ? 's' : '') + ' · ' + wr + '% WR';
+
       contentDiv.appendChild(pnlDiv);
-      contentDiv.appendChild(trDiv);
+      contentDiv.appendChild(metaDiv);
       cell.appendChild(contentDiv);
+
+      // Click to open day panel
+      const ds = cellDate.getFullYear() + '-' +
+        String(cellDate.getMonth()+1).padStart(2,'0') + '-' +
+        String(cellDate.getDate()).padStart(2,'0');
+      cell.style.cursor = 'pointer';
+      cell.addEventListener('click', () => openCalDayPanel(ds, trade));
     }
 
     grid.appendChild(cell);
     dayNum++;
   }
 
-  // Update stats
+  // Update topbar stats
   const statEl = document.getElementById('cal-monthly-stat');
   if (statEl) {
     statEl.textContent = (monthPnl >= 0 ? '+$' : '-$') + Math.abs(monthPnl).toFixed(2);
     statEl.className = 'cal-stat-val ' + (monthPnl > 0 ? 'pos' : monthPnl < 0 ? 'neg' : 'neutral');
   }
-  const daysEl = document.getElementById('cal-trading-days');
-  if (daysEl) daysEl.textContent = tradingDays;
+  document.getElementById('cal-trading-days').textContent = tradingDays;
+
+  // Additional month stats
+  const wrEl = document.getElementById('cal-monthly-wr');
+  if (wrEl) wrEl.textContent = monthTrades > 0 ? Math.round((monthWins/monthTrades)*100) + '%' : '—';
+  const trEl = document.getElementById('cal-monthly-trades');
+  if (trEl) trEl.textContent = monthTrades;
 }
+
+// ─── DAY PANEL ─────────────────────────────────────────────────────────────
+function openCalDayPanel(ds, dayData) {
+  // Remove existing panel
+  const old = document.getElementById('cal-day-panel');
+  if (old) { old.remove(); return; }   // toggle
+
+  const panel = document.createElement('div');
+  panel.id = 'cal-day-panel';
+  panel.className = 'cal-day-panel';
+
+  // Date label
+  const d = new Date(ds + 'T12:00:00');
+  const label = d.toLocaleDateString('fr-FR', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
+  const isPos = dayData.pnl >= 0;
+  const wr    = dayData.trades > 0 ? Math.round((dayData.wins/dayData.trades)*100) : 0;
+
+  let tradesHtml = '';
+  if (dayData.tradeList && dayData.tradeList.length > 0) {
+    dayData.tradeList.forEach((t, idx) => {
+      const pnl   = parseFloat(t.pnl || t.profit || 0);
+      const isW   = pnl > 0;
+      const sym   = t.symbol || t.pair || t.instrument || '—';
+      const dir   = t.direction || t.type || t.side || '';
+      const rr    = t.rr || t.rrRatio || '';
+      const entry = t.entryPrice || t.entry || '';
+      const exit  = t.exitPrice || t.exit || t.closePrice || '';
+      tradesHtml += `
+      <div class="cdp-trade ${isW ? 'win' : 'loss'}">
+        <div class="cdp-trade-top">
+          <div class="cdp-trade-sym">${sym}</div>
+          ${dir ? `<div class="cdp-trade-dir ${dir.toLowerCase()}">${dir.toUpperCase()}</div>` : ''}
+          <div class="cdp-trade-pnl ${isW ? 'pos' : 'neg'}">${isW ? '+$' : '-$'}${Math.abs(pnl).toFixed(2)}</div>
+        </div>
+        <div class="cdp-trade-details">
+          ${entry ? `<span>Entrée <strong>${entry}</strong></span>` : ''}
+          ${exit  ? `<span>Sortie <strong>${exit}</strong></span>` : ''}
+          ${rr    ? `<span>RR <strong>${rr}</strong></span>` : ''}
+        </div>
+      </div>`;
+    });
+  } else {
+    tradesHtml = '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--text3);text-align:center;padding:16px 0;">Données de trades non disponibles</div>';
+  }
+
+  panel.innerHTML = `
+    <div class="cdp-header">
+      <div>
+        <div class="cdp-date">${label}</div>
+        <div class="cdp-sub">Performance du jour</div>
+      </div>
+      <button class="cdp-close" onclick="document.getElementById('cal-day-panel').remove()">✕</button>
+    </div>
+    <div class="cdp-stats-row">
+      <div class="cdp-stat">
+        <div class="cdp-stat-val ${isPos ? 'pos' : 'neg'}">${isPos ? '+$' : '-$'}${Math.abs(dayData.pnl).toFixed(2)}</div>
+        <div class="cdp-stat-lbl">P&L NET</div>
+      </div>
+      <div class="cdp-stat">
+        <div class="cdp-stat-val">${dayData.trades}</div>
+        <div class="cdp-stat-lbl">TRADES</div>
+      </div>
+      <div class="cdp-stat">
+        <div class="cdp-stat-val">${wr}%</div>
+        <div class="cdp-stat-lbl">WIN RATE</div>
+      </div>
+      <div class="cdp-stat">
+        <div class="cdp-stat-val">${dayData.wins}/${dayData.trades - dayData.wins}</div>
+        <div class="cdp-stat-lbl">W / L</div>
+      </div>
+    </div>
+    <div class="cdp-trades-title">Détail des trades</div>
+    <div class="cdp-trades-list">${tradesHtml}</div>
+  `;
+
+  // Inject into cal view
+  const calView = document.getElementById('v-calendar');
+  calView.appendChild(panel);
+}
+
+// Close panel when switching month
+const _origCalPrev = calPrev;
+const _origCalNext = calNext;
 
 </script>
 
@@ -11756,6 +11936,11 @@ document.addEventListener('click', function(e) {
     window.render = function(){
       orig.apply(this, arguments);
       setTimeout(fillInflowExtra, 200);
+      // Refresh calendar if it's visible
+      setTimeout(function(){
+        var calView = document.getElementById('v-calendar');
+        if(calView && calView.classList.contains('on') && typeof renderCalendar === 'function') renderCalendar();
+      }, 300);
     };
     window.render._iflowPatched = true;
   }

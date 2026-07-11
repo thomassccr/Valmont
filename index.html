@@ -4,6 +4,114 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>VALMONT — Trading Assistant</title>
+<!-- ═══ BACKEND CLOUD (Supabase) — comptes réels + synchronisation multi-appareils ═══ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+/* Configuration du backend cloud.
+   Laisser vide = l'app fonctionne 100% en local, comme avant.
+   Pour activer : crée un projet sur supabase.com, exécute supabase-schema.sql
+   dans le SQL Editor, puis colle ici l'URL du projet et la clé "anon public".
+   Guide pas à pas : voir BACKEND.md à la racine du dépôt. */
+window.VALMONT_BACKEND = {
+  url: '',      // ex: 'https://xxxxxxxx.supabase.co'
+  anonKey: ''   // ex: 'eyJhbGciOiJIUzI1NiIs...'
+};
+
+window.VMB = (function(){
+  var cfg = window.VALMONT_BACKEND || {};
+  var enabled = !!(cfg.url && cfg.anonKey && window.supabase);
+  var client = enabled ? window.supabase.createClient(cfg.url, cfg.anonKey) : null;
+  var pushTimer = null;
+  var suspended = false; // évite de re-pousser pendant qu'on applique un pull
+
+  // Toutes les données de l'app vivent sous des clés localStorage "vm_*" :
+  // on synchronise ce snapshot complet dans une ligne JSONB par utilisateur.
+  function snapshot() {
+    var data = {};
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf('vm_') === 0) data[k] = localStorage.getItem(k);
+    }
+    return data;
+  }
+
+  async function push() {
+    if (!enabled || suspended) return;
+    try {
+      var s = await client.auth.getSession();
+      var user = s.data.session && s.data.session.user;
+      if (!user) return;
+      await client.from('user_data').upsert({
+        user_id: user.id,
+        data: snapshot(),
+        updated_at: new Date().toISOString()
+      });
+    } catch(e) { console.warn('[VMB] push échoué', e); }
+  }
+
+  function schedulePush() {
+    if (!enabled || suspended) return;
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(push, 2000);
+  }
+
+  async function pull(userId) {
+    if (!enabled) return false;
+    try {
+      var res = await client.from('user_data').select('data').eq('user_id', userId).maybeSingle();
+      if (res.data && res.data.data) {
+        suspended = true;
+        var data = res.data.data;
+        Object.keys(data).forEach(function(k){ try { localStorage.setItem(k, data[k]); } catch(e){} });
+        suspended = false;
+        return true;
+      }
+    } catch(e) { console.warn('[VMB] pull échoué', e); suspended = false; }
+    return false;
+  }
+
+  function profileFor(user) {
+    var name = (user.user_metadata && user.user_metadata.name) || (user.email || '').split('@')[0];
+    return { id: user.id, name: name, email: user.email, isBoss: false, cloud: true };
+  }
+
+  async function register(name, email, pw) {
+    var r = await client.auth.signUp({ email: email, password: pw, options: { data: { name: name } } });
+    if (r.error) throw r.error;
+    if (!r.data.session) return { needsConfirm: true };
+    return { user: profileFor(r.data.user) };
+  }
+
+  async function login(email, pw) {
+    var r = await client.auth.signInWithPassword({ email: email, password: pw });
+    if (r.error) throw r.error;
+    var user = profileFor(r.data.user);
+    var had = await pull(user.id);
+    if (!had) push(); // première connexion : migre les données locales vers le cloud
+    return user;
+  }
+
+  async function restore() {
+    if (!enabled) return null;
+    try {
+      var s = await client.auth.getSession();
+      var su = s.data.session && s.data.session.user;
+      if (!su) return null;
+      var user = profileFor(su);
+      await pull(user.id);
+      return user;
+    } catch(e) { return null; }
+  }
+
+  function logout() {
+    if (!enabled) return;
+    try { clearTimeout(pushTimer); push(); client.auth.signOut(); } catch(e){}
+  }
+
+  return { enabled: enabled, register: register, login: login, logout: logout,
+           restore: restore, schedulePush: schedulePush, push: push };
+})();
+</script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'%3E%3Cdefs%3E%3Cmask id='m'%3E%3Crect width='1024' height='1024' fill='white'/%3E%3Cpath d='M302 505C296 458 336 428 386 444C452 530 496 572 530 608C668 462 828 295 950 118C830 350 670 570 510 690C436 614 360 556 302 505Z' fill='black' stroke='black' stroke-width='44' stroke-linejoin='round'/%3E%3C/mask%3E%3C/defs%3E%3Crect width='1024' height='1024' rx='224' fill='%23080808'/%3E%3Cg fill='white' transform='translate(83,130) scale(0.78)'%3E%3Cg mask='url(%23m)'%3E%3Cpath fill-rule='evenodd' d='M850 540A350 350 0 1 0 150 540A350 350 0 1 0 850 540ZM714 540A214 214 0 1 1 286 540A214 214 0 1 1 714 540Z'/%3E%3C/g%3E%3Cpath d='M302 505C296 458 336 428 386 444C452 530 496 572 530 608C668 462 828 295 950 118C830 350 670 570 510 690C436 614 360 556 302 505Z'/%3E%3Cpath d='M670 848C810 750 890 550 908 338C858 460 782 592 630 732Z'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
@@ -6213,6 +6321,8 @@ function updateHomeGreeting() {
 function doLogout() {
   // Sauvegarder les trades avant de déconnecter
   saveTradesData();
+  // Backend cloud : pousser une dernière fois puis fermer la session Supabase
+  if (window.VMB && VMB.enabled) VMB.logout();
   if (currentUser) sessionStorage.removeItem('vm_banner_dismissed_' + currentUser.id);
   currentUser = null;
   sessions = [];
@@ -6258,6 +6368,32 @@ function doRegister() {
   if (!name) { err.textContent = "Merci d'entrer votre prénom."; return; }
   if (!email || !email.includes('@')) { err.textContent = "Adresse e-mail invalide."; return; }
   if (pw.length < 6) { err.textContent = "Mot de passe trop court (6 caractères minimum)."; return; }
+
+  // ── Backend cloud activé → vrai compte Supabase ──
+  if (window.VMB && VMB.enabled) {
+    err.textContent = 'Création du compte…';
+    VMB.register(name, email, pw).then(function(res){
+      if (res.needsConfirm) {
+        err.textContent = 'Compte créé ! Vérifie ta boîte mail pour le confirmer, puis connecte-toi.';
+        switchAuthTab('login');
+        document.getElementById('login-err').textContent = 'Compte créé ! Vérifie ta boîte mail pour le confirmer, puis connecte-toi.';
+        return;
+      }
+      var u = res.user;
+      var accs = getAccounts();
+      if (!accs.find(function(a){ return a.id === u.id; })) {
+        accs.push({ id: u.id, name: u.name, email: u.email, isBoss: false, cloud: true });
+        saveAccounts(accs);
+      }
+      loginAs(u);
+    }).catch(function(e){
+      var msg = (e && e.message) || '';
+      err.textContent = msg.indexOf('already registered') !== -1
+        ? 'Un compte existe déjà avec cette adresse.'
+        : "Échec de l'inscription : " + (msg || 'erreur réseau.');
+    });
+    return;
+  }
 
   const accounts = getAccounts();
   const existing = accounts.find(a => a.email === email);
@@ -6328,6 +6464,31 @@ function doLogin() {
     }
     switchAuthTab('register');
     if (document.getElementById('reg-email-in')) document.getElementById('reg-email-in').value = email;
+    return;
+  }
+
+  // ── Backend cloud activé → connexion Supabase ──
+  if (window.VMB && VMB.enabled) {
+    err.textContent = 'Connexion…';
+    VMB.login(email, pw).then(function(u){
+      err.textContent = '';
+      var accs = getAccounts();
+      var ex = accs.find(function(a){ return a.id === u.id; });
+      if (ex) { u.name = ex.name || u.name; u.isBoss = !!ex.isBoss; }
+      else {
+        accs.push({ id: u.id, name: u.name, email: u.email, isBoss: false, cloud: true });
+        saveAccounts(accs);
+      }
+      loginAs(u);
+    }).catch(function(e){
+      var msg = (e && e.message) || '';
+      err.textContent = msg.indexOf('not confirmed') !== -1
+        ? 'Confirme d’abord ton adresse e-mail (regarde ta boîte mail).'
+        : 'Email ou mot de passe incorrect.';
+      const box = document.querySelector('.login-box');
+      box.style.animation = 'none'; box.offsetHeight;
+      box.style.animation = 'loginShake .35s ease';
+    });
     return;
   }
 
@@ -11980,6 +12141,44 @@ document.addEventListener('click', function(e) {
       fillInflowExtra();
     }, 600);
   }
+})();
+</script>
+
+<script>
+/* ─── SYNC CLOUD : reprise de session + push automatique des données ─── */
+(function(){
+  if (!window.VMB || !VMB.enabled) return;
+
+  // Toute écriture locale sous "vm_*" déclenche un push (debounce 2s) vers le cloud
+  var origSet = localStorage.setItem.bind(localStorage);
+  localStorage.setItem = function(k, v) {
+    origSet(k, v);
+    if (typeof k === 'string' && k.indexOf('vm_') === 0) VMB.schedulePush();
+  };
+  var origRem = localStorage.removeItem.bind(localStorage);
+  localStorage.removeItem = function(k) {
+    origRem(k);
+    if (typeof k === 'string' && k.indexOf('vm_') === 0) VMB.schedulePush();
+  };
+
+  // Reprise de session : si l'utilisateur était connecté, on saute l'écran de login
+  window.addEventListener('load', function(){
+    VMB.restore().then(function(u){
+      if (!u) return;
+      if (typeof currentUser !== 'undefined' && currentUser) return; // déjà connecté
+      var accs = getAccounts();
+      var ex = accs.find(function(a){ return a.id === u.id; });
+      if (ex) { u.name = ex.name || u.name; u.isBoss = !!ex.isBoss; }
+      else {
+        accs.push({ id: u.id, name: u.name, email: u.email, isBoss: false, cloud: true });
+        saveAccounts(accs);
+      }
+      loginAs(u);
+    });
+  });
+
+  // Dernier push avant de quitter la page
+  window.addEventListener('beforeunload', function(){ VMB.push(); });
 })();
 </script>
 

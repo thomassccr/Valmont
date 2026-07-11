@@ -8668,14 +8668,18 @@ function resetOnboarding() {
   showToast('info', '↺', 'Onboarding réinitialisé');
 }
 
-// Fermer sur le backdrop
-document.getElementById('profile-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeProfile();
+// Fermer sur le backdrop (le modal est défini plus bas dans la page → attendre le DOM)
+document.addEventListener('DOMContentLoaded', function() {
+  var pm = document.getElementById('profile-modal');
+  if (pm) pm.addEventListener('click', function(e) {
+    if (e.target === pm) closeProfile();
+  });
 });
 
 // ESC
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape' && document.getElementById('profile-modal').classList.contains('open')) {
+  var pm = document.getElementById('profile-modal');
+  if (e.key === 'Escape' && pm && pm.classList.contains('open')) {
     closeProfile();
   }
 });
@@ -9430,7 +9434,7 @@ function showMobileNav() {
 }
 
 /* Hook into existing showV to update mobile active state */
-const _origShowV = typeof showV === 'function' ? showV : null;
+const _origShowVMob = typeof showV === 'function' ? showV : null;
 document.addEventListener('DOMContentLoaded', function() {
   // Show mobile nav when shell becomes visible (after login)
   const shellEl = document.getElementById('shell');
@@ -9739,6 +9743,7 @@ function setChartType(type) {
 }
 
 function drawChart(bars) {
+  if (typeof chartCanvas === 'undefined' || !chartCanvas || !chartCtx) return; // dashboard pas encore initialisé
   if (!bars) bars = chartParams?.bars || [];
   const dpr = window.devicePixelRatio || 1;
   const W = parseInt(chartCanvas.style.width);
@@ -10009,7 +10014,8 @@ function render() {
   // Si un custom range est actif, deléguer à renderCustomRange
   if (window.useCustomRange && typeof renderCustomRange === "function") { renderCustomRange(); return; }
   const { start, end, label } = getPeriodRange(currentView, currentOffset);
-  document.getElementById('period-label').textContent = label;
+  const periodLabelEl = document.getElementById('period-label');
+  if (periodLabelEl) periodLabelEl.textContent = label;
 
 
   const allDashboardTrades = getEffectiveDashboardTrades();
@@ -12171,10 +12177,11 @@ document.addEventListener('click', function(e) {
   function restoreLocal() {
     try {
       var uid = localStorage.getItem('vm_current_user_id');
-      if (!uid) return;
+      if (!uid) { console.log('[VMB] pas d’utilisateur mémorisé → écran de login'); return; }
       var acc = getAccounts().find(function(a){ return a.id === uid; });
-      if (acc) loginAs(acc);
-    } catch(e){}
+      if (acc) { console.log('[VMB] reconnexion locale :', acc.name); loginAs(acc); }
+      else console.log('[VMB] utilisateur mémorisé introuvable dans vm_accounts :', uid);
+    } catch(e){ console.warn('[VMB] échec reconnexion locale', e); }
   }
 
   // Reprise de session : cloud d'abord, sinon local.
@@ -12182,6 +12189,8 @@ document.addEventListener('click', function(e) {
   // une page lourde), avec repli local si Supabase ne répond pas sous 4 s.
   function tryRestore() {
     if (typeof currentUser !== 'undefined' && currentUser) return; // déjà connecté
+    console.log('[VMB] reprise de session — mode', (window.VMB && VMB.enabled) ? 'cloud' : 'local',
+                '· utilisateur mémorisé :', localStorage.getItem('vm_current_user_id') || 'aucun');
     if (window.VMB && VMB.enabled) {
       var done = false;
       function fallback() { if (!done) { done = true; restoreLocal(); } }
@@ -12209,5 +12218,5 @@ document.addEventListener('click', function(e) {
 })();
 </script>
 
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a10da9388a45d110',t:'MTc4MjMyNDMzMA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>

@@ -12177,11 +12177,18 @@ document.addEventListener('click', function(e) {
     } catch(e){}
   }
 
-  // Reprise de session au chargement : cloud d'abord, sinon local
-  window.addEventListener('load', function(){
+  // Reprise de session : cloud d'abord, sinon local.
+  // Lancée dès que le DOM est prêt (pas 'load', qui peut arriver très tard sur
+  // une page lourde), avec repli local si Supabase ne répond pas sous 4 s.
+  function tryRestore() {
     if (typeof currentUser !== 'undefined' && currentUser) return; // déjà connecté
     if (window.VMB && VMB.enabled) {
+      var done = false;
+      function fallback() { if (!done) { done = true; restoreLocal(); } }
+      var timer = setTimeout(fallback, 4000);
       VMB.restore().then(function(u){
+        if (done) return;
+        done = true; clearTimeout(timer);
         if (typeof currentUser !== 'undefined' && currentUser) return;
         if (!u) { restoreLocal(); return; }
         var accs = getAccounts();
@@ -12192,11 +12199,13 @@ document.addEventListener('click', function(e) {
           saveAccounts(accs);
         }
         loginAs(u);
-      });
+      }).catch(function(){ clearTimeout(timer); fallback(); });
     } else {
       restoreLocal();
     }
-  });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tryRestore);
+  else tryRestore();
 })();
 </script>
 

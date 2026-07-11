@@ -6323,6 +6323,8 @@ function doLogout() {
   saveTradesData();
   // Backend cloud : pousser une dernière fois puis fermer la session Supabase
   if (window.VMB && VMB.enabled) VMB.logout();
+  // Oublier l'utilisateur mémorisé (sinon la reconnexion automatique le reconnecterait)
+  try { localStorage.removeItem('vm_current_user_id'); } catch(e) {}
   if (currentUser) sessionStorage.removeItem('vm_banner_dismissed_' + currentUser.id);
   currentUser = null;
   sessions = [];
@@ -12145,40 +12147,56 @@ document.addEventListener('click', function(e) {
 </script>
 
 <script>
-/* ─── SYNC CLOUD : reprise de session + push automatique des données ─── */
+/* ─── SYNC CLOUD + RECONNEXION AUTOMATIQUE ─── */
 (function(){
-  if (!window.VMB || !VMB.enabled) return;
+  // Push automatique vers le cloud (uniquement si le backend est configuré) :
+  // toute écriture locale sous "vm_*" déclenche un push (debounce 2s)
+  if (window.VMB && VMB.enabled) {
+    var origSet = localStorage.setItem.bind(localStorage);
+    localStorage.setItem = function(k, v) {
+      origSet(k, v);
+      if (typeof k === 'string' && k.indexOf('vm_') === 0) VMB.schedulePush();
+    };
+    var origRem = localStorage.removeItem.bind(localStorage);
+    localStorage.removeItem = function(k) {
+      origRem(k);
+      if (typeof k === 'string' && k.indexOf('vm_') === 0) VMB.schedulePush();
+    };
+    // Dernier push avant de quitter la page
+    window.addEventListener('beforeunload', function(){ VMB.push(); });
+  }
 
-  // Toute écriture locale sous "vm_*" déclenche un push (debounce 2s) vers le cloud
-  var origSet = localStorage.setItem.bind(localStorage);
-  localStorage.setItem = function(k, v) {
-    origSet(k, v);
-    if (typeof k === 'string' && k.indexOf('vm_') === 0) VMB.schedulePush();
-  };
-  var origRem = localStorage.removeItem.bind(localStorage);
-  localStorage.removeItem = function(k) {
-    origRem(k);
-    if (typeof k === 'string' && k.indexOf('vm_') === 0) VMB.schedulePush();
-  };
+  // Reconnexion automatique en mode local : l'utilisateur courant est mémorisé
+  // (vm_current_user_id, effacé à la déconnexion)
+  function restoreLocal() {
+    try {
+      var uid = localStorage.getItem('vm_current_user_id');
+      if (!uid) return;
+      var acc = getAccounts().find(function(a){ return a.id === uid; });
+      if (acc) loginAs(acc);
+    } catch(e){}
+  }
 
-  // Reprise de session : si l'utilisateur était connecté, on saute l'écran de login
+  // Reprise de session au chargement : cloud d'abord, sinon local
   window.addEventListener('load', function(){
-    VMB.restore().then(function(u){
-      if (!u) return;
-      if (typeof currentUser !== 'undefined' && currentUser) return; // déjà connecté
-      var accs = getAccounts();
-      var ex = accs.find(function(a){ return a.id === u.id; });
-      if (ex) { u.name = ex.name || u.name; u.isBoss = !!ex.isBoss; }
-      else {
-        accs.push({ id: u.id, name: u.name, email: u.email, isBoss: false, cloud: true });
-        saveAccounts(accs);
-      }
-      loginAs(u);
-    });
+    if (typeof currentUser !== 'undefined' && currentUser) return; // déjà connecté
+    if (window.VMB && VMB.enabled) {
+      VMB.restore().then(function(u){
+        if (typeof currentUser !== 'undefined' && currentUser) return;
+        if (!u) { restoreLocal(); return; }
+        var accs = getAccounts();
+        var ex = accs.find(function(a){ return a.id === u.id; });
+        if (ex) { u.name = ex.name || u.name; u.isBoss = !!ex.isBoss; }
+        else {
+          accs.push({ id: u.id, name: u.name, email: u.email, isBoss: false, cloud: true });
+          saveAccounts(accs);
+        }
+        loginAs(u);
+      });
+    } else {
+      restoreLocal();
+    }
   });
-
-  // Dernier push avant de quitter la page
-  window.addEventListener('beforeunload', function(){ VMB.push(); });
 })();
 </script>
 

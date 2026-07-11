@@ -17,6 +17,8 @@ window.VALMONT_BACKEND = {
   anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhsY3p5YWx1aHFyYnJ5YmFvZmpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NjM2MzIsImV4cCI6MjA5OTMzOTYzMn0.LAq3IgCOCJFsMQXxxHp8tmXa_amFMzZvgcSXAhz9-bY'
 };
 
+console.log('%c[VALMONT] build 11-07-2026 · backend cloud + reconnexion auto', 'color:#3d8ef0;font-weight:bold');
+
 window.VMB = (function(){
   var cfg = window.VALMONT_BACKEND || {};
   var enabled = !!(cfg.url && cfg.anonKey && window.supabase);

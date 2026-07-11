@@ -6485,6 +6485,14 @@ function doLogin() {
       }
       loginAs(u);
     }).catch(function(e){
+      // Repli : ancien compte local (créé avant l'activation du backend cloud)
+      var localAcc = getAccounts().find(function(a){ return a.email === email; });
+      if (localAcc && localAcc.pw && atob(localAcc.pw) === pw) {
+        console.log('[VMB] compte cloud introuvable → connexion via l’ancien compte local');
+        err.textContent = '';
+        loginAs(localAcc);
+        return;
+      }
       var msg = (e && e.message) || '';
       err.textContent = msg.indexOf('not confirmed') !== -1
         ? 'Confirme d’abord ton adresse e-mail (regarde ta boîte mail).'

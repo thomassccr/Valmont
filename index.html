@@ -8771,6 +8771,13 @@ function openProfile() {
   if (planDotEl)   { planDotEl.className = 'pm-plan-dot ' + plan; }
   if (planLabelEl) { planLabelEl.textContent = planLabels[plan] || 'Plan Gratuit'; planLabelEl.className = 'pm-plan-label-text' + (plan === 'elite' ? ' elite' : ''); }
   if (upgradeBtn)  { upgradeBtn.classList.toggle('hidden', plan === 'elite' || isAdmin); }
+  // Marquer le plan actif dans le volet Abonnement
+  ['free','pro','elite'].forEach(p => {
+    const el = document.getElementById('pm-plan-' + p);
+    if (el) el.classList.toggle('active', p === plan);
+  });
+  // Toujours ouvrir sur l'onglet Général
+  if (typeof pmTab === 'function') pmTab('general');
 
   document.getElementById('profile-modal').classList.add('open');
 }
@@ -9389,12 +9396,66 @@ const _origCalNext = calNext;
 <!-- ══════════════════════════════════════
      PROFILE MODAL
 ══════════════════════════════════════ -->
-<div id="profile-modal">
-  <div class="pm-box">
+<style>
+/* ─── PROFIL v2 — style paramètres ChatGPT ─── */
+.pm-box.pms-box { width:780px; max-width:calc(100vw - 24px); height:600px; max-height:calc(100vh - 40px); display:flex; flex-direction:column; border-radius:16px; }
+.pms-head { display:flex; align-items:center; justify-content:space-between; padding:16px 22px; border-bottom:1px solid var(--border); flex-shrink:0; }
+.pms-head-left { display:flex; align-items:center; gap:12px; }
+.pms-title { font-size:16px; font-weight:600; color:var(--text); font-family:'DM Sans',sans-serif; }
+.pms-main { display:flex; flex:1; min-height:0; }
+.pms-nav { width:190px; flex-shrink:0; padding:14px 10px; display:flex; flex-direction:column; gap:2px; border-right:1px solid var(--border); }
+.pms-tab { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:9px; border:none; background:transparent; color:var(--text2); font-family:'DM Sans',sans-serif; font-size:13.5px; cursor:pointer; text-align:left; transition:all .15s; }
+.pms-tab:hover { background:rgba(255,255,255,0.05); color:var(--text); }
+.pms-tab.active { background:rgba(255,255,255,0.09); color:#fff; }
+.pms-tab svg { width:15px; height:15px; flex-shrink:0; opacity:.85; }
+.pms-pane { display:none; flex:1; min-width:0; overflow-y:auto; padding:8px 24px 20px; }
+.pms-pane.active { display:block; }
+.pms-pane::-webkit-scrollbar { width:4px; }
+.pms-pane::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+.pms-row { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:16px 0; border-bottom:1px solid var(--border); }
+.pms-row:last-child { border-bottom:none; }
+.pms-row-info { min-width:0; }
+.pms-row-label { font-size:13.5px; color:var(--text); font-family:'DM Sans',sans-serif; font-weight:500; }
+.pms-row-desc { font-size:12px; color:var(--text3); font-family:'DM Sans',sans-serif; margin-top:2px; }
+.pms-ctrl { flex-shrink:0; display:flex; align-items:center; gap:8px; }
+.pms-ctrl .pm-input, .pms-ctrl .pm-select { width:220px; }
+.pms-seg { display:flex; background:var(--lift); border:1px solid var(--border); border-radius:9px; padding:3px; gap:2px; }
+.pms-seg button { border:none; background:transparent; color:var(--text2); font-family:'DM Sans',sans-serif; font-size:12.5px; padding:6px 14px; border-radius:7px; cursor:pointer; transition:all .15s; }
+.pms-seg button.active { background:#2c2c33; color:#fff; }
+.pms-plans { display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+.pms-plan { display:flex; align-items:center; gap:14px; border:1px solid var(--border2); border-radius:12px; padding:14px 16px; cursor:pointer; transition:all .15s; background:transparent; width:100%; text-align:left; font-family:'DM Sans',sans-serif; }
+.pms-plan:hover { border-color:rgba(255,255,255,0.25); }
+.pms-plan.active { border-color:var(--gold); background:rgba(61,142,240,0.07); }
+.pms-check { width:18px; height:18px; border-radius:50%; border:1.5px solid var(--border2); flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+.pms-plan.active .pms-check { border-color:var(--gold); background:var(--gold); }
+.pms-plan.active .pms-check::after { content:'✓'; color:#fff; font-size:10px; font-weight:700; }
+.pms-plan-info { flex:1; min-width:0; }
+.pms-plan-name { font-size:14px; font-weight:600; color:var(--text); }
+.pms-plan-desc { font-size:12px; color:var(--text3); margin-top:3px; }
+.pms-plan-price { font-size:13px; color:var(--text2); font-weight:600; flex-shrink:0; }
+.pms-plan.active .pms-plan-price { color:var(--gold); }
+.pms-action-btn { background:var(--lift); border:1px solid var(--border2); border-radius:9px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:12.5px; padding:8px 16px; cursor:pointer; transition:all .15s; }
+.pms-action-btn:hover { border-color:rgba(255,255,255,0.3); }
+.pms-action-btn.danger { color:#e05a4a; border-color:rgba(192,57,43,.35); }
+.pms-action-btn.danger:hover { background:rgba(192,57,43,.1); }
+.pms-foot { display:flex; justify-content:flex-end; gap:10px; padding:14px 22px; border-top:1px solid var(--border); flex-shrink:0; }
+@media (max-width:768px) {
+  .pms-main { flex-direction:column; }
+  .pms-nav { width:100%; flex-direction:row; overflow-x:auto; border-right:none; border-bottom:1px solid var(--border); padding:8px 10px; }
+  .pms-tab span { white-space:nowrap; }
+  .pm-box.pms-box { height:calc(100vh - 20px); }
+  .pms-ctrl .pm-input, .pms-ctrl .pm-select { width:150px; }
+  .pms-row { flex-wrap:wrap; }
+}
+</style>
 
-    <div class="pm-head">
-      <div class="pm-head-left">
-        <div class="pm-avatar-big" id="pm-avatar-big" onclick="document.getElementById('avatar-input').click()">
+<div id="profile-modal">
+  <div class="pm-box pms-box">
+
+    <!-- En-tête -->
+    <div class="pms-head">
+      <div class="pms-head-left">
+        <div class="pm-avatar-big" id="pm-avatar-big" onclick="document.getElementById('avatar-input').click()" title="Changer la photo" style="width:36px;height:36px;font-size:14px;">
           <img id="pm-av-img" src="" alt="" style="display:none;">
           <span id="pm-av-init">?</span>
           <div class="pm-avatar-over">
@@ -9402,103 +9463,215 @@ const _origCalNext = calNext;
           </div>
         </div>
         <div>
-          <div class="pm-head-label">Mon Profil</div>
-          <div class="pm-head-name" id="pm-head-name">—</div>
+          <div class="pms-title">Paramètres</div>
+          <div class="pm-head-label" id="pm-head-name" style="margin-bottom:0;margin-top:2px;">—</div>
         </div>
       </div>
       <button class="pm-close" onclick="closeProfile()">✕</button>
     </div>
 
-    <div class="pm-body">
-
-      <!-- Langue -->
-      <div>
-        <div class="pm-section">Langue</div>
-        <div class="pm-lang-row">
-          <button class="pm-lang-btn active" id="pm-lang-fr" onclick="pmSetLang('fr')">Français</button>
-          <button class="pm-lang-btn"         id="pm-lang-en" onclick="pmSetLang('en')">English</button>
-        </div>
-      </div>
-
-      <!-- Identité -->
-      <div>
-        <div class="pm-section">Identité</div>
-        <div class="pm-row">
-          <div class="pm-field">
-            <label class="pm-label">Prénom / Pseudo</label>
-            <input class="pm-input" id="pm-name" type="text" placeholder="Votre prénom" autocomplete="off">
-          </div>
-          <div class="pm-field">
-            <label class="pm-label">Âge</label>
-            <input class="pm-input" id="pm-age" type="number" min="14" max="99" placeholder="—" autocomplete="off">
-          </div>
-        </div>
-      </div>
-
-      <!-- Niveau de trading -->
-      <div>
-        <div class="pm-section">Trading</div>
-        <div class="pm-field">
-          <label class="pm-label">Niveau de trading</label>
-          <select class="pm-select" id="pm-level">
-            <option value="0-6m">Débutant — 0 à 6 mois</option>
-            <option value="6m-1y">Apprenti — 6 mois à 1 an</option>
-            <option value="1y-18m">En progression — 1 an à 1 an ½</option>
-            <option value="18m-2y">Confirmé — 1 an ½ à 2 ans</option>
-            <option value="2y+">Expérimenté — + 2 ans</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Plan -->
-      <div>
-        <div class="pm-section">Abonnement</div>
-        <div class="pm-plan-row">
-          <div class="pm-plan-left">
-            <div class="pm-plan-dot" id="pm-plan-dot"></div>
-            <span class="pm-plan-label-text" id="pm-plan-label">Plan Gratuit</span>
-          </div>
-          <button class="pm-upgrade-btn" id="pm-upgrade-btn" onclick="closeProfile();openPricingFromBanner();">Upgrade →</button>
-        </div>
-      </div>
-
-      <!-- Sécurité -->
-      <div>
-        <div class="pm-section">Sécurité</div>
-        <div class="pm-field">
-          <label class="pm-label">Nouveau mot de passe</label>
-          <div class="pm-input-wrap">
-            <input class="pm-input" id="pm-pw" type="password"
-              placeholder="Laisser vide pour ne pas modifier"
-              autocomplete="new-password" style="padding-right:42px;">
-            <button class="pm-pw-toggle" tabindex="-1" onclick="pmTogglePw()">
-              <svg id="pm-eye-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Réinitialiser l'onboarding -->
-      <div class="pm-reset-zone">
-        <div class="pm-section">Développement</div>
-        <button class="pm-btn-reset" onclick="resetOnboarding()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3"/></svg>
-          Réinitialiser l'onboarding
+    <div class="pms-main">
+      <!-- Navigation gauche -->
+      <div class="pms-nav">
+        <button class="pms-tab active" data-tab="general" onclick="pmTab('general')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Général</span>
+        </button>
+        <button class="pms-tab" data-tab="account" onclick="pmTab('account')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>Compte</span>
+        </button>
+        <button class="pms-tab" data-tab="plan" onclick="pmTab('plan')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <span>Abonnement</span>
+        </button>
+        <button class="pms-tab" data-tab="security" onclick="pmTab('security')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>Sécurité</span>
+        </button>
+        <button class="pms-tab" data-tab="advanced" onclick="pmTab('advanced')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          <span>Avancé</span>
         </button>
       </div>
 
-    </div><!-- /pm-body -->
+      <!-- Volet : Général -->
+      <div class="pms-pane active" id="pms-pane-general">
+        <div class="pms-row">
+          <div class="pms-row-info">
+            <div class="pms-row-label">Langue</div>
+            <div class="pms-row-desc">Langue de l'interface et des réponses de Valmont</div>
+          </div>
+          <div class="pms-ctrl">
+            <div class="pms-seg">
+              <button class="active" id="pm-lang-fr" onclick="pmSetLang('fr')">Français</button>
+              <button id="pm-lang-en" onclick="pmSetLang('en')">English</button>
+            </div>
+          </div>
+        </div>
+        <div class="pms-row">
+          <div class="pms-row-info">
+            <div class="pms-row-label">Niveau de trading</div>
+            <div class="pms-row-desc">Valmont adapte ses conseils à ton expérience</div>
+          </div>
+          <div class="pms-ctrl">
+            <select class="pm-select" id="pm-level">
+              <option value="0-6m">Débutant — 0 à 6 mois</option>
+              <option value="6m-1y">Apprenti — 6 mois à 1 an</option>
+              <option value="1y-18m">En progression — 1 an à 1 an ½</option>
+              <option value="18m-2y">Confirmé — 1 an ½ à 2 ans</option>
+              <option value="2y+">Expérimenté — + 2 ans</option>
+            </select>
+          </div>
+        </div>
+      </div>
 
-    <div class="pm-foot">
+      <!-- Volet : Compte -->
+      <div class="pms-pane" id="pms-pane-account">
+        <div class="pms-row">
+          <div class="pms-row-info">
+            <div class="pms-row-label">Photo de profil</div>
+            <div class="pms-row-desc">Visible dans la barre du haut et le chat</div>
+          </div>
+          <div class="pms-ctrl">
+            <button class="pms-action-btn" onclick="document.getElementById('avatar-input').click()">Changer la photo</button>
+          </div>
+        </div>
+        <div class="pms-row">
+          <div class="pms-row-info">
+            <div class="pms-row-label">Prénom / Pseudo</div>
+            <div class="pms-row-desc">Comment Valmont s'adresse à toi</div>
+          </div>
+          <div class="pms-ctrl">
+            <input class="pm-input" id="pm-name" type="text" placeholder="Votre prénom" autocomplete="off">
+          </div>
+        </div>
+        <div class="pms-row">
+          <div class="pms-row-info">
+            <div class="pms-row-label">Âge</div>
+          </div>
+          <div class="pms-ctrl">
+            <input class="pm-input" id="pm-age" type="number" min="14" max="99" placeholder="—" autocomplete="off" style="width:90px;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Volet : Abonnement -->
+      <div class="pms-pane" id="pms-pane-plan">
+        <div class="pms-row" style="border-bottom:none;padding-bottom:6px;">
+          <div class="pms-row-info">
+            <div class="pms-row-label">Plan actuel : <span class="pm-plan-label-text" id="pm-plan-label">Plan Gratuit</span></div>
+            <div class="pms-row-desc">Change de plan à tout moment — effet immédiat</div>
+            <span class="pm-plan-dot" id="pm-plan-dot" style="display:none;"></span>
+          </div>
+          <div class="pms-ctrl">
+            <button class="pms-action-btn" id="pm-upgrade-btn" onclick="closeProfile();openPricingFromBanner();">Voir les tarifs →</button>
+          </div>
+        </div>
+        <div class="pms-plans">
+          <button class="pms-plan" id="pm-plan-free" onclick="pmSetPlan('free')">
+            <div class="pms-check"></div>
+            <div class="pms-plan-info">
+              <div class="pms-plan-name">Gratuit</div>
+              <div class="pms-plan-desc">Accueil · Morning Briefing · Session Review</div>
+            </div>
+            <div class="pms-plan-price">0$</div>
+          </button>
+          <button class="pms-plan" id="pm-plan-pro" onclick="pmSetPlan('pro')">
+            <div class="pms-check"></div>
+            <div class="pms-plan-info">
+              <div class="pms-plan-name">Pro</div>
+              <div class="pms-plan-desc">Tout le plan Gratuit + Gestion du risque</div>
+            </div>
+            <div class="pms-plan-price">22$/mois</div>
+          </button>
+          <button class="pms-plan" id="pm-plan-elite" onclick="pmSetPlan('elite')">
+            <div class="pms-check"></div>
+            <div class="pms-plan-info">
+              <div class="pms-plan-name">Elite ✦</div>
+              <div class="pms-plan-desc">Accès complet : Dashboard · Ma Stratégie · tout inclus</div>
+            </div>
+            <div class="pms-plan-price">39,99$/mois</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Volet : Sécurité -->
+      <div class="pms-pane" id="pms-pane-security">
+        <div class="pms-row">
+          <div class="pms-row-info">
+            <div class="pms-row-label">Nouveau mot de passe</div>
+            <div class="pms-row-desc">Laisser vide pour ne pas modifier</div>
+          </div>
+          <div class="pms-ctrl">
+            <div class="pm-input-wrap">
+              <input class="pm-input" id="pm-pw" type="password" placeholder="••••••••" autocomplete="new-password" style="padding-right:42px;width:220px;">
+              <button class="pm-pw-toggle" tabindex="-1" onclick="pmTogglePw()">
+                <svg id="pm-eye-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="pms-row">
+          <div class="pms-row-info">
+            <div class="pms-row-label">Se déconnecter</div>
+            <div class="pms-row-desc">Ferme la session sur cet appareil</div>
+          </div>
+          <div class="pms-ctrl">
+            <button class="pms-action-btn danger" onclick="closeProfile();doLogout();">Déconnexion</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Volet : Avancé -->
+      <div class="pms-pane" id="pms-pane-advanced">
+        <div class="pms-row">
+          <div class="pms-row-info">
+            <div class="pms-row-label">Réinitialiser l'onboarding</div>
+            <div class="pms-row-desc">Rejoue le parcours de bienvenue au prochain chargement</div>
+          </div>
+          <div class="pms-ctrl">
+            <button class="pms-action-btn danger" onclick="resetOnboarding()">Réinitialiser</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pied -->
+    <div class="pms-foot">
       <button class="pm-btn-cancel" onclick="closeProfile()">ANNULER</button>
-      <button class="pm-btn-save"   onclick="saveProfile()">SAUVEGARDER</button>
+      <button class="pm-btn-save" onclick="saveProfile()">SAUVEGARDER</button>
     </div>
 
   </div>
 </div>
+
+<script>
+/* Onglets du panneau de paramètres */
+function pmTab(n) {
+  document.querySelectorAll('.pms-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === n));
+  document.querySelectorAll('.pms-pane').forEach(p => p.classList.toggle('active', p.id === 'pms-pane-' + n));
+}
+/* Changement de plan direct depuis les paramètres */
+function pmSetPlan(plan) {
+  localStorage.setItem(PLAN_KEY, plan);
+  ['free','pro','elite'].forEach(p => {
+    const el = document.getElementById('pm-plan-' + p);
+    if (el) el.classList.toggle('active', p === plan);
+  });
+  const planLabels = { free:'Plan Gratuit', pro:'Plan Pro', elite:'Plan Elite ✦' };
+  const lbl = document.getElementById('pm-plan-label');
+  if (lbl) { lbl.textContent = planLabels[plan]; lbl.className = 'pm-plan-label-text' + (plan === 'elite' ? ' elite' : ''); }
+  const dot = document.getElementById('pm-plan-dot');
+  if (dot) dot.className = 'pm-plan-dot ' + plan;
+  if (typeof applyPlanRestrictions === 'function') applyPlanRestrictions();
+  if (typeof updatePlanBanner === 'function') updatePlanBanner();
+  try { showToast('Plan mis à jour : ' + planLabels[plan], 'success', '✦', 2200); } catch(e) {}
+}
+</script>
 
 <script>
 /* ── MOBILE NAVIGATION ── */

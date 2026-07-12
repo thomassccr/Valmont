@@ -1,0 +1,25 @@
+{
+  "name": "valmont-desktop",
+  "version": "1.0.0",
+  "description": "Valmont — Trading Assistant (application Mac)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --mac"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.valmont.app",
+    "productName": "Valmont",
+    "directories": { "output": "dist" },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.finance",
+      "icon": "icon.png",
+      "identity": null
+    }
+  }
+}

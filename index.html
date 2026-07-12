@@ -219,7 +219,7 @@ body::after { content:''; position:fixed; inset:0; background-image:url("data:im
 
 
 /* ─── LOGO MARK ─── */
-.sb-logo-wrap { position:relative; width:26px; height:26px; flex-shrink:0; cursor:pointer; }
+.sb-logo-wrap { position:relative; width:26px; height:26px; flex-shrink:0; }
 .sb-logo-svg { width:26px; height:26px; display:block; color:#fff; }
 
 /* ─── FOCUS MODE ─── */
@@ -479,15 +479,14 @@ body::after { content:''; position:fixed; inset:0; background-image:url("data:im
 
 /* Bouton plan cliquable — style Claude */
 #plan-banner {
-  position:fixed; top:10px;
-  left:calc(50% + var(--sb-offset, 29px)); transform:translateX(-50%);
-  transition:left .25s cubic-bezier(.4,0,.2,1);
-  z-index:200;
+  /* intégré au groupe de droite de la barre du haut : jamais superposé,
+     et la droite ne bouge pas quand la sidebar s'ouvre */
   display:flex; align-items:center; gap:0;
+  margin-right:6px;
   background:var(--panel); border:1px solid var(--border2);
   border-radius:8px; overflow:hidden;
-  box-shadow:var(--shadow-sm);
   font-family:'DM Sans',sans-serif; font-size:13px;
+  flex-shrink:0;
 }
 #plan-banner .pb-switch {
   display:flex; align-items:center; gap:6px;
@@ -1089,9 +1088,8 @@ body::after { content:''; position:fixed; inset:0; background-image:url("data:im
 .sidebar { width:58px; flex-shrink:0; background:var(--sidebar); border-right:1px solid var(--border); display:flex; flex-direction:column; height:100vh; position:fixed; left:0; top:0; z-index:10; transition:width .25s cubic-bezier(.4,0,.2,1); }
 .sidebar.expanded { width:var(--sw); }
 .sb-top { padding:8px; border-bottom:none; display:block; }
-.sb-brand { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:12px; cursor:pointer; transition:background .15s; background:#101014; border:1px solid rgba(255,255,255,0.09); }
+.sb-brand { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:12px; cursor:default; background:#101014; border:1px solid rgba(255,255,255,0.09); }
 .sidebar:not(.expanded) .sb-brand { padding:8px; gap:0; background:transparent; border-color:transparent; }
-.sb-brand:hover { background:#16161a; }
 .sb-logo { width:30px; height:30px; border-radius:8px; background:var(--gold-dim); border:1px solid rgba(61,142,240,0.25); display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:15px; color:var(--gold); flex-shrink:0; }
 .sb-brand-name { font-family:'DM Sans',sans-serif; font-size:14.5px; font-weight:600; letter-spacing:0; color:#fff; flex:1; }
 .sb-brand-dot { width:7px; height:7px; border-radius:50%; background:var(--gold); flex-shrink:0; }
@@ -3880,13 +3878,6 @@ tbody tr:last-child td { border-bottom: none; }
      PRICING SCREEN
 ═══════════════════════════════════════════ -->
 <!-- ─── PLAN BANNER ─── -->
-<div id="plan-banner" style="display:none;">
-  <span class="pb-switch"><span id="pb-name">Plan Gratuit</span></span>
-  <span style="color:var(--text3);padding:0 2px;">·</span>
-  <button class="pb-upgrade" onclick="openPricingFromBanner()">Upgrade</button>
-  <button class="pb-close" onclick="dismissPlanBanner()" title="Fermer">✕</button>
-</div>
-
 <!-- CHECKOUT SCREEN -->
 <div id="checkout-screen" style="display:none;">
   <div class="co-inner">
@@ -4148,7 +4139,7 @@ tbody tr:last-child td { border-bottom: none; }
       </button>
     </div>
     <div class="sb-top">
-      <div class="sb-brand" onclick="isMobile() ? toggleMobileSidebar() : toggleSidebar()" title="Menu">
+      <div class="sb-brand">
         <div class="sb-logo-wrap">
           <!-- Single SVG: fond + V + arc tournant qui suit le contour du V -->
           <svg class="sb-logo-svg" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
@@ -4313,6 +4304,13 @@ tbody tr:last-child td { border-bottom: none; }
 
     <!-- GLOBAL TOP BAR (style OF) -->
     <div id="global-topbar">
+      <!-- Bandeau de plan (à gauche, dans le flux : ne chevauche rien) -->
+      <div id="plan-banner" style="display:none;">
+        <span class="pb-switch"><span id="pb-name">Plan Gratuit</span></span>
+        <span style="color:var(--text3);padding:0 2px;">·</span>
+        <button class="pb-upgrade" onclick="openPricingFromBanner()">Upgrade</button>
+        <button class="pb-close" onclick="dismissPlanBanner()" title="Fermer">✕</button>
+      </div>
       <!-- Operational -->
       <div class="tb-item" style="cursor:default;">
         <div style="width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,0.7);flex-shrink:0;"></div>

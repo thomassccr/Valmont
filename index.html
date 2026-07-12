@@ -1429,6 +1429,11 @@ textarea::placeholder { color:var(--text3); }
 .br-tab.active { color:var(--gold); border-bottom-color:var(--gold); }
 .br-pane { flex:1; overflow-y:auto; }
 .br-pane::-webkit-scrollbar{width:3px;} .br-pane::-webkit-scrollbar-thumb{background:var(--border2);}
+/* Onglet chat du briefing : zone défilante + composer épinglé en bas (comme Session Review) */
+.br-pane-chat { flex-direction:column; overflow:hidden; min-height:0; }
+.br-chat-scroll { flex:1; min-height:0; overflow-y:auto; }
+.br-chat-scroll::-webkit-scrollbar { width:3px; }
+.br-chat-scroll::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
 
 /* ── CALENDAR DAY FILTER ── */
 .cal-filter-row { display:flex; gap:6px; padding:16px 40px 12px; flex-wrap:wrap; flex-shrink:0; }
@@ -5171,33 +5176,39 @@ tbody tr:last-child td { border-bottom: none; }
       </div>
 
       <!-- TAB: CHAT VALMONT -->
-      <div id="br-pane-chat" class="br-pane" style="display:none;">
-        <div class="br-body" style="padding-top:20px;">
-          <div class="br-loading" id="br-load" style="display:none;">
-            <div class="br-scan"></div>
-            <div class="br-loading-txt">Scan des marchés USD...</div>
-          </div>
-          <div id="br-an-sec" style="display:none;">
-            <div class="b-lbl">Analyse Valmont</div>
-            <div class="an-card">
-              <div class="an-from">
-                <div class="an-from-dot"></div>
-                <div class="an-from-lbl">Valmont · Analyse pré-session</div>
+      <div id="br-pane-chat" class="br-pane br-pane-chat" style="display:none;">
+        <!-- Zone défilante : analyse + messages -->
+        <div class="br-chat-scroll">
+          <div class="br-body" style="padding-top:20px;">
+            <div class="br-loading" id="br-load" style="display:none;">
+              <div class="br-scan"></div>
+              <div class="br-loading-txt">Scan des marchés USD...</div>
+            </div>
+            <div id="br-an-sec" style="display:none;">
+              <div class="b-lbl">Analyse Valmont</div>
+              <div class="an-card">
+                <div class="an-from">
+                  <div class="an-from-dot"></div>
+                  <div class="an-from-lbl">Valmont · Analyse pré-session</div>
+                </div>
+                <div class="an-txt" id="br-an-txt"></div>
+                <div class="verd-row" id="br-verd"></div>
               </div>
-              <div class="an-txt" id="br-an-txt"></div>
-              <div class="verd-row" id="br-verd"></div>
+            </div>
+            <div class="br-chat" id="br-chat-sec">
+              <div class="b-lbl">Question à Valmont</div>
+              <div class="br-msgs" id="br-msgs"></div>
             </div>
           </div>
-          <div class="br-chat" id="br-chat-sec">
-            <div class="b-lbl">Question à Valmont</div>
-            <div class="br-msgs" id="br-msgs"></div>
-            <div class="chips" id="br-chips"></div>
-            <div class="inp-card">
-              <textarea id="br-ta" rows="1" placeholder="Ex : Impact du CPI sur le Nasdaq ce soir ?"></textarea>
-              <button class="send-btn" id="br-send" onclick="sendBr()" title="Envoyer">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
-              </button>
-            </div>
+        </div>
+        <!-- Composer en bas, identique à la Session Review -->
+        <div class="chat-foot">
+          <div class="chips" id="br-chips"></div>
+          <div class="inp-card">
+            <textarea id="br-ta" rows="1" placeholder="Ask anything"></textarea>
+            <button class="send-btn" id="br-send" onclick="sendBr()" title="Envoyer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+            </button>
           </div>
         </div>
       </div>

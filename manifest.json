@@ -1,10 +1,11 @@
 {
-  "name": "Valmont — Trading Assistant",
+  "name": "VALMONT — Trading Assistant",
   "short_name": "Valmont",
   "description": "Ton assistant de trading intelligent",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
   "background_color": "#050505",
   "theme_color": "#050505",
   "icons": [

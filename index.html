@@ -189,7 +189,9 @@ body::after { content:''; position:fixed; inset:0; background-image:url("data:im
 
 /* Tooltips for collapsed sidebar */
 .nav-btn { position:relative; }
-.nav-tooltip { position:absolute; left:calc(100% + 10px); top:50%; transform:translateY(-50%); background:var(--panel); border:1px solid var(--border2); border-radius:6px; padding:5px 10px; font-size:11px; color:var(--text); white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .15s; z-index:100; box-shadow:var(--shadow-sm); }
+.nav-tooltip { display:none; position:absolute; left:calc(100% + 10px); top:50%; transform:translateY(-50%); background:var(--panel); border:1px solid var(--border2); border-radius:6px; padding:5px 10px; font-size:11px; color:var(--text); white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .15s; z-index:100; box-shadow:var(--shadow-sm); }
+/* Les infobulles n'existent que lorsque la sidebar est réduite (sinon elles débordent à droite) */
+.sidebar:not(.expanded) .nav-tooltip { display:block; }
 .sidebar:not(.expanded) .nav-btn:hover .nav-tooltip { opacity:1; }
 
 /* ─── DATE RANGE PICKER ─── */
@@ -1102,7 +1104,8 @@ body::after { content:''; position:fixed; inset:0; background-image:url("data:im
 .sb-brand-name { font-family:'DM Sans',sans-serif; font-size:14.5px; font-weight:600; letter-spacing:0; color:#fff; flex:1; }
 .sb-brand-dot { width:7px; height:7px; border-radius:50%; background:var(--gold); flex-shrink:0; }
 .sb-brand-chevron { width:14px; height:14px; color:#777; flex-shrink:0; }
-.sb-nav { padding:8px 10px; display:flex; flex-direction:column; gap:2px; flex:1; min-height:0; overflow-y:auto; }
+.sb-nav { padding:8px 10px; display:flex; flex-direction:column; gap:2px; flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; }
+.sb-nav .nav-btn span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
 .sb-nav::-webkit-scrollbar { width:3px; }
 .sb-nav::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
 .nav-btn { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; cursor:pointer; border:none; background:transparent; color:#b5b2ac; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500; width:100%; text-align:left; transition:background .15s,color .15s; flex-shrink:0; }

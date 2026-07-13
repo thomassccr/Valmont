@@ -10214,7 +10214,7 @@ function drawChart(bars) {
   const chartW = W - padL - padR;
   const chartH = H - padT - padB;
   const n = bars.length;
-  const barW = Math.max(3, (chartW / n) * 0.65);
+  const barW = Math.max(4, (chartW / n) * 0.72);   // barres larges façon Infloww
   const barSpacing = chartW / n;
 
   // Compute cumulative
@@ -10231,14 +10231,14 @@ function drawChart(bars) {
   const fxC = i => padL + i * barSpacing + barSpacing/2;
   const fxB = i => fxC(i) - barW/2;
 
-  // Grid lines
-  ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 1;
-  for (let g = 0; g <= 4; g++) {
-    const y = padT + (g/4) * chartH;
+  // Grid lines (quadrillage horizontal clair façon Infloww)
+  ctx.strokeStyle = 'rgba(255,255,255,0.07)'; ctx.lineWidth = 1;
+  for (let g = 0; g <= 5; g++) {
+    const y = Math.round(padT + (g/5) * chartH) + 0.5;
     ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W-padR, y); ctx.stroke();
-    const val = maxV - (g/4) * range;
-    ctx.fillStyle = 'rgba(255,255,255,0.22)'; ctx.font = '9px monospace'; ctx.textAlign = 'right';
-    ctx.fillText((val>=0?'+':'') + Math.round(val), padL-5, y+3);
+    const val = maxV - (g/5) * range;
+    ctx.fillStyle = 'rgba(255,255,255,0.32)'; ctx.font = "9px 'DM Mono', monospace"; ctx.textAlign = 'right';
+    ctx.fillText((val>=0?'+':'') + Math.round(val), padL-8, y+3);
   }
 
   // Zero line
@@ -10256,20 +10256,23 @@ function drawChart(bars) {
   });
 
   if (chartType === 'bar') {
-    // ── BAR MODE ──
+    // ── BAR MODE (barres bleues pleines, coins arrondis, façon Infloww) ──
+    const r = Math.min(3.5, barW / 2);
     bars.forEach((b, i) => {
       const v = b.pnl || 0;
       const x = fxB(i);
-      const isHovered = false;
       if (v === 0 && !b.hasData) return;
-      if (isHovered) {
-        ctx.fillStyle = v >= 0 ? 'rgba(100,180,255,0.95)' : 'rgba(230,90,70,0.95)';
-      } else {
-        ctx.fillStyle = v >= 0 ? 'rgba(61,142,240,0.82)' : 'rgba(192,57,43,0.72)';
-      }
+      ctx.fillStyle = v >= 0 ? '#4287f5' : '#e5484d';
       const yTop = v >= 0 ? fy(v) : y0;
       const bH = Math.max(2, Math.abs(fy(v) - y0));
-      ctx.fillRect(x, yTop, barW, bH);
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        // coins arrondis du côté extérieur (haut pour gains, bas pour pertes)
+        ctx.roundRect(x, yTop, barW, bH, v >= 0 ? [r, r, 0, 0] : [0, 0, r, r]);
+      } else {
+        ctx.rect(x, yTop, barW, bH);
+      }
+      ctx.fill();
     });
 
   } else {

@@ -4829,6 +4829,7 @@ tbody tr:last-child td { border-bottom: none; }
         // Expose helpers globally so the import functions (outside this IIFE) use the SAME system
         window.getDashAccounts       = getAccs;
         window.saveAccounts          = saveAccs;
+        window.saveDashAccounts      = saveAccs;  // nom sans ambiguïté (évite la collision avec saveAccounts du système de connexion)
         window.getActiveId           = getAct;
         window.setActiveId           = setAct;
         window.genId                 = genId;
@@ -6392,13 +6393,13 @@ function loginAs(user) {
   try { localStorage.setItem('vm_current_user_id', user.id); } catch(e) {}
   // Tagguer les comptes de trading sans ownerId avec cet utilisateur
   try {
-    if (window.getDashAccounts && window.saveAccounts) {
+    if (window.getDashAccounts && window.saveDashAccounts) {
       var dashAccs = window.getDashAccounts();
       var changed = false;
       dashAccs.forEach(function(acc) {
         if (!acc.ownerId) { acc.ownerId = user.id; changed = true; }
       });
-      if (changed) window.saveAccounts(dashAccs);
+      if (changed) window.saveDashAccounts(dashAccs);
     }
   } catch(e) {}
   // Mettre à jour l'affichage du profil sidebar
@@ -11989,7 +11990,7 @@ document.addEventListener('DOMContentLoaded', () => {
       var existingAcc = activeId ? accs.find(function(a){ return a.id === activeId; }) : null;
 
       if (existingAcc) {
-        if (customName) { existingAcc.name = customName; window.saveAccounts(accs); }
+        if (customName) { existingAcc.name = customName; window.saveDashAccounts(accs); }
         window.saveTradesForAccount(existingAcc.id, trades);
         window.switchToAccount(existingAcc);
         window.renderAccTabs(); window.closeFtmoModal();
@@ -11998,7 +11999,7 @@ document.addEventListener('DOMContentLoaded', () => {
         var name = customName || file.name.replace(/\.[^.]+$/,'') || 'Compte FTMO';
         var id   = window.genId();
         accs.push({id:id, name:name, importedAt:Date.now()});
-        window.saveAccounts(accs);
+        window.saveDashAccounts(accs);
         window.saveTradesForAccount(id, trades);
         window.setActiveId(id);
         window.switchToAccount({id:id, name:name});
@@ -12252,7 +12253,7 @@ function processSyncFile(file) {
       // activeId is set but account record is missing — recreate it in place rather than making a duplicate
       var orphanAcc = {id: activeId, name: 'Compte FTMO', importedAt: Date.now()};
       accs.push(orphanAcc);
-      if (typeof window.saveAccounts === 'function') window.saveAccounts(accs);
+      if (typeof window.saveDashAccounts === 'function') window.saveDashAccounts(accs);
       if (typeof window.saveTradesForAccount === 'function') window.saveTradesForAccount(activeId, trades);
       if (typeof window.switchToAccount === 'function') window.switchToAccount(orphanAcc);
     } else {
@@ -12260,7 +12261,7 @@ function processSyncFile(file) {
       var id = typeof window.genId === 'function' ? window.genId() : 'acc_'+Date.now();
       var nm = file.name.replace(/\.[^.]+$/, '') || 'Compte FTMO';
       accs.push({id:id, name:nm, importedAt:Date.now()});
-      if (typeof window.saveAccounts === 'function') window.saveAccounts(accs);
+      if (typeof window.saveDashAccounts === 'function') window.saveDashAccounts(accs);
       if (typeof window.saveTradesForAccount === 'function') window.saveTradesForAccount(id, trades);
       if (typeof window.setActiveId === 'function') window.setActiveId(id);
       if (typeof window.switchToAccount === 'function') window.switchToAccount({id:id, name:nm});

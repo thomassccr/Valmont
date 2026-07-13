@@ -10545,10 +10545,13 @@ function animateVal(id, val, isCurrency) {
     el.textContent = '$0,00';
     el.className = 'sum-total-val ' + (val >= 0 ? 'pos' : 'neg');
 
-    setTimeout(() => {
+    // Annuler un révélé encore en attente (sinon un changement rapide de compte
+    // affiche d'abord l'ancienne valeur puis la nouvelle)
+    if (el._totalTimer) clearTimeout(el._totalTimer);
+    el._totalTimer = setTimeout(() => {
       el.textContent = finalStr;
       el.className = el.className.replace(/\banim-in\b/g,'').trim() + ' anim-in';
-    }, 1100);
+    }, 300);
 
   } else {
     // Other values: instant update with flip animation
@@ -11833,12 +11836,13 @@ document.addEventListener('mousedown', function(e) {
     const tv = document.getElementById('total-val');
     if (tv) {
       if (tv._animRaf) { cancelAnimationFrame(tv._animRaf); tv._animRaf = null; }
+      if (tv._totalTimer) clearTimeout(tv._totalTimer);
       tv.className = 'sum-total-val ' + (totalPnl >= 0 ? 'pos' : 'neg');
       tv.textContent = '$0,00';
-      setTimeout(() => {
+      tv._totalTimer = setTimeout(() => {
         tv.textContent = fmtAbs(totalPnl);
         tv.className = tv.className.replace(/\banim-in\b/g,'').trim() + ' anim-in';
-      }, 1100);
+      }, 300);
     }
     const sw = document.getElementById('sum-wins');
     if (sw) { sw.textContent=fmtAbs(wins); }

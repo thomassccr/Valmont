@@ -4489,7 +4489,7 @@ tbody tr:last-child td { border-bottom: none; }
             <!-- Avatar with V initial -->
             <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#3d8ef0,#1a5fc8);display:flex;align-items:center;justify-content:center;margin-bottom:16px;flex-shrink:0;font-family:'DM Sans',sans-serif;font-size:20px;font-weight:700;color:#fff;" id="inflow-card-avatar"><svg viewBox="0 0 1024 1024" width="28" height="28" style="color:#fff;display:block"><use href="#vlm-mark" xlink:href="#vlm-mark"/></svg></div>
             <div style="font-size:12.5px;color:#3d8ef0;font-family:'DM Sans',sans-serif;margin-bottom:6px;font-weight:500;">Total earnings</div>
-            <div id="total-val" style="font-size:34px;font-weight:700;color:#3d8ef0;font-family:'DM Sans',sans-serif;letter-spacing:-.02em;line-height:1.1;">$0.00</div>
+            <div id="total-val" style="font-size:34px;font-weight:700;color:#3d8ef0;font-family:'DM Sans',sans-serif;letter-spacing:-.02em;line-height:1.1;">$0,00</div>
             <div id="total-sub" style="font-size:11.5px;color:#444;font-family:'DM Sans',sans-serif;margin-top:8px;">—</div>
           </div>
 
@@ -5541,7 +5541,7 @@ tbody tr:last-child td { border-bottom: none; }
         <div class="cal-spacer"></div>
         <div class="cal-stats-group">
           <div class="cal-stat-item">
-            Monthly stats: <span class="cal-stat-val" id="cal-monthly-stat">$0.00</span>
+            Monthly stats: <span class="cal-stat-val" id="cal-monthly-stat">$0,00</span>
           </div>
           <div class="cal-stat-item">
             WR: <span class="cal-stat-val neutral" id="cal-monthly-wr">—</span>
@@ -10485,7 +10485,7 @@ function animateVal(id, val, isCurrency) {
   if (id === 'total-val') {
     const abs = Math.abs(val);
     const finalStr = (val >= 0 ? '+$' : '-$') + abs.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2});
-    el.textContent = '$0.00';
+    el.textContent = '$0,00';
     el.className = 'sum-total-val ' + (val >= 0 ? 'pos' : 'neg');
 
     setTimeout(() => {
@@ -11777,7 +11777,7 @@ document.addEventListener('mousedown', function(e) {
     if (tv) {
       if (tv._animRaf) { cancelAnimationFrame(tv._animRaf); tv._animRaf = null; }
       tv.className = 'sum-total-val ' + (totalPnl >= 0 ? 'pos' : 'neg');
-      tv.textContent = '$0.00';
+      tv.textContent = '$0,00';
       setTimeout(() => {
         tv.textContent = fmtAbs(totalPnl);
         tv.className = tv.className.replace(/\banim-in\b/g,'').trim() + ' anim-in';

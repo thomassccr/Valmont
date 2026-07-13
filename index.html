@@ -4583,23 +4583,77 @@ tbody tr:last-child td { border-bottom: none; }
               <span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);">Importer depuis FTMO</span>
               <button onclick="closeSyncPopover()" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0;line-height:1;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">×</button>
             </div>
-            <div style="background:var(--lift);border:1px solid var(--border);border-radius:8px;padding:10px 12px;">
-              <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.06em;color:var(--text3);margin-bottom:4px;">COMMENT EXPORTER DEPUIS FTMO</div>
-              <div style="font-size:11px;color:var(--text2);line-height:1.7;">1. <b style="color:var(--text)">trader.ftmo.com</b> → compte → <b style="color:var(--text)">Live MetriX</b><br>2. Section <b style="color:var(--text)">Trading Journal</b><br>3. Bouton <b style="color:var(--text)">Export</b> (bleu, à droite)<br>4. Télécharge le <b style="color:var(--text)">CSV ou Excel</b></div>
+            <!-- ÉTAPE 1 : fichier -->
+            <div id="sync-step-file" style="display:flex;flex-direction:column;gap:12px;">
+              <div style="background:var(--lift);border:1px solid var(--border);border-radius:8px;padding:10px 12px;">
+                <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.06em;color:var(--text3);margin-bottom:4px;">COMMENT EXPORTER DEPUIS FTMO</div>
+                <div style="font-size:11px;color:var(--text2);line-height:1.7;">1. <b style="color:var(--text)">trader.ftmo.com</b> → compte → <b style="color:var(--text)">Live MetriX</b><br>2. Section <b style="color:var(--text)">Trading Journal</b><br>3. Bouton <b style="color:var(--text)">Export</b> (bleu, à droite)<br>4. Télécharge le <b style="color:var(--text)">CSV ou Excel</b></div>
+              </div>
+              <label id="sync-drop-zone" for="sync-file-input"
+                style="border:1.5px dashed var(--border2);border-radius:8px;padding:18px;text-align:center;cursor:pointer;transition:all .15s;display:block;"
+                ondragover="event.preventDefault();this.style.borderColor='rgba(61,142,240,.6)';this.style.background='rgba(61,142,240,.04)'"
+                ondragleave="this.style.borderColor='var(--border2)';this.style.background='transparent'"
+                ondrop="event.preventDefault();this.style.borderColor='var(--border2)';this.style.background='transparent';handleSyncFileDrop(event.dataTransfer.files[0])">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:22px;height:22px;color:var(--text3);margin-bottom:6px;display:block;margin-left:auto;margin-right:auto;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <div id="sync-drop-label" style="font-size:11px;color:var(--text2);">Dépose ton fichier CSV ou Excel ici</div>
+                <div style="font-size:10px;color:var(--text3);margin-top:3px;">ou clique pour sélectionner</div>
+                <input id="sync-file-input" type="file" accept=".csv,.xlsx,.xls" style="opacity:0;position:absolute;width:0;height:0;pointer-events:none;" onchange="handleSyncFileSelect(this.files[0])">
+              </label>
+              <div id="sync-url-status" style="font-family:'DM Mono',monospace;font-size:9px;min-height:14px;text-align:center;color:var(--text3);"></div>
             </div>
-            <label id="sync-drop-zone" for="sync-file-input"
-              style="border:1.5px dashed var(--border2);border-radius:8px;padding:18px;text-align:center;cursor:pointer;transition:all .15s;display:block;"
-              ondragover="event.preventDefault();this.style.borderColor='rgba(61,142,240,.6)';this.style.background='rgba(61,142,240,.04)'"
-              ondragleave="this.style.borderColor='var(--border2)';this.style.background='transparent'"
-              ondrop="event.preventDefault();this.style.borderColor='var(--border2)';this.style.background='transparent';handleSyncFileDrop(event.dataTransfer.files[0])">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:22px;height:22px;color:var(--text3);margin-bottom:6px;display:block;margin-left:auto;margin-right:auto;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              <div id="sync-drop-label" style="font-size:11px;color:var(--text2);">Dépose ton fichier CSV ou Excel ici</div>
-              <div style="font-size:10px;color:var(--text3);margin-top:3px;">ou clique pour sélectionner</div>
-              <input id="sync-file-input" type="file" accept=".csv,.xlsx,.xls" style="opacity:0;position:absolute;width:0;height:0;pointer-events:none;" onchange="handleSyncFileSelect(this.files[0])">
-            </label>
-            <div id="sync-url-status" style="font-family:'DM Mono',monospace;font-size:9px;min-height:14px;text-align:center;color:var(--text3);"></div>
+
+            <!-- ÉTAPE 2 : configuration du compte -->
+            <div id="sync-step-config" style="display:none;flex-direction:column;gap:14px;">
+              <button class="sic-back" onclick="importBackToFile()">← Retour</button>
+              <div class="sic-parsed"><span class="sic-check">✓</span><b id="sic-count">0</b>&nbsp;trades détectés</div>
+
+              <div>
+                <div class="sic-lbl">Type de compte</div>
+                <div class="sic-grid sic-types">
+                  <button class="sic-opt" data-v="Challenge"    onclick="picImport(this,'type')">Challenge</button>
+                  <button class="sic-opt" data-v="Verification" onclick="picImport(this,'type')">Verification</button>
+                  <button class="sic-opt" data-v="Funded"       onclick="picImport(this,'type')">Funded</button>
+                  <button class="sic-opt" data-v="Live"         onclick="picImport(this,'type')">Live</button>
+                </div>
+              </div>
+
+              <div>
+                <div class="sic-lbl">Taille du compte</div>
+                <div class="sic-grid sic-sizes">
+                  <button class="sic-opt" data-v="10k"  onclick="picImport(this,'size')">10k</button>
+                  <button class="sic-opt" data-v="25k"  onclick="picImport(this,'size')">25k</button>
+                  <button class="sic-opt" data-v="50k"  onclick="picImport(this,'size')">50k</button>
+                  <button class="sic-opt" data-v="100k" onclick="picImport(this,'size')">100k</button>
+                  <button class="sic-opt" data-v="150k" onclick="picImport(this,'size')">150k</button>
+                  <button class="sic-opt" data-v="200k" onclick="picImport(this,'size')">200k</button>
+                  <button class="sic-opt sic-custom-btn" data-v="custom" onclick="picImport(this,'size')" style="grid-column:span 3;">Custom…</button>
+                </div>
+                <input id="sic-custom" type="text" placeholder="Ex : 300k" oninput="updateImportConfirm()"
+                  style="display:none;margin-top:6px;width:100%;background:var(--lift);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12.5px;outline:none;">
+              </div>
+
+              <button id="sic-confirm" class="sic-confirm" disabled onclick="confirmImportConfig()">Importer le dashboard</button>
+            </div>
           </div>
         </div>
+        <style>
+        #sync-step-config { animation: sicIn .32s cubic-bezier(.34,1.4,.64,1); }
+        @keyframes sicIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+        .sic-back { align-self:flex-start; background:transparent; border:none; color:var(--text3); font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; cursor:pointer; padding:0; transition:color .15s; }
+        .sic-back:hover { color:var(--text); }
+        .sic-parsed { font-size:12px; color:var(--text2); display:flex; align-items:center; gap:5px; }
+        .sic-check { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; background:rgba(61,142,240,.16); color:#3d8ef0; font-size:9px; font-weight:700; }
+        .sic-lbl { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text3); margin-bottom:8px; }
+        .sic-grid { display:grid; gap:6px; }
+        .sic-types { grid-template-columns:1fr 1fr; }
+        .sic-sizes { grid-template-columns:repeat(3,1fr); }
+        .sic-opt { background:var(--lift); border:1px solid var(--border); border-radius:8px; padding:9px 6px; color:var(--text2); font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; transition:all .18s cubic-bezier(.34,1.4,.64,1); }
+        .sic-opt:hover { border-color:rgba(61,142,240,.5); color:var(--text); transform:translateY(-1px); }
+        .sic-opt.on { background:rgba(61,142,240,.16); border-color:#3d8ef0; color:#fff; box-shadow:0 0 0 1px rgba(61,142,240,.45), 0 4px 14px rgba(61,142,240,.15); }
+        .sic-confirm { margin-top:2px; background:#3d8ef0; border:none; border-radius:8px; padding:11px; color:#fff; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:all .18s; }
+        .sic-confirm:hover:not(:disabled) { background:#2f7ae0; transform:translateY(-1px); box-shadow:0 6px 18px rgba(61,142,240,.25); }
+        .sic-confirm:disabled { opacity:.4; cursor:not-allowed; }
+        </style>
         <!-- /SYNC URL BUTTON -->
 
         <div class="topbar-right" style="margin-left:auto;display:flex;align-items:center;gap:10px;">
@@ -12240,6 +12294,9 @@ function toggleSyncPopover(e) {
   var isOpen = pop.style.display === 'flex';
   if (isOpen) { pop.style.display = 'none'; return; }
   pop.style.display = 'flex';
+  // toujours revenir à l'étape fichier à l'ouverture
+  var fileStep = document.getElementById('sync-step-file'); if (fileStep) fileStep.style.display = 'flex';
+  var cfgStep = document.getElementById('sync-step-config'); if (cfgStep) cfgStep.style.display = 'none';
   document.getElementById('sync-url-status').textContent = '';
   document.getElementById('sync-file-input').value = '';
   var lbl = document.getElementById('sync-drop-label');
@@ -12261,53 +12318,83 @@ function processSyncFile(file) {
   var dz = document.getElementById('sync-drop-zone');
   var lbl = document.getElementById('sync-drop-label');
   st.style.color = 'var(--text3)'; st.textContent = 'Lecture du fichier...';
-  dz.style.borderColor = 'rgba(61,142,240,.5)';
+  if (dz) dz.style.borderColor = 'rgba(61,142,240,.5)';
   if (lbl) lbl.textContent = '📄 ' + file.name;
   parseFtmoCSV(file, function(trades) {
-    // Always use window.* to target the TRADING ACCOUNTS system (vm_dash_accounts)
-    // NOT the login accounts system (vm_accounts) — using bare names resolves to the wrong scope
-    var activeId = window.getActiveId ? window.getActiveId() : localStorage.getItem('vm_dash_active');
-    var accs = window.getDashAccounts ? window.getDashAccounts() : [];
-    var existingAcc = activeId ? accs.find(function(a){ return a.id === activeId; }) : null;
-
-    // If activeId exists but wasn't found in the list (race condition / stale list),
-    // re-read directly from localStorage to get the freshest snapshot
-    if (!existingAcc && activeId) {
-      try {
-        var freshAccs = JSON.parse(localStorage.getItem('vm_dash_accounts') || '[]');
-        existingAcc = freshAccs.find(function(a){ return a.id === activeId; }) || null;
-        if (existingAcc) accs = freshAccs;
-      } catch(e) {}
-    }
-
-    if (existingAcc) {
-      // Update trades of the currently active account
-      if (typeof window.saveTradesForAccount === 'function') window.saveTradesForAccount(existingAcc.id, trades);
-      if (typeof window.switchToAccount === 'function') window.switchToAccount(existingAcc);
-    } else if (activeId) {
-      // activeId is set but account record is missing — recreate it in place rather than making a duplicate
-      var orphanAcc = {id: activeId, name: 'Compte FTMO', importedAt: Date.now()};
-      accs.push(orphanAcc);
-      if (typeof window.saveDashAccounts === 'function') window.saveDashAccounts(accs);
-      if (typeof window.saveTradesForAccount === 'function') window.saveTradesForAccount(activeId, trades);
-      if (typeof window.switchToAccount === 'function') window.switchToAccount(orphanAcc);
-    } else {
-      // Truly no active account — create a new one
-      var id = typeof window.genId === 'function' ? window.genId() : 'acc_'+Date.now();
-      var nm = file.name.replace(/\.[^.]+$/, '') || 'Compte FTMO';
-      accs.push({id:id, name:nm, importedAt:Date.now()});
-      if (typeof window.saveDashAccounts === 'function') window.saveDashAccounts(accs);
-      if (typeof window.saveTradesForAccount === 'function') window.saveTradesForAccount(id, trades);
-      if (typeof window.setActiveId === 'function') window.setActiveId(id);
-      if (typeof window.switchToAccount === 'function') window.switchToAccount({id:id, name:nm});
-    }
-    if (typeof window.renderAccTabs === 'function') window.renderAccTabs();
-    closeSyncPopover();
-    if (typeof showToast === 'function') showToast('↻', trades.length + ' trades importés', 'success');
+    // Étape 2 : on garde les trades en attente et on demande le type + la taille du compte
+    window._pendingImport = { trades: trades, fileName: file.name };
+    showImportConfig(trades.length);
   }, function(err) {
     st.style.color = '#c0392b'; st.textContent = '⚠ ' + err;
-    dz.style.borderColor = 'var(--border2)';
+    if (dz) dz.style.borderColor = 'var(--border2)';
   });
+}
+
+// ── Étape de configuration du compte (type + taille) ──
+window._importSel = { type: null, size: null };
+
+function showImportConfig(count) {
+  document.getElementById('sync-step-file').style.display = 'none';
+  var cfg = document.getElementById('sync-step-config');
+  cfg.style.display = 'flex';
+  // relance l'animation
+  cfg.style.animation = 'none'; void cfg.offsetWidth; cfg.style.animation = '';
+  document.getElementById('sic-count').textContent = count;
+  window._importSel = { type: null, size: null };
+  cfg.querySelectorAll('.sic-opt').forEach(function(o){ o.classList.remove('on'); });
+  var ci = document.getElementById('sic-custom');
+  if (ci) { ci.value = ''; ci.style.display = 'none'; }
+  updateImportConfirm();
+}
+
+function importBackToFile() {
+  document.getElementById('sync-step-config').style.display = 'none';
+  document.getElementById('sync-step-file').style.display = 'flex';
+  var st = document.getElementById('sync-url-status'); if (st) st.textContent = '';
+  var lbl = document.getElementById('sync-drop-label'); if (lbl) lbl.textContent = 'Dépose ton fichier CSV ou Excel ici';
+}
+
+function picImport(el, kind) {
+  var grid = el.parentElement;
+  grid.querySelectorAll('.sic-opt').forEach(function(o){ o.classList.remove('on'); });
+  el.classList.add('on');
+  window._importSel[kind] = el.dataset.v;
+  if (kind === 'size') {
+    var ci = document.getElementById('sic-custom');
+    if (el.dataset.v === 'custom') { ci.style.display = 'block'; setTimeout(function(){ ci.focus(); }, 30); }
+    else { ci.style.display = 'none'; }
+  }
+  updateImportConfirm();
+}
+
+function updateImportConfirm() {
+  var sel = window._importSel || {};
+  var ci = document.getElementById('sic-custom');
+  var sizeOk = sel.size && (sel.size !== 'custom' || (ci && ci.value.trim() !== ''));
+  var btn = document.getElementById('sic-confirm');
+  if (btn) btn.disabled = !(sel.type && sizeOk);
+}
+
+function confirmImportConfig() {
+  var pending = window._pendingImport;
+  if (!pending) return;
+  var sel = window._importSel || {};
+  var ci = document.getElementById('sic-custom');
+  var size = sel.size === 'custom' ? (ci.value.trim() || 'Custom') : sel.size;
+  var name = sel.type + ' ' + size + ' - FTMO';
+  var trades = pending.trades;
+
+  var accs = window.getDashAccounts ? window.getDashAccounts() : [];
+  var id = typeof window.genId === 'function' ? window.genId() : 'acc_' + Date.now();
+  accs.push({ id: id, name: name, accType: sel.type, accSize: size, importedAt: Date.now() });
+  if (typeof window.saveDashAccounts === 'function') window.saveDashAccounts(accs);
+  if (typeof window.saveTradesForAccount === 'function') window.saveTradesForAccount(id, trades);
+  if (typeof window.setActiveId === 'function') window.setActiveId(id);
+  if (typeof window.switchToAccount === 'function') window.switchToAccount({ id: id, name: name });
+  if (typeof window.renderAccTabs === 'function') window.renderAccTabs();
+  window._pendingImport = null;
+  closeSyncPopover();
+  if (typeof showToast === 'function') showToast('✓', trades.length + ' trades importés — ' + name, 'success');
 }
 
 document.addEventListener('click', function(e) {

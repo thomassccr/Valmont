@@ -4895,6 +4895,9 @@ tbody tr:last-child td { border-bottom: none; }
         };
 
         window.openAddAccountModal = function() {
+          // Nouveau flux « + Ajouter » : on choisit d'abord le type + la taille (animation),
+          // puis on uploade le fichier — plus de saisie de nom.
+          if (typeof window.openImportConfigFirst === 'function') { window.openImportConfigFirst(); return; }
           var bg=document.getElementById('acc-add-modal-bg');
           if(bg){bg.style.display='flex';var inp=document.getElementById('acc-add-name');if(inp){inp.value='';inp.focus();}}
         };
@@ -12294,6 +12297,10 @@ function toggleSyncPopover(e) {
   var isOpen = pop.style.display === 'flex';
   if (isOpen) { pop.style.display = 'none'; return; }
   pop.style.display = 'flex';
+  // bouton upload classique = mode « fichier d'abord »
+  window._importMode = 'file-first';
+  window._importChosen = null;
+  window._pendingImport = null;
   // toujours revenir à l'étape fichier à l'ouverture
   var fileStep = document.getElementById('sync-step-file'); if (fileStep) fileStep.style.display = 'flex';
   var cfgStep = document.getElementById('sync-step-config'); if (cfgStep) cfgStep.style.display = 'none';
@@ -12321,7 +12328,12 @@ function processSyncFile(file) {
   if (dz) dz.style.borderColor = 'rgba(61,142,240,.5)';
   if (lbl) lbl.textContent = '📄 ' + file.name;
   parseFtmoCSV(file, function(trades) {
-    // Étape 2 : on garde les trades en attente et on demande le type + la taille du compte
+    // Mode « + Ajouter » (config-first) : type/taille déjà choisis → on crée directement
+    if (window._importMode === 'config-first' && window._importChosen) {
+      finalizeImport(window._importChosen.type, window._importChosen.size, trades);
+      return;
+    }
+    // Mode upload classique : on garde les trades et on demande le type + la taille
     window._pendingImport = { trades: trades, fileName: file.name };
     showImportConfig(trades.length);
   }, function(err) {
@@ -12332,6 +12344,19 @@ function processSyncFile(file) {
 
 // ── Étape de configuration du compte (type + taille) ──
 window._importSel = { type: null, size: null };
+window._importMode = 'file-first';   // 'file-first' (upload) | 'config-first' (+ Ajouter)
+window._importChosen = null;
+
+// Ouvre le popover et affiche l'animation type/taille AVANT l'upload (bouton + Ajouter)
+window.openImportConfigFirst = function() {
+  window._importMode = 'config-first';
+  window._importChosen = null;
+  window._pendingImport = null;
+  var pop = document.getElementById('sync-url-popover');
+  if (!pop) return;
+  pop.style.display = 'flex';
+  showImportConfig(null);
+};
 
 function showImportConfig(count) {
   document.getElementById('sync-step-file').style.display = 'none';
@@ -12339,7 +12364,13 @@ function showImportConfig(count) {
   cfg.style.display = 'flex';
   // relance l'animation
   cfg.style.animation = 'none'; void cfg.offsetWidth; cfg.style.animation = '';
-  document.getElementById('sic-count').textContent = count;
+  // Ligne « X trades détectés » seulement si un fichier a déjà été lu
+  var parsed = cfg.querySelector('.sic-parsed');
+  if (count == null) { if (parsed) parsed.style.display = 'none'; }
+  else { if (parsed) parsed.style.display = 'flex'; document.getElementById('sic-count').textContent = count; }
+  // Libellé du bouton selon le mode
+  var btn = document.getElementById('sic-confirm');
+  if (btn) btn.textContent = (window._importMode === 'config-first') ? 'Continuer  →' : 'Importer le dashboard';
   window._importSel = { type: null, size: null };
   cfg.querySelectorAll('.sic-opt').forEach(function(o){ o.classList.remove('on'); });
   var ci = document.getElementById('sic-custom');
@@ -12348,6 +12379,8 @@ function showImportConfig(count) {
 }
 
 function importBackToFile() {
+  // En mode + Ajouter, la config est la 1re étape → Retour ferme le popover
+  if (window._importMode === 'config-first' && !window._importChosen) { closeSyncPopover(); return; }
   document.getElementById('sync-step-config').style.display = 'none';
   document.getElementById('sync-step-file').style.display = 'flex';
   var st = document.getElementById('sync-url-status'); if (st) st.textContent = '';
@@ -12375,26 +12408,44 @@ function updateImportConfirm() {
   if (btn) btn.disabled = !(sel.type && sizeOk);
 }
 
-function confirmImportConfig() {
-  var pending = window._pendingImport;
-  if (!pending) return;
-  var sel = window._importSel || {};
-  var ci = document.getElementById('sic-custom');
-  var size = sel.size === 'custom' ? (ci.value.trim() || 'Custom') : sel.size;
-  var name = sel.type + ' ' + size + ' - FTMO';
-  var trades = pending.trades;
-
+// Crée le compte et importe les trades
+function finalizeImport(type, size, trades) {
+  var name = type + ' ' + size + ' - FTMO';
   var accs = window.getDashAccounts ? window.getDashAccounts() : [];
   var id = typeof window.genId === 'function' ? window.genId() : 'acc_' + Date.now();
-  accs.push({ id: id, name: name, accType: sel.type, accSize: size, importedAt: Date.now() });
+  accs.push({ id: id, name: name, accType: type, accSize: size, importedAt: Date.now() });
   if (typeof window.saveDashAccounts === 'function') window.saveDashAccounts(accs);
   if (typeof window.saveTradesForAccount === 'function') window.saveTradesForAccount(id, trades);
   if (typeof window.setActiveId === 'function') window.setActiveId(id);
   if (typeof window.switchToAccount === 'function') window.switchToAccount({ id: id, name: name });
   if (typeof window.renderAccTabs === 'function') window.renderAccTabs();
   window._pendingImport = null;
+  window._importChosen = null;
   closeSyncPopover();
   if (typeof showToast === 'function') showToast('✓', trades.length + ' trades importés — ' + name, 'success');
+}
+
+function confirmImportConfig() {
+  var sel = window._importSel || {};
+  var ci = document.getElementById('sic-custom');
+  var size = sel.size === 'custom' ? (ci.value.trim() || 'Custom') : sel.size;
+
+  if (window._importMode === 'config-first') {
+    // On mémorise le choix puis on passe à l'upload du fichier
+    window._importChosen = { type: sel.type, size: size };
+    document.getElementById('sync-step-config').style.display = 'none';
+    var fileStep = document.getElementById('sync-step-file');
+    fileStep.style.display = 'flex';
+    fileStep.style.animation = 'sicIn .32s cubic-bezier(.34,1.4,.64,1)';
+    var st = document.getElementById('sync-url-status'); if (st) st.textContent = '';
+    var lbl = document.getElementById('sync-drop-label'); if (lbl) lbl.textContent = 'Dépose le fichier de ' + sel.type + ' ' + size;
+    return;
+  }
+
+  // Mode upload classique : les trades sont déjà en attente
+  var pending = window._pendingImport;
+  if (!pending) return;
+  finalizeImport(sel.type, size, pending.trades);
 }
 
 document.addEventListener('click', function(e) {

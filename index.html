@@ -65,6 +65,10 @@ window.VMB = (function(){
     pushTimer = setTimeout(push, 2000);
   }
 
+  function isEmptyVal(v) {
+    return v === null || v === undefined || v === '' || v === '[]' || v === '{}';
+  }
+
   async function pull(userId) {
     if (!enabled) return false;
     try {
@@ -72,7 +76,16 @@ window.VMB = (function(){
       if (res.data && res.data.data) {
         suspended = true;
         var data = res.data.data;
-        Object.keys(data).forEach(function(k){ try { localStorage.setItem(k, data[k]); } catch(e){} });
+        // NON DESTRUCTIF : on ne remplit que les clés absentes ou vides en local.
+        // Une donnée locale existante (dashboards, trades…) n'est JAMAIS écrasée
+        // par un instantané cloud vide/ancien → plus de remise à zéro.
+        Object.keys(data).forEach(function(k){
+          try {
+            if (isEmptyVal(localStorage.getItem(k)) && !isEmptyVal(data[k])) {
+              localStorage.setItem(k, data[k]);
+            }
+          } catch(e){}
+        });
         suspended = false;
         return true;
       }
@@ -96,8 +109,8 @@ window.VMB = (function(){
     var r = await client.auth.signInWithPassword({ email: email, password: pw });
     if (r.error) throw r.error;
     var user = profileFor(r.data.user);
-    var had = await pull(user.id);
-    if (!had) push(); // première connexion : migre les données locales vers le cloud
+    await pull(user.id);        // récupère le cloud pour les clés absentes/vides
+    setTimeout(push, 1500);     // puis renvoie l'état local (autoritaire) vers le cloud
     return user;
   }
 
@@ -109,13 +122,19 @@ window.VMB = (function(){
       if (!su) return null;
       var user = profileFor(su);
       await pull(user.id);
+      setTimeout(push, 1500);   // resynchronise le cloud avec l'état local
       return user;
     } catch(e) { return null; }
   }
 
   function logout() {
     if (!enabled) return;
-    try { clearTimeout(pushTimer); push(); client.auth.signOut(); } catch(e){}
+    // On pousse une dernière fois AVANT de fermer la session (sinon l'upsert
+    // échoue faute de session et le cloud garde un état vide/ancien).
+    try {
+      clearTimeout(pushTimer);
+      Promise.resolve(push()).finally(function(){ try { client.auth.signOut(); } catch(e){} });
+    } catch(e){}
   }
 
   return { enabled: enabled, register: register, login: login, logout: logout,
@@ -9952,7 +9971,13 @@ function saveTradesData() {
     });
 
     Object.keys(grouped).forEach(function(accId) {
-      localStorage.setItem('vm_trades_acc_' + accId, JSON.stringify(grouped[accId] || []));
+      var _g = grouped[accId] || [];
+      // Ne jamais écraser des trades existants par une liste vide (évite la remise à zéro)
+      if (_g.length === 0) {
+        var _ex = localStorage.getItem('vm_trades_acc_' + accId);
+        if (_ex && _ex !== '[]' && _ex !== '') return;
+      }
+      localStorage.setItem('vm_trades_acc_' + accId, JSON.stringify(_g));
     });
 
     if (currentUser && currentUser.id) {
@@ -9965,12 +9990,22 @@ function saveTradesData() {
   }
 
   if (!currentUser) return;
-  const _json = JSON.stringify(ALL_TRADES);
+  // L'upload écrit dans window.ALL_TRADES ; on le préfère s'il est renseigné
+  const _TR = (window.ALL_TRADES && window.ALL_TRADES.length) ? window.ALL_TRADES : (ALL_TRADES || []);
+  const _json = JSON.stringify(_TR);
   localStorage.setItem(tradesKey(currentUser.id), _json);
   // Sync to the active account key used by the tabs system
   const _aid = (window.getActiveId ? window.getActiveId() : null)
              || localStorage.getItem('vm_dash_active');
-  if (_aid) localStorage.setItem('vm_trades_acc_' + _aid, _json);
+  if (_aid) {
+    // Ne jamais écraser des trades existants par une liste vide (évite la remise à zéro)
+    if (_TR.length === 0) {
+      const _ex = localStorage.getItem('vm_trades_acc_' + _aid);
+      if (!_ex || _ex === '[]' || _ex === '') localStorage.setItem('vm_trades_acc_' + _aid, _json);
+    } else {
+      localStorage.setItem('vm_trades_acc_' + _aid, _json);
+    }
+  }
 }
 
 function loadTradesData(userId) {

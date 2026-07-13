@@ -12349,13 +12349,17 @@ window._importChosen = null;
 
 // Ouvre le popover et affiche l'animation type/taille AVANT l'upload (bouton + Ajouter)
 window.openImportConfigFirst = function() {
-  window._importMode = 'config-first';
-  window._importChosen = null;
-  window._pendingImport = null;
-  var pop = document.getElementById('sync-url-popover');
-  if (!pop) return;
-  pop.style.display = 'flex';
-  showImportConfig(null);
+  // Différé : sinon le clic sur « + Ajouter » se propage jusqu'au handler global
+  // « clic à l'extérieur → fermer » et referme le popover immédiatement.
+  setTimeout(function() {
+    window._importMode = 'config-first';
+    window._importChosen = null;
+    window._pendingImport = null;
+    var pop = document.getElementById('sync-url-popover');
+    if (!pop) return;
+    pop.style.display = 'flex';
+    showImportConfig(null);
+  }, 0);
 };
 
 function showImportConfig(count) {

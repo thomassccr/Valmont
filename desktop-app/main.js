@@ -9,6 +9,7 @@ function createWindow() {
     height: 900,
     minWidth: 900,
     minHeight: 600,
+    title: 'Valmont',
     backgroundColor: '#050505',
     // Aucune barre de titre : uniquement les 3 boutons ronds macOS, posés sur le contenu
     titleBarStyle: 'hiddenInset',
@@ -17,6 +18,10 @@ function createWindow() {
   });
 
   win.loadURL(APP_URL);
+
+  // Garde « Valmont » comme titre de fenêtre (sinon la page impose le sien,
+  // visible dans la barre que macOS révèle en plein écran au survol du haut)
+  win.webContents.on('page-title-updated', (e) => e.preventDefault());
 
   // Adaptations appliquées uniquement dans l'app (le site en navigateur n'est pas touché) :
   // - décale le haut de la sidebar pour que le toggle ne passe pas sous les 3 boutons macOS

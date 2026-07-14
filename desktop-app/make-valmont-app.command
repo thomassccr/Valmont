@@ -47,7 +47,7 @@ function createWindow() {
   });
   win.loadURL(APP_URL);
   win.webContents.on('did-finish-load', () => {
-    win.webContents.insertCSS('.sidebar{padding-top:30px !important;} .main{margin-top:30px !important;height:calc(100vh - 30px) !important;} #global-topbar{-webkit-app-region:drag;} #global-topbar .tb-item,#global-topbar .tb-btn,#global-topbar .tb-icon-btn,#global-topbar .tb-avatar,#global-topbar #plan-banner,.sb-toggle-row,.sb-brand{-webkit-app-region:no-drag;}');
+    win.webContents.insertCSS('.sidebar{padding-top:30px !important;} #global-topbar{-webkit-app-region:drag;} #global-topbar .tb-item,#global-topbar .tb-btn,#global-topbar .tb-icon-btn,#global-topbar .tb-avatar,#global-topbar #plan-banner,.sb-toggle-row,.sb-brand{-webkit-app-region:no-drag;}');
   });
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (!url.startsWith(APP_URL)) { shell.openExternal(url); return { action: 'deny' }; }

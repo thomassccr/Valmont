@@ -19,13 +19,12 @@ function createWindow() {
   win.loadURL(APP_URL);
 
   // Adaptations appliquées uniquement dans l'app (le site en navigateur n'est pas touché) :
-  // - réserve une fine bande en haut pour les 3 boutons macOS, en décalant
-  //   la sidebar ET la barre du haut de la MÊME hauteur → tout reste aligné
+  // - décale le haut de la sidebar pour que le toggle ne passe pas sous les 3 boutons macOS
+  //   (les boutons sont au-dessus de la sidebar ; le reste du contenu monte jusqu'en haut)
   // - rend la barre du haut « attrapable » pour déplacer la fenêtre
   win.webContents.on('did-finish-load', () => {
     win.webContents.insertCSS(`
       .sidebar { padding-top: 30px !important; }
-      .main { margin-top: 30px !important; height: calc(100vh - 30px) !important; }
       #global-topbar { -webkit-app-region: drag; }
       #global-topbar .tb-item, #global-topbar .tb-btn, #global-topbar .tb-icon-btn,
       #global-topbar .tb-avatar, #global-topbar #plan-banner { -webkit-app-region: no-drag; }

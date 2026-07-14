@@ -1223,6 +1223,10 @@ body::after { content:''; position:fixed; inset:0; background-image:url("data:im
 
 /* MAIN */
 .main { margin-left:58px; flex:1; height:100vh; display:flex; flex-direction:column; overflow:hidden; background:#050505; padding:0 10px 10px 4px; }
+/* App Mac : annule la bande noire de 30px que l'app de bureau injecte au-dessus du contenu
+   (.main{margin-top:30px !important}). Sélecteur plus spécifique → gagne le duel de !important.
+   La sidebar garde son padding-top injecté : le toggle reste sous les 3 boutons macOS. */
+body .main { margin-top:0 !important; height:100vh !important; }
 .view { display:none; flex:1; min-height:0; flex-direction:column; height:auto; overflow:hidden; opacity:0; transform:translateY(6px); position:relative; border:1px solid rgba(255,255,255,0.07); border-radius:14px; background:#0e0e10; }
 /* Dashboard façon Infloww : plein cadre (plus de bande noire autour), fond gris foncé.
    Sidebar et barre du haut restent noires ; seules les autres vues gardent la carte arrondie. */

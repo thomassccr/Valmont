@@ -1234,14 +1234,16 @@ body .main { margin-top:0 !important; height:100vh !important; }
 #v-dashboard { border:none; border-radius:12px 0 0 0; background:#17181a; }
 /* Cartes sans contour + sections resserrées (façon Infloww : séparation par l'espace, pas par des traits).
    Tout est compacté pour tenir sur une page sans scroll. */
-#v-dashboard .chart-card, #v-dashboard .table-card { background:#17181a; border:none; }
+#v-dashboard .chart-card { background:#17181a; border:none; }
 #v-dashboard .content { gap:6px; padding:8px 24px 10px; overflow:hidden; }
 #v-dashboard .content > * { flex-shrink:0; }
 #v-dashboard .chart-card { padding:12px 16px; }
 #v-dashboard .chart-card-header { margin-bottom:8px; }
-/* Le tableau absorbe l'espace restant et scrolle en interne : la page ne scrolle jamais */
-#v-dashboard .table-card { flex:1 1 auto; min-height:90px; display:flex; flex-direction:column; overflow:hidden; }
-#v-dashboard .table-card .table-card-wrap { flex:1; min-height:0; overflow-y:auto; }
+/* Les deux cartes graphiques se partagent tout l'espace restant : la page ne scrolle jamais.
+   Les canvas sont en absolu dans leur zone ; le JS mesure la zone et redessine (ResizeObserver). */
+#v-dashboard .chart-card { flex:1 1 0; min-height:150px; display:flex; flex-direction:column; overflow:hidden; }
+#v-dashboard .chart-card .chart-wrap { flex:1; min-height:0; position:relative; }
+#v-dashboard #main-chart, #v-dashboard #cumul-chart { position:absolute; left:0; top:0; }
 
 /* ─── GLOBAL TOP BAR (style OF) ─── */
 #global-topbar { flex-shrink:0; height:52px; display:flex; align-items:center; justify-content:flex-end; padding:0 4px; gap:6px; background:transparent; }
@@ -5068,9 +5070,9 @@ tbody tr:last-child td { border-bottom: none; }
         </div>
         <!-- Legend (dots + names) -->
         <div id="cumul-legend" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px;"></div>
-        <div style="display:flex;gap:26px;align-items:stretch;">
+        <div style="display:flex;gap:26px;align-items:stretch;flex:1;min-height:0;">
           <div class="chart-wrap" style="position:relative;flex:1;min-width:0;">
-            <canvas id="cumul-chart" style="width:100%;height:160px;display:block;cursor:default;border-radius:6px;"></canvas>
+            <canvas id="cumul-chart" style="display:block;cursor:default;border-radius:6px;"></canvas>
           </div>
           <div id="cumul-channel-legend" style="width:240px;flex-shrink:0;display:flex;flex-direction:column;padding-top:2px;"></div>
         </div>
@@ -5097,39 +5099,6 @@ tbody tr:last-child td { border-bottom: none; }
             <div id="cs-best" style="font-size:26px;font-weight:700;color:#3dbf8a;font-family:'DM Sans',sans-serif;letter-spacing:-.02em;line-height:1.1;">$0,00</div>
             <div style="font-size:12.5px;color:#8a8680;font-family:'DM Sans',sans-serif;margin-top:5px;">Meilleur trade</div>
           </div>
-        </div>
-      </div>
-
-      <!-- Table -->
-      <div class="table-card">
-        <div class="table-card-header">
-          <div class="table-card-title">Trades Journal</div>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div class="table-count" id="trade-count">0 trades</div>
-            <button class="btn-add-trade" onclick="openTradeModal(null)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Ajouter
-            </button>
-          </div>
-        </div>
-        <div id="table-body-wrap" class="table-card-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Instrument</th>
-                <th>Direction</th>
-                <th>Lots</th>
-                <th>Entry</th>
-                <th>Exit</th>
-                <th>P&L</th>
-                <th>R:R</th>
-                <th>Résultat</th>
-              </tr>
-            </thead>
-            <tbody id="trades-tbody"></tbody>
-          </table>
-          <div class="empty-notice" id="empty-notice" style="display:none">AUCUN TRADE SUR CETTE PÉRIODE</div>
         </div>
       </div>
 
@@ -10730,7 +10699,7 @@ function drawCumulChart(accData) {
   const dpr = window.devicePixelRatio || 1;
   const parent = cumulCanvas.parentElement;
   const W = Math.round((parent ? (parent.getBoundingClientRect().width || parent.offsetWidth) : 0) || 800);
-  const H = vmChartH();
+  const H = Math.max(90, Math.round((parent ? parent.getBoundingClientRect().height : 0) || vmChartH()));
   cumulCanvas.width  = W * dpr;
   cumulCanvas.height = H * dpr;
   cumulCanvas.style.width  = W + 'px';
@@ -10927,17 +10896,21 @@ function drawCumulChart(accData) {
 
 
 function renderTable(trades) {
+  // Le tableau « Trades Journal » a été retiré du dashboard.
   const tbody = document.getElementById('trades-tbody');
   const empty = document.getElementById('empty-notice');
+  if (!tbody) return;
   tbody.innerHTML = '';
 
   if (trades.length === 0) {
-    empty.style.display = 'block';
-    document.getElementById('trade-count').textContent = '0 trades';
+    if (empty) empty.style.display = 'block';
+    var _tc0 = document.getElementById('trade-count');
+    if (_tc0) _tc0.textContent = '0 trades';
     return;
   }
-  empty.style.display = 'none';
-  document.getElementById('trade-count').textContent = trades.length + ' trade' + (trades.length>1?'s':'');
+  if (empty) empty.style.display = 'none';
+  var _tc = document.getElementById('trade-count');
+  if (_tc) _tc.textContent = trades.length + ' trade' + (trades.length>1?'s':'');
 
   // Sort newest first
   const sorted = [...trades].sort((a,b) => b.date.localeCompare(a.date));
@@ -11317,8 +11290,9 @@ function navigate(dir) {
 window.addEventListener('resize', () => {
   if (chartCanvas) {
     const dpr = window.devicePixelRatio || 1;
-    const W = chartCanvas.parentElement.getBoundingClientRect().width;
-    const H = vmChartH();
+    const _r = chartCanvas.parentElement.getBoundingClientRect();
+    const W = _r.width;
+    const H = Math.max(90, Math.round(_r.height) || vmChartH());
     chartCanvas.width = W * dpr; chartCanvas.height = H * dpr;
     chartCanvas.style.width = W + 'px'; chartCanvas.style.height = H + 'px';
     chartCtx = chartCanvas.getContext('2d');
@@ -11339,8 +11313,9 @@ window.addEventListener('resize', () => {
       if (!chartCanvas) chartCanvas = document.getElementById('main-chart');
       if (chartCanvas) {
         const dpr = window.devicePixelRatio || 1;
-        const W = chartCanvas.parentElement.getBoundingClientRect().width;
-        const H = vmChartH();
+        const _r = chartCanvas.parentElement.getBoundingClientRect();
+        const W = _r.width;
+        const H = Math.max(90, Math.round(_r.height) || vmChartH());
         chartCanvas.width = W * dpr; chartCanvas.height = H * dpr;
         chartCanvas.style.width = W + 'px'; chartCanvas.style.height = H + 'px';
         chartCtx = chartCanvas.getContext('2d');
@@ -11377,8 +11352,9 @@ function ensureChartInit() {
   chartCtx = chartCanvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
   const parent = chartCanvas.parentElement;
-  const W = parent.getBoundingClientRect().width || parent.offsetWidth || 600;
-  const H = vmChartH();
+  const _r = parent.getBoundingClientRect();
+  const W = _r.width || parent.offsetWidth || 600;
+  const H = Math.max(90, Math.round(_r.height) || vmChartH());
   chartCanvas.width = W * dpr;
   chartCanvas.height = H * dpr;
   chartCanvas.style.width = W + 'px';

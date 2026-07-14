@@ -46,6 +46,7 @@ function createWindow() {
     trafficLightPosition: { x: 14, y: 9 }
   });
   win.loadURL(APP_URL);
+  win.webContents.on('page-title-updated', (e) => e.preventDefault());
   win.webContents.on('did-finish-load', () => {
     win.webContents.insertCSS('.sidebar{padding-top:30px !important;} #global-topbar{-webkit-app-region:drag;} #global-topbar .tb-item,#global-topbar .tb-btn,#global-topbar .tb-icon-btn,#global-topbar .tb-avatar,#global-topbar #plan-banner,.sb-toggle-row,.sb-brand{-webkit-app-region:no-drag;}');
   });

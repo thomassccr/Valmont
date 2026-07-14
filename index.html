@@ -1232,7 +1232,9 @@ body .main { margin-top:0 !important; height:100vh !important; }
    Sidebar et barre du haut restent noires ; seules les autres vues gardent la carte arrondie. */
 .main:has(#v-dashboard.on) { padding:0; }
 #v-dashboard { border:none; border-radius:12px 0 0 0; background:#17181a; }
-#v-dashboard .chart-card, #v-dashboard .table-card { background:#17181a; border-color:rgba(255,255,255,0.08); }
+/* Cartes sans contour + sections resserrées (façon Infloww : séparation par l'espace, pas par des traits) */
+#v-dashboard .chart-card, #v-dashboard .table-card { background:#17181a; border:none; }
+#v-dashboard .content { gap:8px; padding:14px 24px 18px; }
 
 /* ─── GLOBAL TOP BAR (style OF) ─── */
 #global-topbar { flex-shrink:0; height:52px; display:flex; align-items:center; justify-content:flex-end; padding:0 4px; gap:6px; background:transparent; }
@@ -4406,7 +4408,7 @@ tbody tr:last-child td { border-bottom: none; }
 
       <!-- INFLOW EARNINGS OVERVIEW BAR -->
       <!-- Outer wrapper: black background + subtle dot grid like the screenshot -->
-      <div style="flex-shrink:0;background:#17181a;border-bottom:1px solid rgba(255,255,255,0.06);padding:18px 24px 4px;">
+      <div style="flex-shrink:0;background:#17181a;padding:18px 24px 4px;">
 
         <!-- Header row: title left, controls right -->
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
@@ -5074,23 +5076,23 @@ tbody tr:last-child td { border-bottom: none; }
       </div>
 
       <!-- Statistiques (tuiles façon Infloww « Creator statistics ») -->
-      <div style="margin:20px 0 4px;">
+      <div style="margin:8px 0 0;">
         <div style="font-size:15px;font-weight:600;color:#f0ede8;font-family:'DM Sans',sans-serif;margin-bottom:4px;">Statistiques</div>
         <div style="font-size:12px;color:#666;font-family:'DM Sans',sans-serif;margin-bottom:14px;">Calculées sur la période sélectionnée.</div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;">
-          <div style="background:#1b1d20;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:20px 22px;">
+          <div style="background:#1b1d20;border-radius:12px;padding:20px 22px;">
             <div id="cs-trades" style="font-size:26px;font-weight:700;color:#f0ede8;font-family:'DM Sans',sans-serif;letter-spacing:-.02em;line-height:1.1;">0</div>
             <div style="font-size:12.5px;color:#8a8680;font-family:'DM Sans',sans-serif;margin-top:5px;">Trades</div>
           </div>
-          <div style="background:#1b1d20;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:20px 22px;">
+          <div style="background:#1b1d20;border-radius:12px;padding:20px 22px;">
             <div id="cs-avg" style="font-size:26px;font-weight:700;color:#f0ede8;font-family:'DM Sans',sans-serif;letter-spacing:-.02em;line-height:1.1;">$0,00</div>
             <div style="font-size:12.5px;color:#8a8680;font-family:'DM Sans',sans-serif;margin-top:5px;">Gain moyen / trade</div>
           </div>
-          <div style="background:#1b1d20;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:20px 22px;">
+          <div style="background:#1b1d20;border-radius:12px;padding:20px 22px;">
             <div id="cs-total" style="font-size:26px;font-weight:700;color:#3d8ef0;font-family:'DM Sans',sans-serif;letter-spacing:-.02em;line-height:1.1;">$0,00</div>
             <div style="font-size:12.5px;color:#8a8680;font-family:'DM Sans',sans-serif;margin-top:5px;">Total earnings</div>
           </div>
-          <div style="background:#1b1d20;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:20px 22px;">
+          <div style="background:#1b1d20;border-radius:12px;padding:20px 22px;">
             <div id="cs-best" style="font-size:26px;font-weight:700;color:#3dbf8a;font-family:'DM Sans',sans-serif;letter-spacing:-.02em;line-height:1.1;">$0,00</div>
             <div style="font-size:12.5px;color:#8a8680;font-family:'DM Sans',sans-serif;margin-top:5px;">Meilleur trade</div>
           </div>

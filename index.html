@@ -1232,9 +1232,16 @@ body .main { margin-top:0 !important; height:100vh !important; }
    Sidebar et barre du haut restent noires ; seules les autres vues gardent la carte arrondie. */
 .main:has(#v-dashboard.on) { padding:0; }
 #v-dashboard { border:none; border-radius:12px 0 0 0; background:#17181a; }
-/* Cartes sans contour + sections resserrées (façon Infloww : séparation par l'espace, pas par des traits) */
+/* Cartes sans contour + sections resserrées (façon Infloww : séparation par l'espace, pas par des traits).
+   Tout est compacté pour tenir sur une page sans scroll. */
 #v-dashboard .chart-card, #v-dashboard .table-card { background:#17181a; border:none; }
-#v-dashboard .content { gap:8px; padding:14px 24px 18px; }
+#v-dashboard .content { gap:6px; padding:8px 24px 10px; overflow:hidden; }
+#v-dashboard .content > * { flex-shrink:0; }
+#v-dashboard .chart-card { padding:12px 16px; }
+#v-dashboard .chart-card-header { margin-bottom:8px; }
+/* Le tableau absorbe l'espace restant et scrolle en interne : la page ne scrolle jamais */
+#v-dashboard .table-card { flex:1 1 auto; min-height:90px; display:flex; flex-direction:column; overflow:hidden; }
+#v-dashboard .table-card .table-card-wrap { flex:1; min-height:0; overflow-y:auto; }
 
 /* ─── GLOBAL TOP BAR (style OF) ─── */
 #global-topbar { flex-shrink:0; height:52px; display:flex; align-items:center; justify-content:flex-end; padding:0 4px; gap:6px; background:transparent; }
@@ -4408,10 +4415,10 @@ tbody tr:last-child td { border-bottom: none; }
 
       <!-- INFLOW EARNINGS OVERVIEW BAR -->
       <!-- Outer wrapper: black background + subtle dot grid like the screenshot -->
-      <div style="flex-shrink:0;background:#17181a;padding:18px 24px 4px;">
+      <div style="flex-shrink:0;background:#17181a;padding:12px 24px 0;">
 
         <!-- Header row: title left, controls right -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
           <div style="display:flex;align-items:center;gap:8px;">
             <span style="font-size:15px;font-weight:600;color:#f0ede8;font-family:'DM Sans',sans-serif;">Creator earnings overview</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;color:#444;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -4597,16 +4604,16 @@ tbody tr:last-child td { border-bottom: none; }
         <div style="display:grid;grid-template-columns:240px 1fr 1fr 1fr;gap:1px;background:rgba(255,255,255,0.055);">
 
           <!-- LEFT col spans 2 rows: avatar + total -->
-          <div style="grid-row:1/3;background:#17181a;padding:22px 24px 24px;display:flex;flex-direction:column;gap:0;">
+          <div style="grid-row:1/3;background:#17181a;padding:14px 24px 16px;display:flex;flex-direction:column;gap:0;">
             <!-- Avatar with V initial -->
-            <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#3d8ef0,#1a5fc8);display:flex;align-items:center;justify-content:center;margin-bottom:16px;flex-shrink:0;font-family:'DM Sans',sans-serif;font-size:20px;font-weight:700;color:#fff;" id="inflow-card-avatar"><svg viewBox="0 0 1024 1024" width="28" height="28" style="color:#fff;display:block"><use href="#vlm-mark" xlink:href="#vlm-mark"/></svg></div>
+            <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#3d8ef0,#1a5fc8);display:flex;align-items:center;justify-content:center;margin-bottom:8px;flex-shrink:0;font-family:'DM Sans',sans-serif;font-size:20px;font-weight:700;color:#fff;" id="inflow-card-avatar"><svg viewBox="0 0 1024 1024" width="28" height="28" style="color:#fff;display:block"><use href="#vlm-mark" xlink:href="#vlm-mark"/></svg></div>
             <div style="font-size:12.5px;color:#3d8ef0;font-family:'DM Sans',sans-serif;margin-bottom:6px;font-weight:500;">Total earnings</div>
             <div id="total-val" style="font-size:34px;font-weight:700;color:#3d8ef0;font-family:'DM Sans',sans-serif;letter-spacing:-.02em;line-height:1.1;">$0,00</div>
             <div id="total-sub" style="font-size:11.5px;color:#444;font-family:'DM Sans',sans-serif;margin-top:8px;">—</div>
           </div>
 
           <!-- ROW 1, col 2: Gains -->
-          <div style="background:#17181a;padding:22px 24px 22px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+          <div style="background:#17181a;padding:12px 24px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
             <div>
               <div id="sum-wins" style="font-size:28px;font-weight:700;color:#e8e4de;font-family:'DM Sans',sans-serif;letter-spacing:-.02em;line-height:1.1;">$0</div>
               <div style="font-size:12px;color:#666;font-family:'DM Sans',sans-serif;margin-top:5px;">Gains</div>
@@ -4617,7 +4624,7 @@ tbody tr:last-child td { border-bottom: none; }
           </div>
 
           <!-- ROW 1, col 3: Pertes -->
-          <div style="background:#17181a;padding:22px 24px 22px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+          <div style="background:#17181a;padding:12px 24px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
             <div>
               <div id="sum-losses" style="font-size:28px;font-weight:700;color:#e8e4de;font-family:'DM Sans',sans-serif;letter-spacing:-.02em;line-height:1.1;">$0</div>
               <div style="font-size:12px;color:#666;font-family:'DM Sans',sans-serif;margin-top:5px;">Pertes</div>
@@ -4628,7 +4635,7 @@ tbody tr:last-child td { border-bottom: none; }
           </div>
 
           <!-- ROW 1, col 4: Win Rate -->
-          <div style="background:#17181a;padding:22px 24px 22px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+          <div style="background:#17181a;padding:12px 24px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
             <div>
               <div id="sum-winrate" style="font-size:28px;font-weight:700;color:#e8e4de;font-family:'DM Sans',sans-serif;letter-spacing:-.02em;line-height:1.1;">0%</div>
               <div style="font-size:12px;color:#666;font-family:'DM Sans',sans-serif;margin-top:5px;">Win Rate</div>
@@ -4639,7 +4646,7 @@ tbody tr:last-child td { border-bottom: none; }
           </div>
 
           <!-- ROW 2, col 2: Jours tradés -->
-          <div style="background:#17181a;padding:16px 24px 20px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+          <div style="background:#17181a;padding:10px 24px 12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
             <div>
               <div id="sum-days" style="font-size:28px;font-weight:700;color:#e8e4de;font-family:'DM Sans',sans-serif;letter-spacing:-.02em;line-height:1.1;">0</div>
               <div style="font-size:12px;color:#666;font-family:'DM Sans',sans-serif;margin-top:5px;">Jours tradés</div>
@@ -4650,7 +4657,7 @@ tbody tr:last-child td { border-bottom: none; }
           </div>
 
           <!-- ROW 2, col 3: Drawdown max -->
-          <div style="background:#17181a;padding:16px 24px 20px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+          <div style="background:#17181a;padding:10px 24px 12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
             <div>
               <div id="inflow-dd" style="font-size:28px;font-weight:700;color:#e8e4de;font-family:'DM Sans',sans-serif;letter-spacing:-.02em;line-height:1.1;">—</div>
               <div style="font-size:12px;color:#666;font-family:'DM Sans',sans-serif;margin-top:5px;">Drawdown max</div>
@@ -4661,7 +4668,7 @@ tbody tr:last-child td { border-bottom: none; }
           </div>
 
           <!-- ROW 2, col 4: Profit Factor -->
-          <div style="background:#17181a;padding:16px 24px 20px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+          <div style="background:#17181a;padding:10px 24px 12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
             <div>
               <div id="inflow-pf" style="font-size:28px;font-weight:700;color:#e8e4de;font-family:'DM Sans',sans-serif;letter-spacing:-.02em;line-height:1.1;">—</div>
               <div style="font-size:12px;color:#666;font-family:'DM Sans',sans-serif;margin-top:5px;">Profit Factor</div>
@@ -4673,7 +4680,7 @@ tbody tr:last-child td { border-bottom: none; }
 
         </div>
         <!-- bottom padding so grid shows below last row -->
-        <div style="height:16px;"></div>
+        <div style="height:8px;"></div>
       </div>
       <!-- /INFLOW EARNINGS OVERVIEW -->
 
@@ -5034,16 +5041,11 @@ tbody tr:last-child td { border-bottom: none; }
         <div class="chart-wrap">
           <canvas id="main-chart"></canvas>
         </div>
-        <div class="chart-legend" id="chart-legend">
-          <div class="leg-item" id="leg-bar-pos"><div class="leg-dot" style="background:rgba(61,142,240,0.82)"></div> Gain</div>
-          <div class="leg-item" id="leg-bar-neg"><div class="leg-dot" style="background:rgba(192,57,43,0.72)"></div> Perte</div>
-          <div class="leg-item" id="leg-cumul" style="display:none"><div class="leg-line" style="background:rgba(61,142,240,0.9)"></div> P&L cumulatif</div>
-        </div>
       </div>
 
       <!-- Cumulative P&L Line Chart -->
-      <div class="chart-card" id="cumul-card" style="margin-top:0;padding:20px 22px 16px;">
-        <div class="chart-card-header" style="margin-bottom:16px;">
+      <div class="chart-card" id="cumul-card" style="margin-top:0;">
+        <div class="chart-card-header" style="margin-bottom:8px;">
           <div style="display:flex;align-items:center;gap:10px;">
             <div class="chart-card-title">Earnings by channel</div>
             <div id="cumul-meta" style="font-family:'DM Mono',monospace;font-size:12px;font-weight:700;color:#e8b84b;letter-spacing:.04em;">—</div>
@@ -5065,10 +5067,10 @@ tbody tr:last-child td { border-bottom: none; }
           </div>
         </div>
         <!-- Legend (dots + names) -->
-        <div id="cumul-legend" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;"></div>
+        <div id="cumul-legend" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px;"></div>
         <div style="display:flex;gap:26px;align-items:stretch;">
           <div class="chart-wrap" style="position:relative;flex:1;min-width:0;">
-            <canvas id="cumul-chart" style="width:100%;height:200px;display:block;cursor:default;border-radius:6px;"></canvas>
+            <canvas id="cumul-chart" style="width:100%;height:160px;display:block;cursor:default;border-radius:6px;"></canvas>
           </div>
           <div id="cumul-channel-legend" style="width:240px;flex-shrink:0;display:flex;flex-direction:column;padding-top:2px;"></div>
         </div>
@@ -5076,23 +5078,22 @@ tbody tr:last-child td { border-bottom: none; }
       </div>
 
       <!-- Statistiques (tuiles façon Infloww « Creator statistics ») -->
-      <div style="margin:8px 0 0;">
-        <div style="font-size:15px;font-weight:600;color:#f0ede8;font-family:'DM Sans',sans-serif;margin-bottom:4px;">Statistiques</div>
-        <div style="font-size:12px;color:#666;font-family:'DM Sans',sans-serif;margin-bottom:14px;">Calculées sur la période sélectionnée.</div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;">
-          <div style="background:#1b1d20;border-radius:12px;padding:20px 22px;">
+      <div style="margin:4px 0 0;">
+        <div style="font-size:15px;font-weight:600;color:#f0ede8;font-family:'DM Sans',sans-serif;margin-bottom:8px;">Statistiques</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+          <div style="background:#1b1d20;border-radius:12px;padding:12px 18px;">
             <div id="cs-trades" style="font-size:26px;font-weight:700;color:#f0ede8;font-family:'DM Sans',sans-serif;letter-spacing:-.02em;line-height:1.1;">0</div>
             <div style="font-size:12.5px;color:#8a8680;font-family:'DM Sans',sans-serif;margin-top:5px;">Trades</div>
           </div>
-          <div style="background:#1b1d20;border-radius:12px;padding:20px 22px;">
+          <div style="background:#1b1d20;border-radius:12px;padding:12px 18px;">
             <div id="cs-avg" style="font-size:26px;font-weight:700;color:#f0ede8;font-family:'DM Sans',sans-serif;letter-spacing:-.02em;line-height:1.1;">$0,00</div>
             <div style="font-size:12.5px;color:#8a8680;font-family:'DM Sans',sans-serif;margin-top:5px;">Gain moyen / trade</div>
           </div>
-          <div style="background:#1b1d20;border-radius:12px;padding:20px 22px;">
+          <div style="background:#1b1d20;border-radius:12px;padding:12px 18px;">
             <div id="cs-total" style="font-size:26px;font-weight:700;color:#3d8ef0;font-family:'DM Sans',sans-serif;letter-spacing:-.02em;line-height:1.1;">$0,00</div>
             <div style="font-size:12.5px;color:#8a8680;font-family:'DM Sans',sans-serif;margin-top:5px;">Total earnings</div>
           </div>
-          <div style="background:#1b1d20;border-radius:12px;padding:20px 22px;">
+          <div style="background:#1b1d20;border-radius:12px;padding:12px 18px;">
             <div id="cs-best" style="font-size:26px;font-weight:700;color:#3dbf8a;font-family:'DM Sans',sans-serif;letter-spacing:-.02em;line-height:1.1;">$0,00</div>
             <div style="font-size:12.5px;color:#8a8680;font-family:'DM Sans',sans-serif;margin-top:5px;">Meilleur trade</div>
           </div>
@@ -10176,11 +10177,16 @@ function setChartType(type) {
   chartType = type;
   document.getElementById('ctt-bar').classList.toggle('active', type === 'bar');
   document.getElementById('ctt-line').classList.toggle('active', type === 'line');
-  // Update legend
-  document.getElementById('leg-bar-pos').style.display = type === 'bar' ? 'flex' : 'none';
-  document.getElementById('leg-bar-neg').style.display = type === 'bar' ? 'flex' : 'none';
-  document.getElementById('leg-cumul').style.display = type === 'line' ? 'flex' : 'none';
-  document.getElementById('leg-cumul').innerHTML = '<div class="leg-line" style="background:rgba(61,142,240,0.9)"></div> P&L cumulatif';
+  // (légende Gain/Perte supprimée du dashboard — garde le code tolérant si absente)
+  var _lp = document.getElementById('leg-bar-pos');
+  var _ln = document.getElementById('leg-bar-neg');
+  var _lc = document.getElementById('leg-cumul');
+  if (_lp) _lp.style.display = type === 'bar' ? 'flex' : 'none';
+  if (_ln) _ln.style.display = type === 'bar' ? 'flex' : 'none';
+  if (_lc) {
+    _lc.style.display = type === 'line' ? 'flex' : 'none';
+    _lc.innerHTML = '<div class="leg-line" style="background:rgba(61,142,240,0.9)"></div> P&L cumulatif';
+  }
   if (chartParams?.bars) drawChart(chartParams.bars);
 }
 
@@ -10189,7 +10195,7 @@ function drawChart(bars) {
   if (!bars) bars = chartParams?.bars || [];
   const dpr = window.devicePixelRatio || 1;
   const W = parseInt(chartCanvas.style.width);
-  const H = 220;
+  const H = parseInt(chartCanvas.style.height) || vmChartH();
   const ctx = chartCtx;
   ctx.clearRect(0, 0, W * dpr, H * dpr);
   ctx.save(); ctx.scale(1, 1);
@@ -10714,13 +10720,17 @@ function applyDateFilter(trades) {
   });
 }
 
+// Hauteur adaptative des graphiques : ~13% de la fenêtre, bornée — pour que
+// tout le dashboard tienne sur une page sans scroll.
+function vmChartH() { return Math.max(90, Math.min(170, Math.round(window.innerHeight * 0.13))); }
+
 function drawCumulChart(accData) {
   cumulCanvas = document.getElementById('cumul-chart');
   if (!cumulCanvas) return;
   const dpr = window.devicePixelRatio || 1;
   const parent = cumulCanvas.parentElement;
   const W = Math.round((parent ? (parent.getBoundingClientRect().width || parent.offsetWidth) : 0) || 800);
-  const H = 200;
+  const H = vmChartH();
   cumulCanvas.width  = W * dpr;
   cumulCanvas.height = H * dpr;
   cumulCanvas.style.width  = W + 'px';
@@ -11308,7 +11318,7 @@ window.addEventListener('resize', () => {
   if (chartCanvas) {
     const dpr = window.devicePixelRatio || 1;
     const W = chartCanvas.parentElement.getBoundingClientRect().width;
-    const H = 220;
+    const H = vmChartH();
     chartCanvas.width = W * dpr; chartCanvas.height = H * dpr;
     chartCanvas.style.width = W + 'px'; chartCanvas.style.height = H + 'px';
     chartCtx = chartCanvas.getContext('2d');
@@ -11330,7 +11340,7 @@ window.addEventListener('resize', () => {
       if (chartCanvas) {
         const dpr = window.devicePixelRatio || 1;
         const W = chartCanvas.parentElement.getBoundingClientRect().width;
-        const H = 220;
+        const H = vmChartH();
         chartCanvas.width = W * dpr; chartCanvas.height = H * dpr;
         chartCanvas.style.width = W + 'px'; chartCanvas.style.height = H + 'px';
         chartCtx = chartCanvas.getContext('2d');
@@ -11368,7 +11378,7 @@ function ensureChartInit() {
   const dpr = window.devicePixelRatio || 1;
   const parent = chartCanvas.parentElement;
   const W = parent.getBoundingClientRect().width || parent.offsetWidth || 600;
-  const H = 220;
+  const H = vmChartH();
   chartCanvas.width = W * dpr;
   chartCanvas.height = H * dpr;
   chartCanvas.style.width = W + 'px';

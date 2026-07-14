@@ -4478,8 +4478,125 @@ tbody tr:last-child td { border-bottom: none; }
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+
+            <!-- Upload / import (déplacé depuis l'ancienne barre) -->
+            <div style="position:relative;" id="sync-url-wrap">
+              <button id="sync-url-btn" title="Importer un dashboard" onclick="toggleSyncPopover(event)"
+                style="display:flex;align-items:center;gap:6px;padding:6px 14px;background:#18181c;border:1px solid rgba(255,255,255,0.11);border-radius:8px;color:#c8c4be;font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;transition:border-color .15s;"
+                onmouseover="this.style.borderColor='rgba(255,255,255,0.22)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.11)'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;flex-shrink:0;color:#8a8680;"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+                <span id="sync-url-label">upload</span>
+              </button>
+              <!-- POPOVER -->
+              <div id="sync-url-popover" style="display:none;position:absolute;right:0;top:calc(100% + 8px);width:360px;background:var(--panel);border:1px solid var(--border2);border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,.7);z-index:1000;padding:16px;flex-direction:column;gap:12px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);">Importer depuis FTMO</span>
+                  <button onclick="closeSyncPopover()" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0;line-height:1;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">×</button>
+                </div>
+                <!-- ÉTAPE 1 : fichier -->
+                <div id="sync-step-file" style="display:flex;flex-direction:column;gap:12px;">
+                  <div style="background:var(--lift);border:1px solid var(--border);border-radius:8px;padding:10px 12px;">
+                    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.06em;color:var(--text3);margin-bottom:4px;">COMMENT EXPORTER DEPUIS FTMO</div>
+                    <div style="font-size:11px;color:var(--text2);line-height:1.7;">1. <b style="color:var(--text)">trader.ftmo.com</b> → compte → <b style="color:var(--text)">Live MetriX</b><br>2. Section <b style="color:var(--text)">Trading Journal</b><br>3. Bouton <b style="color:var(--text)">Export</b> (bleu, à droite)<br>4. Télécharge le <b style="color:var(--text)">CSV ou Excel</b></div>
+                  </div>
+                  <label id="sync-drop-zone" for="sync-file-input"
+                    style="border:1.5px dashed var(--border2);border-radius:8px;padding:18px;text-align:center;cursor:pointer;transition:all .15s;display:block;"
+                    ondragover="event.preventDefault();this.style.borderColor='rgba(61,142,240,.6)';this.style.background='rgba(61,142,240,.04)'"
+                    ondragleave="this.style.borderColor='var(--border2)';this.style.background='transparent'"
+                    ondrop="event.preventDefault();this.style.borderColor='var(--border2)';this.style.background='transparent';handleSyncFileDrop(event.dataTransfer.files[0])">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:22px;height:22px;color:var(--text3);margin-bottom:6px;display:block;margin-left:auto;margin-right:auto;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <div id="sync-drop-label" style="font-size:11px;color:var(--text2);">Dépose ton fichier CSV ou Excel ici</div>
+                    <div style="font-size:10px;color:var(--text3);margin-top:3px;">ou clique pour sélectionner</div>
+                    <input id="sync-file-input" type="file" accept=".csv,.xlsx,.xls" style="opacity:0;position:absolute;width:0;height:0;pointer-events:none;" onchange="handleSyncFileSelect(this.files[0])">
+                  </label>
+                  <div id="sync-url-status" style="font-family:'DM Mono',monospace;font-size:9px;min-height:14px;text-align:center;color:var(--text3);"></div>
+                </div>
+
+                <!-- ÉTAPE 2 : configuration du compte -->
+                <div id="sync-step-config" style="display:none;flex-direction:column;gap:14px;">
+                  <button class="sic-back" onclick="importBackToFile()">← Retour</button>
+                  <div class="sic-parsed"><span class="sic-check">✓</span><b id="sic-count">0</b>&nbsp;trades détectés</div>
+
+                  <div>
+                    <div class="sic-lbl">Type de compte</div>
+                    <div class="sic-grid sic-types">
+                      <button class="sic-opt" data-v="Challenge"    onclick="picImport(this,'type')">Challenge</button>
+                      <button class="sic-opt" data-v="Verification" onclick="picImport(this,'type')">Verification</button>
+                      <button class="sic-opt" data-v="Funded"       onclick="picImport(this,'type')">Funded</button>
+                      <button class="sic-opt" data-v="Live"         onclick="picImport(this,'type')">Live</button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="sic-lbl">Taille du compte</div>
+                    <div class="sic-grid sic-sizes">
+                      <button class="sic-opt" data-v="10k"  onclick="picImport(this,'size')">10k</button>
+                      <button class="sic-opt" data-v="25k"  onclick="picImport(this,'size')">25k</button>
+                      <button class="sic-opt" data-v="50k"  onclick="picImport(this,'size')">50k</button>
+                      <button class="sic-opt" data-v="100k" onclick="picImport(this,'size')">100k</button>
+                      <button class="sic-opt" data-v="150k" onclick="picImport(this,'size')">150k</button>
+                      <button class="sic-opt" data-v="200k" onclick="picImport(this,'size')">200k</button>
+                      <button class="sic-opt sic-custom-btn" data-v="custom" onclick="picImport(this,'size')" style="grid-column:span 3;">Custom…</button>
+                    </div>
+                    <input id="sic-custom" type="text" placeholder="Ex : 300k" oninput="updateImportConfirm()"
+                      style="display:none;margin-top:6px;width:100%;background:var(--lift);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12.5px;outline:none;">
+                  </div>
+
+                  <button id="sic-confirm" class="sic-confirm" disabled onclick="confirmImportConfig()">Importer le dashboard</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Filters (style Infloww) -->
+            <div style="position:relative;" id="vm-filters-wrap">
+              <button id="vm-filters-btn" onclick="toggleFiltersDropdown(event)"
+                style="display:flex;align-items:center;gap:7px;padding:6px 14px;background:#18181c;border:1px solid rgba(255,255,255,0.11);border-radius:8px;color:#c8c4be;font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;transition:border-color .15s;"
+                onmouseover="this.style.borderColor='rgba(255,255,255,0.22)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.11)'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#3d8ef0" stroke-width="2" style="width:14px;height:14px;flex-shrink:0;"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                <span>Filters</span>
+              </button>
+              <div id="vm-filters-dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:#18181c;border:1px solid rgba(255,255,255,0.12);border-radius:10px;box-shadow:0 16px 48px rgba(0,0,0,.85);z-index:2000;overflow:hidden;min-width:220px;">
+                <div style="padding:8px 14px 4px;font-size:9px;font-family:'DM Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#555;">Filtrer par type de compte</div>
+                <div style="padding:2px 0 6px;">
+                  <button class="vmf-opt" onclick="applyFilterType('gross')"><span class="vmf-check" id="vmf-check-gross">✓</span>Tous les comptes</button>
+                  <button class="vmf-opt" onclick="applyFilterType('challenge')"><span class="vmf-check" id="vmf-check-challenge" style="opacity:0">✓</span>Challenge</button>
+                  <button class="vmf-opt" onclick="applyFilterType('verification')"><span class="vmf-check" id="vmf-check-verification" style="opacity:0">✓</span>Verification</button>
+                  <button class="vmf-opt" onclick="applyFilterType('funded')"><span class="vmf-check" id="vmf-check-funded" style="opacity:0">✓</span>Funded</button>
+                </div>
+              </div>
+            </div>
+            <style>
+            .vmf-opt { display:flex; align-items:center; gap:8px; width:100%; text-align:left; background:transparent; border:none; padding:8px 14px; color:#c8c4be; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; transition:background .12s; }
+            .vmf-opt:hover { background:rgba(255,255,255,0.05); color:#fff; }
+            .vmf-check { color:#3d8ef0; font-size:11px; width:12px; display:inline-block; text-align:center; }
+            </style>
+            <script>
+            function toggleFiltersDropdown(e){
+              e.stopPropagation();
+              var dd=document.getElementById('vm-filters-dropdown');
+              if(!dd) return;
+              var open=dd.style.display==='block';
+              var cur=(typeof window._currentInflowEarningsType!=='undefined')?window._currentInflowEarningsType:'gross';
+              ['gross','challenge','verification','funded'].forEach(function(v){
+                var c=document.getElementById('vmf-check-'+v);
+                if(c) c.style.opacity=(v===cur)?'1':'0';
+              });
+              dd.style.display=open?'none':'block';
+              if(!open){
+                setTimeout(function(){
+                  document.addEventListener('click',function _c(){ dd.style.display='none'; document.removeEventListener('click',_c); });
+                },0);
+              }
+            }
+            function applyFilterType(val){
+              if(typeof window.selectInflowEarningsType==='function') window.selectInflowEarningsType(val);
+              ['gross','challenge','verification','funded'].forEach(function(v){
+                var c=document.getElementById('vmf-check-'+v);
+                if(c) c.style.opacity=(v===val)?'1':'0';
+              });
+              var dd=document.getElementById('vm-filters-dropdown'); if(dd) dd.style.display='none';
+            }
+            </script>
 
         <!-- Cards grid: à plat, hairlines fins, sans encadré (façon Infloww) -->
         <div style="display:grid;grid-template-columns:240px 1fr 1fr 1fr;gap:1px;background:rgba(255,255,255,0.055);">
@@ -4565,108 +4682,31 @@ tbody tr:last-child td { border-bottom: none; }
       </div>
       <!-- /INFLOW EARNINGS OVERVIEW -->
 
-      <!-- Top bar (upload/date picker — kept for functionality, hidden visually) -->
-      <div class="topbar" style="border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;height:44px;background:#0d0d0f;">
-
-        <!-- SYNC URL BUTTON -->
-        <div style="position:relative;" id="sync-url-wrap">
-          <button id="sync-url-btn" title="Synchroniser depuis une URL" onclick="toggleSyncPopover(event)"
-            style="display:flex;align-items:center;gap:5px;padding:4px 9px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text3);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;cursor:pointer;transition:all .15s;"
-            onmouseover="this.style.borderColor='var(--border2)';this.style.color='var(--text2)'"
-            onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text3)'">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px;flex-shrink:0;"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
-            <span id="sync-url-label">upload</span>
-          </button>
-          <!-- POPOVER -->
-          <div id="sync-url-popover" style="display:none;position:absolute;left:0;top:calc(100% + 8px);width:360px;background:var(--panel);border:1px solid var(--border2);border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,.7);z-index:1000;padding:16px;flex-direction:column;gap:12px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;">
-              <span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);">Importer depuis FTMO</span>
-              <button onclick="closeSyncPopover()" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0;line-height:1;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">×</button>
-            </div>
-            <!-- ÉTAPE 1 : fichier -->
-            <div id="sync-step-file" style="display:flex;flex-direction:column;gap:12px;">
-              <div style="background:var(--lift);border:1px solid var(--border);border-radius:8px;padding:10px 12px;">
-                <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.06em;color:var(--text3);margin-bottom:4px;">COMMENT EXPORTER DEPUIS FTMO</div>
-                <div style="font-size:11px;color:var(--text2);line-height:1.7;">1. <b style="color:var(--text)">trader.ftmo.com</b> → compte → <b style="color:var(--text)">Live MetriX</b><br>2. Section <b style="color:var(--text)">Trading Journal</b><br>3. Bouton <b style="color:var(--text)">Export</b> (bleu, à droite)<br>4. Télécharge le <b style="color:var(--text)">CSV ou Excel</b></div>
-              </div>
-              <label id="sync-drop-zone" for="sync-file-input"
-                style="border:1.5px dashed var(--border2);border-radius:8px;padding:18px;text-align:center;cursor:pointer;transition:all .15s;display:block;"
-                ondragover="event.preventDefault();this.style.borderColor='rgba(61,142,240,.6)';this.style.background='rgba(61,142,240,.04)'"
-                ondragleave="this.style.borderColor='var(--border2)';this.style.background='transparent'"
-                ondrop="event.preventDefault();this.style.borderColor='var(--border2)';this.style.background='transparent';handleSyncFileDrop(event.dataTransfer.files[0])">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:22px;height:22px;color:var(--text3);margin-bottom:6px;display:block;margin-left:auto;margin-right:auto;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                <div id="sync-drop-label" style="font-size:11px;color:var(--text2);">Dépose ton fichier CSV ou Excel ici</div>
-                <div style="font-size:10px;color:var(--text3);margin-top:3px;">ou clique pour sélectionner</div>
-                <input id="sync-file-input" type="file" accept=".csv,.xlsx,.xls" style="opacity:0;position:absolute;width:0;height:0;pointer-events:none;" onchange="handleSyncFileSelect(this.files[0])">
-              </label>
-              <div id="sync-url-status" style="font-family:'DM Mono',monospace;font-size:9px;min-height:14px;text-align:center;color:var(--text3);"></div>
-            </div>
-
-            <!-- ÉTAPE 2 : configuration du compte -->
-            <div id="sync-step-config" style="display:none;flex-direction:column;gap:14px;">
-              <button class="sic-back" onclick="importBackToFile()">← Retour</button>
-              <div class="sic-parsed"><span class="sic-check">✓</span><b id="sic-count">0</b>&nbsp;trades détectés</div>
-
-              <div>
-                <div class="sic-lbl">Type de compte</div>
-                <div class="sic-grid sic-types">
-                  <button class="sic-opt" data-v="Challenge"    onclick="picImport(this,'type')">Challenge</button>
-                  <button class="sic-opt" data-v="Verification" onclick="picImport(this,'type')">Verification</button>
-                  <button class="sic-opt" data-v="Funded"       onclick="picImport(this,'type')">Funded</button>
-                  <button class="sic-opt" data-v="Live"         onclick="picImport(this,'type')">Live</button>
-                </div>
-              </div>
-
-              <div>
-                <div class="sic-lbl">Taille du compte</div>
-                <div class="sic-grid sic-sizes">
-                  <button class="sic-opt" data-v="10k"  onclick="picImport(this,'size')">10k</button>
-                  <button class="sic-opt" data-v="25k"  onclick="picImport(this,'size')">25k</button>
-                  <button class="sic-opt" data-v="50k"  onclick="picImport(this,'size')">50k</button>
-                  <button class="sic-opt" data-v="100k" onclick="picImport(this,'size')">100k</button>
-                  <button class="sic-opt" data-v="150k" onclick="picImport(this,'size')">150k</button>
-                  <button class="sic-opt" data-v="200k" onclick="picImport(this,'size')">200k</button>
-                  <button class="sic-opt sic-custom-btn" data-v="custom" onclick="picImport(this,'size')" style="grid-column:span 3;">Custom…</button>
-                </div>
-                <input id="sic-custom" type="text" placeholder="Ex : 300k" oninput="updateImportConfirm()"
-                  style="display:none;margin-top:6px;width:100%;background:var(--lift);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12.5px;outline:none;">
-              </div>
-
-              <button id="sic-confirm" class="sic-confirm" disabled onclick="confirmImportConfig()">Importer le dashboard</button>
-            </div>
-          </div>
-        </div>
-        <style>
-        #sync-step-config { animation: sicIn .32s cubic-bezier(.34,1.4,.64,1); }
-        @keyframes sicIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
-        .sic-back { align-self:flex-start; background:transparent; border:none; color:var(--text3); font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; cursor:pointer; padding:0; transition:color .15s; }
-        .sic-back:hover { color:var(--text); }
-        .sic-parsed { font-size:12px; color:var(--text2); display:flex; align-items:center; gap:5px; }
-        .sic-check { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; background:rgba(61,142,240,.16); color:#3d8ef0; font-size:9px; font-weight:700; }
-        .sic-lbl { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text3); margin-bottom:8px; }
-        .sic-grid { display:grid; gap:6px; }
-        .sic-types { grid-template-columns:1fr 1fr; }
-        .sic-sizes { grid-template-columns:repeat(3,1fr); }
-        .sic-opt { background:var(--lift); border:1px solid var(--border); border-radius:8px; padding:9px 6px; color:var(--text2); font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; transition:all .18s cubic-bezier(.34,1.4,.64,1); }
-        .sic-opt:hover { border-color:rgba(61,142,240,.5); color:var(--text); transform:translateY(-1px); }
-        .sic-opt.on { background:rgba(61,142,240,.16); border-color:#3d8ef0; color:#fff; box-shadow:0 0 0 1px rgba(61,142,240,.45), 0 4px 14px rgba(61,142,240,.15); }
-        .sic-confirm { margin-top:2px; background:#3d8ef0; border:none; border-radius:8px; padding:11px; color:#fff; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:all .18s; }
-        .sic-confirm:hover:not(:disabled) { background:#2f7ae0; transform:translateY(-1px); box-shadow:0 6px 18px rgba(61,142,240,.25); }
-        .sic-confirm:disabled { opacity:.4; cursor:not-allowed; }
-        </style>
-        <!-- /SYNC URL BUTTON -->
-
-        <div class="topbar-right" style="margin-left:auto;display:flex;align-items:center;gap:10px;">
-
-          <!-- Hidden vt-btns for compatibility with setView -->
-          <div style="display:none;">
-            <button class="vt-btn" id="vt-day"></button>
-            <button class="vt-btn active" id="vt-week"></button>
-            <button class="vt-btn" id="vt-month"></button>
-            <button class="vt-btn" id="vt-year"></button>
-          </div>
-        </div>
+      <!-- upload déplacé dans le header ; boutons de vue cachés conservés pour setView -->
+      <div style="display:none;">
+        <button class="vt-btn" id="vt-day"></button>
+        <button class="vt-btn active" id="vt-week"></button>
+        <button class="vt-btn" id="vt-month"></button>
+        <button class="vt-btn" id="vt-year"></button>
       </div>
+      <style>
+      #sync-step-config { animation: sicIn .32s cubic-bezier(.34,1.4,.64,1); }
+      @keyframes sicIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+      .sic-back { align-self:flex-start; background:transparent; border:none; color:var(--text3); font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; cursor:pointer; padding:0; transition:color .15s; }
+      .sic-back:hover { color:var(--text); }
+      .sic-parsed { font-size:12px; color:var(--text2); display:flex; align-items:center; gap:5px; }
+      .sic-check { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; background:rgba(61,142,240,.16); color:#3d8ef0; font-size:9px; font-weight:700; }
+      .sic-lbl { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--text3); margin-bottom:8px; }
+      .sic-grid { display:grid; gap:6px; }
+      .sic-types { grid-template-columns:1fr 1fr; }
+      .sic-sizes { grid-template-columns:repeat(3,1fr); }
+      .sic-opt { background:var(--lift); border:1px solid var(--border); border-radius:8px; padding:9px 6px; color:var(--text2); font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; transition:all .18s cubic-bezier(.34,1.4,.64,1); }
+      .sic-opt:hover { border-color:rgba(61,142,240,.5); color:var(--text); transform:translateY(-1px); }
+      .sic-opt.on { background:rgba(61,142,240,.16); border-color:#3d8ef0; color:#fff; box-shadow:0 0 0 1px rgba(61,142,240,.45), 0 4px 14px rgba(61,142,240,.15); }
+      .sic-confirm { margin-top:2px; background:#3d8ef0; border:none; border-radius:8px; padding:11px; color:#fff; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:all .18s; }
+      .sic-confirm:hover:not(:disabled) { background:#2f7ae0; transform:translateY(-1px); box-shadow:0 6px 18px rgba(61,142,240,.25); }
+      .sic-confirm:disabled { opacity:.4; cursor:not-allowed; }
+      </style>
       <!-- Account tabs bar -->
       <div id="acc-tabs-bar" style="display:flex;align-items:center;gap:0;border-bottom:1px solid rgba(255,255,255,0.06);padding:0 24px;flex-shrink:0;height:40px;background:#0a0a0a;overflow-x:auto;"></div>
       <script>

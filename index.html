@@ -12516,19 +12516,6 @@ document.addEventListener('click', function(e) {
   }
   setUTCLabels();
 
-  // Pastille « App » : visible uniquement dans l'app de bureau (Electron),
-  // jamais dans un navigateur ni une web-app épinglée — sert à les distinguer.
-  if (/Electron/i.test(navigator.userAgent)) {
-    var _tbApp = document.getElementById('global-topbar');
-    if (_tbApp) {
-      var _badge = document.createElement('div');
-      _badge.className = 'tb-item';
-      _badge.style.cssText = 'cursor:default;';
-      _badge.innerHTML = '<div style="width:8px;height:8px;border-radius:50%;background:#3d8ef0;box-shadow:0 0 6px rgba(61,142,240,0.7);flex-shrink:0;"></div><span>App</span>';
-      _tbApp.insertBefore(_badge, _tbApp.firstElementChild);
-    }
-  }
-
   // Avatar initials from user
   function setAvatar(){
     var el = document.getElementById('inflow-avatar-top');

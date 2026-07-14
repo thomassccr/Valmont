@@ -4479,16 +4479,10 @@ tbody tr:last-child td { border-bottom: none; }
               </div>
             </div>
 
-            <!-- Upload / import (déplacé depuis l'ancienne barre) -->
-            <div style="position:relative;" id="sync-url-wrap">
-              <button id="sync-url-btn" title="Importer un dashboard" onclick="toggleSyncPopover(event)"
-                style="display:flex;align-items:center;gap:6px;padding:6px 14px;background:#18181c;border:1px solid rgba(255,255,255,0.11);border-radius:8px;color:#c8c4be;font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;transition:border-color .15s;"
-                onmouseover="this.style.borderColor='rgba(255,255,255,0.22)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.11)'">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;flex-shrink:0;color:#8a8680;"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
-                <span id="sync-url-label">upload</span>
-              </button>
-              <!-- POPOVER -->
-              <div id="sync-url-popover" style="display:none;position:absolute;right:0;top:calc(100% + 8px);width:360px;background:var(--panel);border:1px solid var(--border2);border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,.7);z-index:1000;padding:16px;flex-direction:column;gap:12px;">
+            <!-- Import de dashboard : modale ouverte uniquement via « Ajouter un compte » (plus de bouton upload autonome) -->
+            <div style="display:contents;" id="sync-url-wrap">
+              <!-- MODALE CENTRÉE -->
+              <div id="sync-url-popover" style="display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:360px;background:var(--panel);border:1px solid var(--border2);border-radius:12px;box-shadow:0 24px 60px rgba(0,0,0,.7), 0 0 0 100vmax rgba(0,0,0,0.55);z-index:3000;padding:16px;flex-direction:column;gap:12px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;">
                   <span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);">Importer depuis FTMO</span>
                   <button onclick="closeSyncPopover()" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0;line-height:1;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">×</button>

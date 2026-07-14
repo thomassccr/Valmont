@@ -5073,25 +5073,6 @@ tbody tr:last-child td { border-bottom: none; }
         <div id="cumul-tooltip" style="position:fixed;background:var(--panel);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;pointer-events:none;display:none;z-index:500;font-family:'DM Mono',monospace;font-size:10px;color:var(--text);box-shadow:var(--shadow-md);white-space:nowrap;"></div>
       </div>
 
-            <!-- Bottom row -->
-      <div class="bottom-row">
-        <!-- Breakdown by instrument -->
-        <div class="chart-card">
-          <div class="chart-card-header">
-            <div class="chart-card-title">Détail par instrument</div>
-          </div>
-          <div class="channel-row" id="channel-breakdown">—</div>
-        </div>
-
-        <!-- Stats mini -->
-        <div class="chart-card">
-          <div class="chart-card-header">
-            <div class="chart-card-title">Performance Stats</div>
-          </div>
-          <div class="stats-mini" id="stats-mini">—</div>
-        </div>
-      </div>
-
       <!-- Statistiques (tuiles façon Infloww « Creator statistics ») -->
       <div style="margin:20px 0 4px;">
         <div style="font-size:15px;font-weight:600;color:#f0ede8;font-family:'DM Sans',sans-serif;margin-bottom:4px;">Statistiques</div>
@@ -10982,10 +10963,9 @@ function renderCreatorStats(trades, total) {
 
 function renderChannels(trades, total) {
   renderCreatorStats(trades, total);
+  // La carte « Détail par instrument » a été retirée du dashboard : wrap peut être absent.
   const wrap = document.getElementById('channel-breakdown');
-  wrap.innerHTML = '';
-
-  if (trades.length === 0) { wrap.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--text3);padding:8px 0">Aucune donnée</div>'; return; }
+  if (wrap) wrap.innerHTML = '';
 
   const byInst = {};
   trades.forEach(t => { byInst[t.inst] = (byInst[t.inst]||0) + t.pnl; });
@@ -10997,20 +10977,24 @@ function renderChannels(trades, total) {
   const colorFor = {};
   entries.forEach(([inst], i) => { colorFor[inst] = palette[i % palette.length]; });
 
-  entries.forEach(([inst, val]) => {
-    const pct = Math.round(Math.abs(val)/totalAbs*100);
-    const color = colorFor[inst];
-    const el = document.createElement('div');
-    el.className = 'ch-item';
-    el.innerHTML = `
-      <div class="ch-dot" style="background:${color}"></div>
-      <div class="ch-label">${inst}</div>
-      <div class="ch-bar-track"><div class="ch-bar-fill" style="width:0%;background:${color}" data-w="${pct}"></div></div>
-      <div class="ch-pct">${pct}%</div>
-      <div class="ch-val" style="color:${val>=0?'var(--gold2)':'var(--red)'}">${val>=0?'+$':'-$'}${Math.abs(Math.round(val)).toLocaleString('fr-FR')}</div>
-    `;
-    wrap.appendChild(el);
-  });
+  if (wrap) {
+    if (!entries.length) {
+      wrap.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--text3);padding:8px 0">Aucune donnée</div>';
+    } else entries.forEach(([inst, val]) => {
+      const pct = Math.round(Math.abs(val)/totalAbs*100);
+      const color = colorFor[inst];
+      const el = document.createElement('div');
+      el.className = 'ch-item';
+      el.innerHTML = `
+        <div class="ch-dot" style="background:${color}"></div>
+        <div class="ch-label">${inst}</div>
+        <div class="ch-bar-track"><div class="ch-bar-fill" style="width:0%;background:${color}" data-w="${pct}"></div></div>
+        <div class="ch-pct">${pct}%</div>
+        <div class="ch-val" style="color:${val>=0?'var(--gold2)':'var(--red)'}">${val>=0?'+$':'-$'}${Math.abs(Math.round(val)).toLocaleString('fr-FR')}</div>
+      `;
+      wrap.appendChild(el);
+    });
+  }
 
   // Légende « Earnings by channel » façon Infloww (dot · nom · % · montant)
   const legend = document.getElementById('cumul-channel-legend');
@@ -11036,7 +11020,7 @@ function renderChannels(trades, total) {
   }
 
   // Animate bars
-  setTimeout(() => {
+  if (wrap) setTimeout(() => {
     wrap.querySelectorAll('.ch-bar-fill').forEach(el => {
       el.style.width = el.dataset.w + '%';
     });
@@ -11044,7 +11028,9 @@ function renderChannels(trades, total) {
 }
 
 function renderStats(trades, winRate) {
+  // La carte « Performance Stats » a été retirée du dashboard.
   const wrap = document.getElementById('stats-mini');
+  if (!wrap) return;
   wrap.innerHTML = '';
 
   if (trades.length === 0) { wrap.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--text3);padding:8px 0">Aucune donnée</div>'; return; }

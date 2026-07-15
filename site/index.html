@@ -108,9 +108,10 @@
     .hero { padding-top:48px; }
   }
 
-  /* ── NOTIFICATIONS DE PAIEMENT (mêmes que l'écran de login) ── */
+  /* ── NOTIFICATIONS DE PAIEMENT (mêmes que l'écran de login) ──
+     Dans le flux du hero, centrées au-dessus du logo : jamais de chevauchement. */
   #login-notifs {
-    position:fixed; right:26px; top:26px; width:360px; height:176px;
+    position:relative; width:360px; height:176px; margin:0 auto 30px;
     pointer-events:none; z-index:5; overflow:visible;
   }
   .ln-notif {
@@ -146,6 +147,7 @@
 
   <!-- ── HERO (structure du composant shadcn : badge → titre dégradé → texte → CTA → stats) ── -->
   <section class="hero">
+    <div id="login-notifs"></div>
     <img class="logo fx fx-1" src="../icon-512.png" alt="Valmont">
 
     <div class="fx fx-1">
@@ -226,7 +228,6 @@
   </footer>
 
   <!-- ── NOTIFICATIONS DE PAIEMENT (identiques à l'écran de login) ── -->
-  <div id="login-notifs"></div>
   <script>
   (function initLoginNotifs() {
     const ICON_FTMO = `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">

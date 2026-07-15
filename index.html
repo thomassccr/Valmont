@@ -4,6 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>VALMONT — Trading Assistant</title>
+<script>
+/* Valmont s'utilise via l'app de bureau : un navigateur est renvoyé vers la
+   page de téléchargement (site/). Exceptions : l'app Electron, l'ouverture
+   locale en file:, et la porte dérobée ?web=1 (mémorisée). */
+(function(){
+  try {
+    if (/Electron/i.test(navigator.userAgent)) return;
+    if (location.protocol === 'file:') return;
+    if (/[?&]web=1/.test(location.search)) { localStorage.setItem('vm_allow_web','1'); return; }
+    if (localStorage.getItem('vm_allow_web') === '1') return;
+    location.replace('site/');
+  } catch(e){}
+})();
+</script>
 <!-- PWA : installable comme une vraie application (sans barre de navigateur) -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#050505">

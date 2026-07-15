@@ -240,12 +240,12 @@ body::after { content:''; position:fixed; inset:0; background-image:url("data:im
 .drp-cal-day.drp-other { color:#55575c; cursor:pointer; }
 .drp-cal-day.drp-empty { pointer-events:none; }
 .drp-cal-day.drp-today { font-weight:700; box-shadow:inset 0 0 0 1px rgba(255,255,255,0.3); }
-/* Sélection : pastilles claires jour par jour (négatif exact d'Infloww) */
-.drp-cal-day.drp-in-range { background:#f2f3f5; color:#16181c; border-radius:6px; }
-.drp-cal-day.drp-in-range:hover { background:#ffffff; }
-.drp-cal-day.drp-sel-start { background:#f2f3f5 !important; color:#16181c !important; font-weight:600; border-radius:6px !important; }
-.drp-cal-day.drp-sel-end { background:#f2f3f5 !important; color:#16181c !important; font-weight:600; border-radius:6px !important; }
-.drp-cal-day.drp-sel-start.drp-sel-end { background:#f2f3f5 !important; border-radius:6px !important; }
+/* Sélection : bloc gris discret, à peine plus clair que le fond (comme Infloww sombre) */
+.drp-cal-day.drp-in-range { background:#2c2f35; color:#fff; border-radius:6px; }
+.drp-cal-day.drp-in-range:hover { background:#343841; }
+.drp-cal-day.drp-sel-start { background:#2c2f35 !important; color:#fff !important; font-weight:600; border-radius:6px !important; }
+.drp-cal-day.drp-sel-end { background:#2c2f35 !important; color:#fff !important; font-weight:600; border-radius:6px !important; }
+.drp-cal-day.drp-sel-start.drp-sel-end { background:#2c2f35 !important; border-radius:6px !important; }
 /* ── En-tête des calendriers */
 .drp-cal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
 .drp-cal-nav { width:24px; height:24px; background:transparent; border:none; border-radius:6px; color:#8a8680; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .12s; padding:0; }

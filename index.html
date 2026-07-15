@@ -10175,7 +10175,7 @@ function drawChart(bars) {
     ctx.restore(); return;
   }
 
-  const padL=52, padR=14, padT=18, padB=36;
+  const padL=52, padR=14, padT=10, padB=30;
   const chartW = W - padL - padR;
   const chartH = H - padT - padB;
   const n = bars.length;
@@ -10185,9 +10185,11 @@ function drawChart(bars) {
   // Compute cumulative
   let cum = 0;
   const cumVals = bars.map(b => { cum += (b.pnl||0); return cum; });
-  const allVals = [...bars.map(b=>b.pnl||0), ...cumVals];
-  const minV = Math.min(...allVals, 0) * 1.12;
-  const maxV = Math.max(...allVals, 0) * 1.12 || 100;
+  // Échelle selon le mode affiché : en barres on ne compte QUE les barres
+  // (sinon le cumul écrase tout et les barres restent minuscules en bas)
+  const allVals = chartType === 'bar' ? bars.map(b=>b.pnl||0) : cumVals;
+  const minV = Math.min(...allVals, 0) * 1.08;
+  const maxV = Math.max(...allVals, 0) * 1.08 || 100;
   const range = maxV - minV || 1;
 
   chartParams = { padL, padR, padT, padB, chartW, chartH, barW, barSpacing, n, W, H, bars, cumVals, minV, maxV, range };

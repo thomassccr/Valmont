@@ -107,6 +107,39 @@
     .stats { gap:18px; }
     .hero { padding-top:48px; }
   }
+
+  /* ── NOTIFICATIONS DE PAIEMENT (mêmes que l'écran de login) ── */
+  #login-notifs {
+    position:fixed; right:26px; top:26px; width:360px; height:176px;
+    pointer-events:none; z-index:5; overflow:visible;
+  }
+  .ln-notif {
+    position:absolute; left:0; right:0;
+    display:flex; align-items:center; gap:13px;
+    padding:14px 18px 14px 14px;
+    background:rgba(28,28,30,0.92);
+    border:1px solid rgba(255,255,255,0.10);
+    border-radius:16px;
+    backdrop-filter:blur(40px) saturate(180%);
+    -webkit-backdrop-filter:blur(40px) saturate(180%);
+    box-shadow:0 4px 8px rgba(0,0,0,0.25), 0 16px 52px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.07);
+    will-change:transform, opacity;
+    transform:translateY(90px); opacity:0;
+    transition:transform .68s cubic-bezier(.16,1,.3,1), opacity .5s ease;
+  }
+  .ln-notif.ln-slot-0 { transform:translateY(0); opacity:1; bottom:0; }
+  .ln-notif.ln-slot-1 { transform:translateY(0); opacity:1; bottom:88px; }
+  .ln-notif.ln-exit { transform:translateY(-90px); opacity:0; transition:transform .52s cubic-bezier(.4,0,.6,1), opacity .42s ease; }
+  .ln-app-icon { width:40px; height:40px; border-radius:10px; flex-shrink:0; overflow:hidden; box-shadow:0 1px 6px rgba(0,0,0,0.45); }
+  .ln-app-icon svg { display:block; width:100%; height:100%; }
+  .ln-content { flex:1; min-width:0; }
+  .ln-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:2px; }
+  .ln-app-name { font-family:-apple-system,'Helvetica Neue',sans-serif; font-size:10.5px; font-weight:500; color:rgba(235,235,240,0.48); letter-spacing:.025em; text-transform:uppercase; }
+  .ln-time { font-family:-apple-system,'Helvetica Neue',sans-serif; font-size:11px; color:rgba(235,235,240,0.35); letter-spacing:-.01em; flex-shrink:0; }
+  .ln-title { font-family:-apple-system,'Helvetica Neue',sans-serif; font-size:13px; font-weight:600; color:rgba(255,255,255,0.90); letter-spacing:-.015em; line-height:1.2; margin-bottom:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ln-body-text { font-family:-apple-system,'Helvetica Neue',sans-serif; font-size:12.5px; font-weight:400; color:rgba(235,235,240,0.65); letter-spacing:-.01em; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ln-amt { color:#3d8ef0; font-weight:500; }
+  @media (max-width:900px) { #login-notifs { display:none; } }
 </style>
 </head>
 <body>
@@ -191,6 +224,112 @@
     <span>© VALMONT</span>
     <a href="../?web=1" title="Accès web">·</a>
   </footer>
+
+  <!-- ── NOTIFICATIONS DE PAIEMENT (identiques à l'écran de login) ── -->
+  <div id="login-notifs"></div>
+  <script>
+  (function initLoginNotifs() {
+    const ICON_FTMO = `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="9" fill="#0d0d0d"/>
+      <path d="M20 6 L32 20 L20 34 L8 20 Z" fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M20 11 L27 20 L20 29 L13 20 Z" fill="white"/>
+    </svg>`;
+    const ICON_FUNDED_NEXT = `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="9" fill="#f0f0f0"/>
+      <text x="20" y="26" text-anchor="middle" font-family="Arial Black,sans-serif" font-weight="900" font-size="15" fill="#111" letter-spacing="-1">FN</text>
+      <line x1="27" y1="11" x2="31" y2="7" stroke="#111" stroke-width="2.2" stroke-linecap="round"/>
+    </svg>`;
+    const ICON_PAYPAL = `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="9" fill="#003087"/>
+      <text x="20" y="27" text-anchor="middle" font-family="Arial Black,sans-serif" font-weight="900" font-size="14" fill="white" letter-spacing="-0.5">PP</text>
+      <rect x="9" y="13" width="22" height="2" rx="1" fill="#009cde" opacity="0.7"/>
+    </svg>`;
+    const ICON_BANK = `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="9" fill="#1a2744"/>
+      <polygon points="20,8 31,14 31,16 9,16 9,14" fill="white" opacity="0.95"/>
+      <rect x="12" y="18" width="3" height="9" rx="1" fill="white" opacity="0.85"/>
+      <rect x="18.5" y="18" width="3" height="9" rx="1" fill="white" opacity="0.85"/>
+      <rect x="25" y="18" width="3" height="9" rx="1" fill="white" opacity="0.85"/>
+      <rect x="9" y="28" width="22" height="2.5" rx="1" fill="white"/>
+    </svg>`;
+
+    const NOTIFS = [
+      { icon: ICON_FTMO,        app: 'FTMO',          title: 'Payout processed',       body: (a) => `Your withdrawal of ${a} has been sent` },
+      { icon: ICON_FUNDED_NEXT, app: 'FundedNext',    title: 'Withdrawal approved',    body: (a) => `${a} will be credited within 24h` },
+      { icon: ICON_PAYPAL,      app: 'PayPal',        title: 'Payment received',       body: (a) => `${a} added to your balance` },
+      { icon: ICON_BANK,        app: 'Bank Transfer', title: 'Incoming wire received', body: (a) => `${a} credited to your account` },
+      { icon: ICON_FTMO,        app: 'FTMO',          title: 'Profit split approved',  body: (a) => `${a} — payment on its way` },
+      { icon: ICON_FUNDED_NEXT, app: 'FundedNext',    title: 'Evaluation passed',      body: (a) => `Funded account — ${a} ready` },
+      { icon: ICON_PAYPAL,      app: 'PayPal',        title: 'Transfer completed',     body: (a) => `${a} sent to your linked account` },
+      { icon: ICON_BANK,        app: 'Bank Transfer', title: 'Payment received',       body: (a) => `${a} from FTMO s.r.o. — ref: PROP` },
+      { icon: ICON_FTMO,        app: 'FTMO',          title: 'Withdrawal confirmed',   body: (a) => `${a} transferred to your account` },
+      { icon: ICON_FUNDED_NEXT, app: 'FundedNext',    title: 'Payout sent',            body: (a) => `Your request of ${a} is processed` },
+      { icon: ICON_PAYPAL,      app: 'PayPal',        title: 'You received money',     body: (a) => `${a} from trading profits` },
+      { icon: ICON_BANK,        app: 'Bank Transfer', title: 'Transfer completed',     body: (a) => `${a} deposited — PROP-TRADE` },
+    ];
+    const AMOUNTS = [2140.50,2487.25,2850.75,3214.00,3562.50,3748.25,4100.00,4327.75,4612.50,4850.25,5000.00,5234.75,5430.50,5812.25,6100.00,6543.50,6820.75,7150.00,7487.25,7900.50,8212.75,8640.00,9125.50,9520.25,9874.75,10000.00];
+    const TIMES = ['now', '1 min ago', '2 min ago', 'just now', '3 min ago'];
+    function randAmt() {
+      const v = AMOUNTS[Math.floor(Math.random() * AMOUNTS.length)];
+      return '$' + v.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    }
+
+    const wrap = document.getElementById('login-notifs');
+    if (!wrap) return;
+    let slotEls = [null, null];
+    let notifIdx = 0;
+
+    function buildEl(notif) {
+      const el = document.createElement('div');
+      el.className = 'ln-notif';
+      const time = TIMES[Math.floor(Math.random() * TIMES.length)];
+      const amt = randAmt();
+      el.innerHTML =
+        '<div class="ln-app-icon">' + notif.icon + '</div>' +
+        '<div class="ln-content">' +
+          '<div class="ln-header">' +
+            '<span class="ln-app-name">' + notif.app + '</span>' +
+            '<span class="ln-time">' + time + '</span>' +
+          '</div>' +
+          '<div class="ln-title">' + notif.title + '</div>' +
+          '<div class="ln-body-text">' + notif.body('<span class="ln-amt">' + amt + '</span>') + '</div>' +
+        '</div>';
+      return el;
+    }
+
+    function pushNotif() {
+      if (document.hidden) return; // pas d'animation quand l'onglet est caché
+      const notif = NOTIFS[notifIdx % NOTIFS.length];
+      notifIdx++;
+      if (slotEls[1]) {
+        const old = slotEls[1];
+        old.classList.remove('ln-slot-1');
+        old.classList.add('ln-exit');
+        setTimeout(function(){ if (old.parentNode) old.parentNode.removeChild(old); }, 560);
+        slotEls[1] = null;
+      }
+      if (slotEls[0]) {
+        const mid = slotEls[0];
+        mid.classList.remove('ln-slot-0');
+        requestAnimationFrame(function(){ mid.classList.add('ln-slot-1'); });
+        slotEls[1] = mid;
+        slotEls[0] = null;
+      }
+      const el = buildEl(notif);
+      wrap.appendChild(el);
+      slotEls[0] = el;
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){ el.classList.add('ln-slot-0'); });
+      });
+    }
+
+    // Première à 0.9s, deuxième à 2.7s, puis toutes les ~2.6-3.4s (rythme naturel)
+    setTimeout(pushNotif, 900);
+    setTimeout(pushNotif, 2700);
+    function loop() { pushNotif(); setTimeout(loop, 2600 + Math.random() * 800); }
+    setTimeout(loop, 5300);
+  })();
+  </script>
 
 </body>
 </html>

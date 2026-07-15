@@ -10,72 +10,187 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  html, body { height:100%; }
+  html { scroll-behavior:smooth; }
   body {
     background:#050505; color:#e8e4de; font-family:'DM Sans',sans-serif;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    min-height:100vh; padding:32px 20px; text-align:center; position:relative; overflow-x:hidden;
+    min-height:100vh; text-align:center; position:relative; overflow-x:hidden;
   }
   body::before {
-    content:''; position:fixed; inset:0; pointer-events:none;
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
     background:
       radial-gradient(ellipse 60% 40% at 50% -10%, rgba(61,142,240,0.13), transparent 60%),
       radial-gradient(ellipse 50% 35% at 50% 115%, rgba(61,142,240,0.07), transparent 60%);
   }
-  .logo { width:88px; height:88px; border-radius:22px; margin-bottom:26px; box-shadow:0 18px 50px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,0.06); }
-  h1 { font-size:clamp(40px,7vw,64px); font-weight:700; letter-spacing:.28em; text-indent:.28em; color:#fff; }
-  .tagline { margin-top:10px; font-family:'DM Mono',monospace; font-size:12px; letter-spacing:.3em; text-transform:uppercase; color:#8a8680; }
-  .features {
-    display:flex; gap:12px; flex-wrap:wrap; justify-content:center;
-    margin:38px 0 44px; max-width:720px;
+
+  /* ── Apparition en cascade (équivalent du stagger framer-motion) ── */
+  @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  .fx { opacity:0; animation:fadeUp .5s ease-out both; }
+  .fx-1 { animation-delay:.10s; } .fx-2 { animation-delay:.25s; }
+  .fx-3 { animation-delay:.40s; } .fx-4 { animation-delay:.55s; }
+  .fx-5 { animation-delay:.70s; } .fx-6 { animation-delay:.85s; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height:100vh; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; padding:64px 20px 80px; position:relative; z-index:1;
   }
-  .chip {
-    display:flex; align-items:center; gap:8px;
-    background:rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.08);
-    border-radius:999px; padding:9px 18px; font-size:13px; color:#c8c4be;
+  .logo { width:72px; height:72px; border-radius:18px; margin-bottom:24px; box-shadow:0 18px 50px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,0.06); }
+  .badge {
+    display:inline-flex; align-items:center; gap:8px;
+    border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.1);
+    border-radius:999px; padding:6px 16px; font-size:13.5px; font-weight:500; color:#a8a49e;
+    margin-bottom:22px;
   }
-  .chip .dot { width:7px; height:7px; border-radius:50%; background:#3d8ef0; box-shadow:0 0 8px rgba(61,142,240,.8); flex-shrink:0; }
-  .dl-btn {
-    display:inline-flex; align-items:center; gap:12px;
-    background:#3d8ef0; color:#fff; text-decoration:none;
-    font-size:16.5px; font-weight:600; padding:17px 40px; border-radius:14px;
-    box-shadow:0 10px 34px rgba(61,142,240,.35);
-    transition:transform .18s cubic-bezier(.34,1.4,.64,1), box-shadow .18s, background .18s;
+  .badge svg { width:15px; height:15px; }
+  h1 {
+    font-size:clamp(42px,7.5vw,72px); font-weight:700; line-height:1.08;
+    letter-spacing:-.02em; color:#fff; margin-bottom:22px;
   }
-  .dl-btn:hover { transform:translateY(-2px); background:#2f7ae0; box-shadow:0 16px 44px rgba(61,142,240,.45); }
-  .dl-btn svg { width:19px; height:19px; }
+  h1 .grad {
+    background:linear-gradient(to right, #ffffff, rgba(255,255,255,0.55));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .sub {
+    max-width:620px; font-size:17.5px; line-height:1.65; color:rgba(232,228,222,0.7);
+    margin:0 auto 34px;
+  }
+  .ctas { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+  .btn {
+    display:inline-flex; align-items:center; gap:9px; text-decoration:none;
+    font-size:15.5px; font-weight:600; padding:15px 32px; border-radius:13px;
+    transition:transform .18s cubic-bezier(.34,1.4,.64,1), box-shadow .18s, background .18s, border-color .18s;
+  }
+  .btn svg { width:17px; height:17px; }
+  .btn-primary { background:#3d8ef0; color:#fff; box-shadow:0 10px 34px rgba(61,142,240,.35); }
+  .btn-primary:hover { transform:translateY(-2px); background:#2f7ae0; box-shadow:0 16px 44px rgba(61,142,240,.45); }
+  .btn-outline { background:transparent; color:#e8e4de; border:1px solid rgba(255,255,255,0.18); }
+  .btn-outline:hover { transform:translateY(-2px); background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.32); }
   .dl-note { margin-top:16px; font-size:12.5px; color:#666; }
   .dl-note b { color:#8a8680; font-weight:500; }
+
+  /* ── Stats (rangée façon composant hero) ── */
+  .stats {
+    margin-top:52px; display:flex; align-items:center; justify-content:center; gap:32px;
+    font-size:13.5px; color:rgba(232,228,222,0.6);
+  }
+  .stats .val { font-size:24px; font-weight:700; color:#fff; margin-bottom:2px; }
+  .stats .sep { width:1px; height:34px; background:rgba(255,255,255,0.12); }
+
+  /* ── Installation ── */
+  .install {
+    position:relative; z-index:1; max-width:640px; margin:0 auto; padding:24px 20px 110px;
+  }
+  .install h2 { font-size:22px; font-weight:700; color:#fff; margin-bottom:26px; }
+  .step {
+    display:flex; align-items:flex-start; gap:16px; text-align:left;
+    background:rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.08);
+    border-radius:14px; padding:16px 20px; margin-bottom:12px;
+  }
+  .step .num {
+    width:28px; height:28px; border-radius:50%; flex-shrink:0;
+    background:rgba(61,142,240,0.16); color:#3d8ef0; font-weight:700; font-size:14px;
+    display:flex; align-items:center; justify-content:center; margin-top:1px;
+  }
+  .step .t { font-size:14.5px; font-weight:600; color:#e8e4de; margin-bottom:3px; }
+  .step .d { font-size:13px; line-height:1.55; color:#8a8680; }
+  .step .d b { color:#c8c4be; font-weight:500; }
+
   footer {
-    position:fixed; bottom:18px; left:0; right:0;
+    position:relative; z-index:1; padding:0 0 22px;
     display:flex; align-items:center; justify-content:center; gap:14px;
     font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.14em; color:#4a4844;
   }
   footer a { color:#3a3834; text-decoration:none; transition:color .15s; }
   footer a:hover { color:#8a8680; }
+
+  @media (max-width:560px) {
+    .stats { gap:18px; }
+    .hero { padding-top:48px; }
+  }
 </style>
 </head>
 <body>
-  <img class="logo" src="../icon-512.png" alt="Valmont">
-  <h1>VALMONT</h1>
-  <div class="tagline">Ton assistant de trading intelligent</div>
 
-  <div class="features">
-    <div class="chip"><span class="dot"></span>Dashboard de performance pro</div>
-    <div class="chip"><span class="dot"></span>Import FTMO en un clic</div>
-    <div class="chip"><span class="dot"></span>Coach IA personnel</div>
-    <div class="chip"><span class="dot"></span>Synchronisation cloud</div>
-  </div>
+  <!-- ── HERO (structure du composant shadcn : badge → titre dégradé → texte → CTA → stats) ── -->
+  <section class="hero">
+    <img class="logo fx fx-1" src="../icon-512.png" alt="Valmont">
 
-  <a class="dl-btn" href="../Valmont-pour-Mac.zip" download>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    Télécharger pour Mac
-  </a>
-  <div class="dl-note">Nécessite <b>macOS</b> · L'application se met à jour automatiquement</div>
+    <div class="fx fx-1">
+      <span class="badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+        Nouvelle version disponible
+      </span>
+    </div>
+
+    <h1 class="fx fx-2">
+      VALMONT
+      <br>
+      <span class="grad">Remember why you started.</span>
+    </h1>
+
+    <p class="sub fx fx-3">
+      Dashboard de performance professionnel, import FTMO en un clic, coach IA
+      personnel et synchronisation cloud — tout ce qu'il faut pour progresser,
+      réuni dans une seule application.
+    </p>
+
+    <div class="ctas fx fx-4">
+      <a class="btn btn-primary" href="../Valmont-pour-Mac.zip" download>
+        Télécharger pour Mac
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </a>
+      <a class="btn btn-outline" href="#installer">Comment l'installer</a>
+    </div>
+    <div class="dl-note fx fx-4">Nécessite <b>macOS</b> · L'application se met à jour automatiquement</div>
+
+    <div class="stats fx fx-5">
+      <div>
+        <div class="val">1 clic</div>
+        <div>Import FTMO</div>
+      </div>
+      <div class="sep"></div>
+      <div>
+        <div class="val">24/7</div>
+        <div>Coach IA</div>
+      </div>
+      <div class="sep"></div>
+      <div>
+        <div class="val">100%</div>
+        <div>Synchronisé</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── INSTALLATION ── -->
+  <section class="install" id="installer">
+    <h2>Installation en 3 étapes</h2>
+    <div class="step">
+      <div class="num">1</div>
+      <div>
+        <div class="t">Installe Node.js (une seule fois)</div>
+        <div class="d">Va sur <b>nodejs.org</b>, télécharge la version <b>LTS</b>, ouvre le fichier .pkg et clique « Continuer » jusqu'au bout.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">2</div>
+      <div>
+        <div class="t">Lance l'installateur</div>
+        <div class="d">Dézipe le téléchargement, puis <b>clic droit</b> sur <b>make-valmont-app.command</b> → « Ouvrir » → « Ouvrir ».</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">3</div>
+      <div>
+        <div class="t">C'est prêt</div>
+        <div class="d">Après ~1 minute, <b>Valmont</b> apparaît dans le dossier Applications et s'ouvre tout seul — sans barre de navigateur, toujours à jour.</div>
+      </div>
+    </div>
+  </section>
 
   <footer>
     <span>© VALMONT</span>
     <a href="../?web=1" title="Accès web">·</a>
   </footer>
+
 </body>
 </html>

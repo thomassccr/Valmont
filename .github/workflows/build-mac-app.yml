@@ -1,0 +1,62 @@
+name: Build Mac app
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'desktop-app/**'
+      - '.github/workflows/build-mac-app.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assembler Valmont.app (Apple Silicon + Intel)
+        run: |
+          set -e
+          build() {
+            ARCH=$1; OUT=$2
+            rm -rf "work-$ARCH" && mkdir "work-$ARCH" && cd "work-$ARCH"
+            npm init -y >/dev/null 2>&1
+            npm_config_platform=darwin npm_config_arch=$ARCH npm install electron@33 --no-save --loglevel=error
+            APP="$PWD/Valmont.app"
+            cp -R node_modules/electron/dist/Electron.app "$APP"
+            mv "$APP/Contents/MacOS/Electron" "$APP/Contents/MacOS/Valmont"
+            mkdir -p "$APP/Contents/Resources/app"
+            cp "$GITHUB_WORKSPACE/desktop-app/main.js" "$APP/Contents/Resources/app/main.js"
+            printf '{"name":"valmont","version":"1.0.0","main":"main.js"}' > "$APP/Contents/Resources/app/package.json"
+            ICONSET="$(mktemp -d)/Valmont.iconset"; mkdir -p "$ICONSET"
+            for s in 16 32 128 256 512; do
+              sips -z $s $s "$GITHUB_WORKSPACE/icon-mac.png" --out "$ICONSET/icon_${s}x${s}.png" >/dev/null
+              d=$((s*2)); sips -z $d $d "$GITHUB_WORKSPACE/icon-mac.png" --out "$ICONSET/icon_${s}x${s}@2x.png" >/dev/null
+            done
+            iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/valmont.icns"
+            PB=/usr/libexec/PlistBuddy; PL="$APP/Contents/Info.plist"
+            $PB -c "Set :CFBundleName Valmont" "$PL"
+            $PB -c "Set :CFBundleDisplayName Valmont" "$PL" 2>/dev/null || $PB -c "Add :CFBundleDisplayName string Valmont" "$PL"
+            $PB -c "Set :CFBundleExecutable Valmont" "$PL"
+            $PB -c "Set :CFBundleIconFile valmont" "$PL"
+            $PB -c "Set :CFBundleIdentifier com.valmont.app" "$PL"
+            codesign --force --deep --sign - "$APP"
+            ditto -c -k --keepParent "$APP" "$GITHUB_WORKSPACE/$OUT"
+            cd "$GITHUB_WORKSPACE"
+          }
+          build arm64 Valmont-AppleSilicon.zip
+          build x64  Valmont-Intel.zip
+          ls -lh Valmont-*.zip
+
+      - name: Publier la release « desktop-latest »
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete desktop-latest -y 2>/dev/null || true
+          git push --delete origin desktop-latest 2>/dev/null || true
+          gh release create desktop-latest Valmont-AppleSilicon.zip Valmont-Intel.zip \
+            -t "Valmont pour Mac" \
+            -n "Application Mac prête à l'emploi — dézippe, glisse dans Applications, c'est tout. Choisis Apple Silicon (M1/M2/M3/M4, Mac depuis fin 2020) ou Intel."

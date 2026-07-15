@@ -111,7 +111,9 @@
   /* ── NOTIFICATIONS DE PAIEMENT (mêmes que l'écran de login) ──
      Dans le flux du hero, centrées au-dessus du logo : jamais de chevauchement. */
   #login-notifs {
-    position:relative; width:360px; height:176px; margin:0 auto 30px;
+    /* marge basse ≥ 90px : la notif entrante surgit 90px sous la pile,
+       elle ne doit jamais toucher le logo pendant l'animation */
+    position:relative; width:360px; height:176px; margin:0 auto 96px;
     pointer-events:none; z-index:5; overflow:visible;
   }
   .ln-notif {

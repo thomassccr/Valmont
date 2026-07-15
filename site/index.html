@@ -75,6 +75,9 @@
   }
   .stats .val { font-size:24px; font-weight:700; color:#fff; margin-bottom:2px; }
   .stats .sep { width:1px; height:34px; background:rgba(255,255,255,0.12); }
+  .stars-val { display:flex; align-items:center; justify-content:center; gap:8px; }
+  .stars { display:inline-flex; gap:2px; }
+  .stars svg { width:15px; height:15px; fill:#f5b942; display:block; }
 
   /* ── Installation ── */
   .install {
@@ -182,18 +185,27 @@
 
     <div class="stats fx fx-5">
       <div>
-        <div class="val">1 clic</div>
-        <div>Import FTMO</div>
+        <div class="val" id="stat-users">2 500+</div>
+        <div>Traders actifs</div>
       </div>
       <div class="sep"></div>
       <div>
-        <div class="val">24/7</div>
-        <div>Coach IA</div>
+        <div class="val stars-val">
+          <span class="stars" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
+            <svg viewBox="0 0 24 24"><defs><linearGradient id="star48"><stop offset="80%" stop-color="#f5b942"/><stop offset="80%" stop-color="rgba(255,255,255,0.18)"/></linearGradient></defs><path fill="url(#star48)" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
+          </span>
+          4.8/5
+        </div>
+        <div>Satisfaits</div>
       </div>
       <div class="sep"></div>
       <div>
-        <div class="val">100%</div>
-        <div>Synchronisé</div>
+        <div class="val" id="stat-trades">+5 000</div>
+        <div>Trades analysés</div>
       </div>
     </div>
   </section>
@@ -331,6 +343,22 @@
     setTimeout(pushNotif, 2700);
     function loop() { pushNotif(); setTimeout(loop, 2600 + Math.random() * 800); }
     setTimeout(loop, 5300);
+  })();
+
+  // ── Stats : compteur de traders (léger aléa à chaque visite) + compte à rebours animé ──
+  (function initStats() {
+    const usersEl = document.getElementById('stat-users');
+    if (!usersEl) return;
+    const target = 2400 + Math.floor(Math.random() * 350); // 2 400 – 2 749, varie à chaque visite
+    const t0 = performance.now(), DUR = 1400;
+    function fmt(n) { return n.toLocaleString('fr-FR') + '+'; }
+    function tick(t) {
+      const p = Math.min(1, (t - t0) / DUR);
+      const eased = 1 - Math.pow(1 - p, 3);
+      usersEl.textContent = fmt(Math.round(target * eased));
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    setTimeout(function(){ requestAnimationFrame(tick); }, 750); // démarre avec l'apparition de la rangée
   })();
   </script>
 

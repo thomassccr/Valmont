@@ -227,35 +227,35 @@ body::after { content:''; position:fixed; inset:0; background-image:url("data:im
 .sidebar:not(.expanded) .nav-tooltip { display:block; }
 .sidebar:not(.expanded) .nav-btn:hover .nav-tooltip { opacity:1; }
 
-/* ─── DATE RANGE PICKER — panneau CLAIR façon Infloww ─── */
-/* ── Raccourcis : chips gris clair, texte sombre, « Custom » bleu plein */
-.drp-sh-btn { display:block; width:100%; text-align:center; padding:8px 10px; margin-bottom:8px; background:#f2f3f5; border:none; border-radius:8px; color:#1f2430; font-family:'DM Sans',sans-serif; font-size:12.5px; font-weight:500; letter-spacing:.01em; cursor:pointer; transition:background .12s,color .12s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.drp-sh-btn:hover { background:#e7e9ec; }
+/* ─── DATE RANGE PICKER — design Infloww transposé en SOMBRE ─── */
+/* ── Raccourcis : chips gris foncé, texte clair, « Custom » bleu plein */
+.drp-sh-btn { display:block; width:100%; text-align:center; padding:8px 10px; margin-bottom:8px; background:#2a2c31; border:none; border-radius:8px; color:#d5d2cc; font-family:'DM Sans',sans-serif; font-size:12.5px; font-weight:500; letter-spacing:.01em; cursor:pointer; transition:background .12s,color .12s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.drp-sh-btn:hover { background:#34363c; }
 .drp-sh-btn.active { background:#3d8ef0; color:#fff; font-weight:600; }
 .drp-sh-btn.active:hover { background:#2f7ae0; }
 /* ── Grille du calendrier */
 .drp-cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px 0; }
-.drp-cal-day { width:100%; height:28px; display:flex; align-items:center; justify-content:center; border-radius:6px; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; color:#1f2430; transition:background .1s,color .1s; user-select:none; }
-.drp-cal-day:hover:not(.drp-empty):not(.drp-other) { background:#eceef1; }
-.drp-cal-day.drp-other { color:#c3c7cd; cursor:pointer; }
+.drp-cal-day { width:100%; height:28px; display:flex; align-items:center; justify-content:center; border-radius:6px; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; color:#d5d2cc; transition:background .1s,color .1s; user-select:none; }
+.drp-cal-day:hover:not(.drp-empty):not(.drp-other) { background:rgba(255,255,255,0.09); }
+.drp-cal-day.drp-other { color:#55575c; cursor:pointer; }
 .drp-cal-day.drp-empty { pointer-events:none; }
-.drp-cal-day.drp-today { font-weight:700; box-shadow:inset 0 0 0 1px #c9cdd3; }
-/* Sélection : pastilles sombres façon Infloww (chaque jour de la plage) */
-.drp-cal-day.drp-in-range { background:#23272f; color:#fff; border-radius:6px; }
-.drp-cal-day.drp-in-range:hover { background:#2c313b; }
-.drp-cal-day.drp-sel-start { background:#23272f !important; color:#fff !important; font-weight:600; border-radius:6px !important; }
-.drp-cal-day.drp-sel-end { background:#23272f !important; color:#fff !important; font-weight:600; border-radius:6px !important; }
-.drp-cal-day.drp-sel-start.drp-sel-end { background:#23272f !important; border-radius:6px !important; }
+.drp-cal-day.drp-today { font-weight:700; box-shadow:inset 0 0 0 1px rgba(255,255,255,0.3); }
+/* Sélection : pastilles claires jour par jour (négatif exact d'Infloww) */
+.drp-cal-day.drp-in-range { background:#f2f3f5; color:#16181c; border-radius:6px; }
+.drp-cal-day.drp-in-range:hover { background:#ffffff; }
+.drp-cal-day.drp-sel-start { background:#f2f3f5 !important; color:#16181c !important; font-weight:600; border-radius:6px !important; }
+.drp-cal-day.drp-sel-end { background:#f2f3f5 !important; color:#16181c !important; font-weight:600; border-radius:6px !important; }
+.drp-cal-day.drp-sel-start.drp-sel-end { background:#f2f3f5 !important; border-radius:6px !important; }
 /* ── En-tête des calendriers */
 .drp-cal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-.drp-cal-nav { width:24px; height:24px; background:transparent; border:none; border-radius:6px; color:#6b7078; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .12s; padding:0; }
-.drp-cal-nav:hover { background:#eceef1; color:#1f2430; }
+.drp-cal-nav { width:24px; height:24px; background:transparent; border:none; border-radius:6px; color:#8a8680; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .12s; padding:0; }
+.drp-cal-nav:hover { background:rgba(255,255,255,0.09); color:#fff; }
 .drp-cal-nav svg { width:11px; height:11px; }
 .drp-cal-nav-group { display:flex; align-items:center; gap:2px; }
-.drp-cal-month-label { font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; letter-spacing:.02em; color:#1f2430; }
+.drp-cal-month-label { font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; letter-spacing:.02em; color:#fff; }
 /* ── Jours de la semaine */
 .drp-day-headers { display:grid; grid-template-columns:repeat(7,1fr); gap:0; margin-bottom:2px; }
-.drp-day-hdr { text-align:center; font-family:'DM Sans',sans-serif; font-size:11px; color:#9aa0a8; font-weight:500; padding:4px 0; }
+.drp-day-hdr { text-align:center; font-family:'DM Sans',sans-serif; font-size:11px; color:#7a7f87; font-weight:500; padding:4px 0; }
 
 
 
@@ -4484,8 +4484,8 @@ tbody tr:last-child td { border-bottom: none; }
                 </div>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:11px;height:11px;flex-shrink:0;margin-left:2px;" id="drp-chevron"><polyline points="6 9 12 15 18 9"/></svg>
               </button>
-              <!-- DROPDOWN (panneau clair façon Infloww) -->
-              <div id="drp-dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:#ffffff;border:none;border-radius:12px;box-shadow:0 12px 44px rgba(0,0,0,.4), 0 2px 8px rgba(0,0,0,.18);z-index:999;overflow:hidden;width:760px;">
+              <!-- DROPDOWN (design Infloww, version sombre) -->
+              <div id="drp-dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:#1b1c1f;border:1px solid rgba(255,255,255,0.09);border-radius:12px;box-shadow:0 16px 52px rgba(0,0,0,.7);z-index:999;overflow:hidden;width:760px;">
                 <div style="display:flex;">
                   <!-- LEFT: 2 columns of shortcuts -->
                   <div id="drp-left" style="width:240px;flex-shrink:0;padding:16px 14px;display:flex;gap:8px;">
@@ -4499,10 +4499,10 @@ tbody tr:last-child td { border-bottom: none; }
                   </div>
                 </div>
                 <!-- footer -->
-                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid #eceef1;">
-                  <span id="drp-range-display" style="font-family:'DM Sans',sans-serif;font-size:12px;color:#6b7078;">Sélectionner une plage</span>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid rgba(255,255,255,0.08);">
+                  <span id="drp-range-display" style="font-family:'DM Sans',sans-serif;font-size:12px;color:#8a8680;">Sélectionner une plage</span>
                   <div style="display:flex;gap:8px;">
-                    <button onclick="closeDatePicker()" style="padding:7px 16px;background:#f2f3f5;border:none;border-radius:8px;color:#1f2430;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='#e7e9ec';" onmouseout="this.style.background='#f2f3f5';">Cancel</button>
+                    <button onclick="closeDatePicker()" style="padding:7px 16px;background:#2a2c31;border:none;border-radius:8px;color:#d5d2cc;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='#34363c';" onmouseout="this.style.background='#2a2c31';">Cancel</button>
                     <button onclick="applyDateRange()" style="padding:7px 20px;background:#3d8ef0;border:none;border-radius:8px;color:#fff;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='#2f7ae0';" onmouseout="this.style.background='#3d8ef0';">Apply</button>
                   </div>
                 </div>

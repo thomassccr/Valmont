@@ -129,12 +129,16 @@
   .step .d b { color:#c8c4be; font-weight:500; }
 
   footer {
-    position:relative; z-index:1; padding:0 0 22px;
-    display:flex; align-items:center; justify-content:center; gap:14px;
-    font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.14em; color:#4a4844;
+    position:relative; z-index:1; padding:26px 20px 24px;
+    border-top:1px solid rgba(255,255,255,0.06);
+    display:flex; flex-direction:column; align-items:center; gap:10px;
   }
-  footer a { color:#3a3834; text-decoration:none; transition:color .15s; }
-  footer a:hover { color:#8a8680; }
+  .foot-links { display:flex; align-items:center; gap:18px; flex-wrap:wrap; justify-content:center; }
+  .foot-links a { color:#8a8680; text-decoration:none; font-family:'DM Sans',sans-serif; font-size:12.5px; transition:color .15s; }
+  .foot-links a:hover { color:#fff; }
+  .foot-copy { display:flex; align-items:center; gap:10px; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.14em; color:#4a4844; }
+  .foot-copy a { color:#3a3834; text-decoration:none; transition:color .15s; }
+  .foot-copy a:hover { color:#8a8680; }
 
   @media (max-width:560px) {
     .stats { gap:18px; }
@@ -333,8 +337,15 @@
   </section>
 
   <footer>
-    <span>© VALMONT</span>
-    <a href="../?web=1" title="Accès web">·</a>
+    <div class="foot-links">
+      <a href="conditions.html">Conditions d'utilisation</a>
+      <a href="confidentialite.html">Politique de confidentialité</a>
+      <a href="#installer">Installation</a>
+    </div>
+    <div class="foot-copy">
+      <span>© 2026 VALMONT — TOUS DROITS RÉSERVÉS</span>
+      <a href="../?web=1" title="Accès web">·</a>
+    </div>
   </footer>
 
   <!-- ── NOTIFICATIONS DE PAIEMENT (identiques à l'écran de login) ── -->

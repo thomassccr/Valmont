@@ -117,7 +117,6 @@
      sans couture, translateX -50% moins la moitié du gap), pause au survol */
   .t-wrap { position:relative; overflow:hidden; }
   .t-track { display:flex; gap:16px; width:max-content; animation:tScroll 42s linear infinite; will-change:transform; }
-  .t-wrap:hover .t-track { animation-play-state:paused; }
   @keyframes tScroll { to { transform:translateX(calc(-50% - 8px)); } }
   .t-fade { position:absolute; top:0; bottom:0; width:120px; z-index:2; pointer-events:none; }
   .t-fade.l { left:0; background:linear-gradient(90deg, #050505 0%, rgba(5,5,5,0) 100%); }

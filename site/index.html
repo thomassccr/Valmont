@@ -79,6 +79,29 @@
   .stars { display:inline-flex; gap:2px; }
   .stars svg { width:15px; height:15px; fill:#f5b942; display:block; }
 
+  /* ── Showcase : grande capture de l'app ── */
+  .showcase {
+    position:relative; z-index:1; max-width:1120px; margin:0 auto; padding:8px 20px 90px;
+  }
+  .sc-tabs { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:22px; }
+  .sc-tab {
+    background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+    border-radius:999px; padding:9px 20px; color:#c8c4be;
+    font-family:'DM Sans',sans-serif; font-size:13.5px; font-weight:500; cursor:pointer;
+    transition:all .18s;
+  }
+  .sc-tab:hover { background:rgba(255,255,255,0.09); color:#fff; }
+  .sc-tab.on { background:#3d8ef0; border-color:#3d8ef0; color:#fff; font-weight:600; }
+  .sc-frame {
+    background:#101113; border:1px solid rgba(255,255,255,0.09); border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 30px 90px rgba(0,0,0,.65), 0 0 80px rgba(61,142,240,.07);
+  }
+  .sc-bar { display:flex; align-items:center; gap:7px; padding:13px 16px; border-bottom:1px solid rgba(255,255,255,0.06); }
+  .sc-dot { width:11px; height:11px; border-radius:50%; }
+  .sc-img-wrap { position:relative; }
+  #sc-img { display:block; width:100%; height:auto; transition:opacity .22s ease; }
+
   /* ── Installation ── */
   .install {
     position:relative; z-index:1; max-width:640px; margin:0 auto; padding:24px 20px 110px;
@@ -209,6 +232,39 @@
       </div>
     </div>
   </section>
+
+  <!-- ── SHOWCASE : l'application en grand ── -->
+  <section class="showcase">
+    <div class="sc-tabs">
+      <button class="sc-tab on" data-shot="dashboard" onclick="scSwitch(this)">Dashboard principal</button>
+      <button class="sc-tab" data-shot="stats" onclick="scSwitch(this)">Statistiques</button>
+      <button class="sc-tab" data-shot="journal" onclick="scSwitch(this)">Journal de trading</button>
+      <button class="sc-tab" data-shot="coach" onclick="scSwitch(this)">Coach IA</button>
+    </div>
+    <div class="sc-frame">
+      <div class="sc-bar">
+        <span class="sc-dot" style="background:#ff5f57;"></span>
+        <span class="sc-dot" style="background:#febc2e;"></span>
+        <span class="sc-dot" style="background:#28c840;"></span>
+      </div>
+      <div class="sc-img-wrap">
+        <img id="sc-img" src="shots/dashboard.png" alt="Dashboard Valmont" loading="eager">
+      </div>
+    </div>
+  </section>
+  <script>
+  function scSwitch(btn) {
+    document.querySelectorAll('.sc-tab').forEach(function(t){ t.classList.remove('on'); });
+    btn.classList.add('on');
+    var img = document.getElementById('sc-img');
+    img.style.opacity = '0';
+    var next = new Image();
+    next.onload = function(){ img.src = next.src; img.style.opacity = '1'; };
+    next.src = 'shots/' + btn.dataset.shot + '.png';
+  }
+  // Précharge les 4 vues pour des bascules instantanées
+  ['dashboard','stats','journal','coach'].forEach(function(s){ (new Image()).src = 'shots/' + s + '.png'; });
+  </script>
 
   <!-- ── INSTALLATION ── -->
   <section class="install" id="installer">

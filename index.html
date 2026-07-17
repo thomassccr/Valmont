@@ -3715,7 +3715,9 @@ tbody tr:last-child td { border-bottom: none; }
 <!-- ═══════════════════════════════════════════
      CINEMATIC INTRO
 ═══════════════════════════════════════════ -->
-<div id="intro">
+<!-- Intro cinématique désactivée : l'app s'ouvre directement (le HTML est
+     conservé au cas où on voudrait la réactiver un jour). -->
+<div id="intro" style="display:none">
   <canvas id="intro-canvas"></canvas>
 
   <!-- Scan line sweep -->
@@ -9113,8 +9115,10 @@ function saveProfile() {
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    initIntroCanvas();
-    setTimeout(dismissIntro, INTRO_DURATION);
+    // Intro désactivée : rien à animer, on marque juste l'état comme terminé.
+    introDone = true;
+    const el = document.getElementById('intro');
+    if (el) el.style.display = 'none';
   });
 })();
 

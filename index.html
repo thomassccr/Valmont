@@ -2395,36 +2395,27 @@ textarea::placeholder { color:var(--text3); }
   color:var(--text2); margin-bottom:6px; line-height:1;
   font-variant-numeric:tabular-nums; letter-spacing:.01em;
 }
+/* Case teintée selon le résultat — look épuré */
+.cal-cell.day-pos { background:linear-gradient(180deg, rgba(61,142,240,.13), rgba(61,142,240,.03)); }
+.cal-cell.day-neg { background:linear-gradient(180deg, rgba(224,87,74,.13), rgba(224,87,74,.03)); }
+.cal-cell.day-pos:hover { background:linear-gradient(180deg, rgba(61,142,240,.19), rgba(61,142,240,.05)); }
+.cal-cell.day-neg:hover { background:linear-gradient(180deg, rgba(224,87,74,.19), rgba(224,87,74,.05)); }
+.cal-cell.day-pos::after, .cal-cell.day-neg::after {
+  content:''; position:absolute; left:12px; right:12px; bottom:0; height:2px; border-radius:2px 2px 0 0;
+}
+.cal-cell.day-pos::after { background:linear-gradient(90deg, transparent, rgba(61,142,240,.9), transparent); box-shadow:0 0 10px rgba(61,142,240,.5); }
+.cal-cell.day-neg::after { background:linear-gradient(90deg, transparent, rgba(224,87,74,.9), transparent); box-shadow:0 0 10px rgba(224,87,74,.45); }
+
 .cal-cell-content {
   flex:1; display:flex; flex-direction:column; gap:3px; justify-content:center;
-  padding:9px 12px 9px 14px; border-radius:10px; margin-top:2px;
-  position:relative; overflow:hidden;
-  transition:transform .13s ease, box-shadow .18s ease;
+  padding:0; margin-top:2px; background:none; border:none; box-shadow:none;
 }
-.cal-cell-content::before {
-  content:''; position:absolute; left:0; top:6px; bottom:6px; width:3px; border-radius:0 3px 3px 0;
-}
-.cal-cell-content.pos {
-  background:linear-gradient(140deg, rgba(31,82,146,.52), rgba(17,46,88,.30));
-  border:1px solid rgba(61,142,240,.30);
-  box-shadow:inset 0 1px 0 rgba(130,185,255,.12), 0 4px 16px rgba(0,0,0,.28);
-}
-.cal-cell-content.pos::before { background:#3d8ef0; box-shadow:0 0 12px rgba(61,142,240,.65); }
-.cal-cell-content.neg {
-  background:linear-gradient(140deg, rgba(104,38,35,.5), rgba(62,20,19,.28));
-  border:1px solid rgba(226,92,76,.26);
-  box-shadow:inset 0 1px 0 rgba(255,150,135,.08), 0 4px 16px rgba(0,0,0,.28);
-}
-.cal-cell-content.neg::before { background:#e0574a; box-shadow:0 0 12px rgba(224,87,74,.55); }
-.cal-cell:hover .cal-cell-content { transform:translateY(-1px); }
-.cal-cell:hover .cal-cell-content.pos { box-shadow:inset 0 1px 0 rgba(130,185,255,.16), 0 8px 22px rgba(0,0,0,.36); }
-.cal-cell:hover .cal-cell-content.neg { box-shadow:inset 0 1px 0 rgba(255,150,135,.13), 0 8px 22px rgba(0,0,0,.36); }
 .cal-cell-pnl {
-  font-family:'DM Mono',monospace; font-size:15px; font-weight:600;
-  letter-spacing:-.02em; font-variant-numeric:tabular-nums;
+  font-family:'DM Mono',monospace; font-size:18px; font-weight:600;
+  letter-spacing:-.03em; font-variant-numeric:tabular-nums; line-height:1.05;
 }
-.cal-cell-content.pos .cal-cell-pnl { color:#63acf7; text-shadow:0 0 14px rgba(99,172,247,.30); }
-.cal-cell-content.neg .cal-cell-pnl { color:#f0776a; text-shadow:0 0 14px rgba(240,119,106,.22); }
+.cal-cell-content.pos .cal-cell-pnl { color:#6ab0f8; }
+.cal-cell-content.neg .cal-cell-pnl { color:#f0776a; }
 .cal-cell-trades {
   font-family:'DM Mono',monospace; font-size:10px; color:rgba(255,255,255,.42);
 }
@@ -9458,6 +9449,7 @@ function renderCalendar() {
       monthTrades += trade.trades;
 
       const isPos = trade.pnl >= 0;
+      cell.classList.add(isPos ? 'day-pos' : 'day-neg');
       const contentDiv = document.createElement('div');
       contentDiv.className = 'cal-cell-content ' + (isPos ? 'pos' : 'neg');
 

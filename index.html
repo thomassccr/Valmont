@@ -7627,15 +7627,19 @@ async function callVM(isTradeAnalysis=false){
     let raw = '';
     const reader = resp.body.getReader();
     const decoder = new TextDecoder();
+    let buffer = '';
 
     while(true){
       const {done, value} = await reader.read();
       if(done) break;
-      const chunk = decoder.decode(value, {stream:true});
-      for(const line of chunk.split('\n')){
+      buffer += decoder.decode(value, {stream:true});
+      const lines = buffer.split('\n');
+      // On garde la dernière ligne (potentiellement incomplète) pour le tour suivant
+      buffer = lines.pop() || '';
+      for(const line of lines){
         if(!line.startsWith('data: ')) continue;
         const data = line.slice(6).trim();
-        if(data === '[DONE]') break;
+        if(data === '[DONE]') continue;
         try{
           const ev = JSON.parse(data);
           const token = ev.choices?.[0]?.delta?.content;

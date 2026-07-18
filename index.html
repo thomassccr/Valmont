@@ -7449,7 +7449,8 @@ function addMsgWithVerdict(text){
 }
 
 // ─── GROQ API HELPER ───
-const GROQ_API_KEY = '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';
+// L'IA passe désormais par un proxy sécurisé (la clé reste côté serveur, jamais dans l'app).
+const VM_AI_ENDPOINT = 'https://valmont.t49-cicero.workers.dev';
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
 
@@ -7462,11 +7463,10 @@ async function vmFetch(payload){
     content: typeof m.content === 'string' ? m.content : JSON.stringify(m.content)
   }));
 
-  const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  const r = await fetch(VM_AI_ENDPOINT, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${GROQ_API_KEY}`
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({
       model: GROQ_MODEL,
@@ -7593,11 +7593,10 @@ async function callVM(isTradeAnalysis=false){
       content: typeof m.content === 'string' ? m.content : JSON.stringify(m.content)
     }));
 
-    const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const resp = await fetch(VM_AI_ENDPOINT, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GROQ_API_KEY}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         model: GROQ_MODEL,
@@ -8049,9 +8048,9 @@ async function loadBrCalendar(){
     const datesStr=nextDays.map(x=>x.iso).join(', ');
 
     // Appel Groq direct (bypass vmFetch pour éviter le filtre unicode qui efface le JSON)
-    const resp = await fetch('https://api.groq.com/openai/v1/chat/completions',{
+    const resp = await fetch(VM_AI_ENDPOINT,{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':`Bearer ${GROQ_API_KEY}`},
+      headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         model: GROQ_MODEL,
         max_tokens: 3000,

@@ -11914,9 +11914,9 @@ document.addEventListener('mousedown', function(e) {
       return td>=start && td<=end;
     });
     const totalPnl = trades.reduce(function(s,t){return s+(t.pnl||0);},0);
-    const wins     = trades.filter(function(t){return t.res==='win';}).reduce(function(s,t){return s+(t.pnl||0);},0);
-    const losses   = trades.filter(function(t){return t.res==='loss';}).reduce(function(s,t){return s+(t.pnl||0);},0);
-    const winCount = trades.filter(function(t){return t.res==='win';}).length;
+    const wins     = trades.filter(function(t){return (t.pnl||0)>0;}).reduce(function(s,t){return s+(t.pnl||0);},0);
+    const losses   = trades.filter(function(t){return (t.pnl||0)<0;}).reduce(function(s,t){return s+(t.pnl||0);},0);
+    const winCount = trades.filter(function(t){return (t.pnl||0)>0;}).length;
     const winRate  = trades.length ? Math.round(winCount/trades.length*100) : 0;
     const tradedDays = new Set(trades.map(function(t){return t.date;})).size;
 

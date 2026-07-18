@@ -1,0 +1,7 @@
+{
+  // Configuration Cloudflare Workers pour le proxy IA de Valmont.
+  // Indique à Cloudflare de déployer le CODE du proxy (et non le site statique).
+  "name": "valmont-ia",
+  "main": "proxy/valmont-ia-worker.js",
+  "compatibility_date": "2025-06-01"
+}

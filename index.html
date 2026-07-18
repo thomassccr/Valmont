@@ -7643,8 +7643,8 @@ async function callVM(isTradeAnalysis=false){
     }
 
     // ── Typewriter : écrit caractère par caractère en texte brut ──
-    // Pause initiale avant de commencer à écrire (1.2–2s)
-    await new Promise(r => setTimeout(r, 1200 + Math.random() * 800));
+    // Pause initiale avant de commencer à écrire (0.7–1.2s)
+    await new Promise(r => setTimeout(r, 700 + Math.random() * 500));
 
     // Nettoie le raw des balises internes avant affichage (SESSION_COMPLETE, CHIPS, VERDICT, etc)
     const displayRaw = raw
@@ -7662,11 +7662,11 @@ async function callVM(isTradeAnalysis=false){
       txtEl.textContent = displayed;
       scrollD();
       const ch = displayRaw[i];
-      let delay = 35 + Math.random() * 30;
-      if('.!?'.includes(ch)) delay = 420 + Math.random() * 200;
-      else if(',;:'.includes(ch)) delay = 180 + Math.random() * 80;
-      else if(ch === '\n') delay = 140 + Math.random() * 60;
-      else if(ch === ' ') delay = 25 + Math.random() * 20;
+      let delay = 18 + Math.random() * 18;
+      if('.!?'.includes(ch)) delay = 240 + Math.random() * 130;
+      else if(',;:'.includes(ch)) delay = 100 + Math.random() * 50;
+      else if(ch === '\n') delay = 80 + Math.random() * 40;
+      else if(ch === ' ') delay = 14 + Math.random() * 12;
       await new Promise(r => setTimeout(r, delay));
     }
 

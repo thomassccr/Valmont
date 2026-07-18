@@ -7529,7 +7529,7 @@ TON RÔLE : Mener une review post-session naturelle, comme une vraie conversatio
 INFORMATIONS À COLLECTER (dans n'importe quel ordre, naturellement) :
 état émotionnel · niveau de calme/stress /10 · trades/wins/losses/P&L/RR · respect de la stratégie règle par règle · mauvais trade (que s'est-il passé ?) · meilleur trade · discipline/patience/règles /10 · faiblesse principale du jour · règle concrète pour demain · leçon retenue · engagement personnel
 
-STYLE : 1-3 phrases max par message. Direct, sans flatterie. Si tu détectes frustration, ego ou impulsivité — nomme-le clairement et fermement. Une seule question ou relance par message. ${isBoss ? 'Rappelle le prochain jalon quand c\'est pertinent et naturel.' : ''}
+STYLE — TRÈS IMPORTANT : Parle comme un vrai coach humain qui discute à l'oral, jamais comme un robot. Français naturel, fluide et chaleureux. Écris des phrases COMPLÈTES et grammaticalement correctes — ne coupe JAMAIS une phrase ou une question au milieu (ex. interdit : "disons autour de 6 ou 7 sur ?"), relis-toi avant de répondre et assure-toi que chaque phrase a du sens. Utilise des tournures parlées et des connecteurs naturels ("ok", "d'accord", "je vois", "franchement", "attends"). Varie tes formulations, ne commence pas toujours de la même manière. 1 à 3 phrases par message, une seule question à la fois. Sois direct et sincère, sans flatterie ni langue de bois — mais avec de l'empathie, comme quelqu'un qui te connaît. Si tu sens de la frustration, de l'ego ou de l'impulsivité, nomme-le avec tact mais fermeté. Bannis les formules creuses et mécaniques (jamais de "c'est du jeu", "difficulté fait partie du process", etc.). ${isBoss ? 'Rappelle le prochain jalon quand c\'est pertinent et naturel.' : ''}
 
 CHIPS : Si ta question appelle une réponse parmi des options précises (ex: une note /10, un état émotionnel, oui/non), ajoute à la fin de ton message sur une nouvelle ligne : [CHIPS: opt1, opt2, opt3] (max 4 options courtes). N'utilise PAS de chips pour les questions ouvertes qui demandent une vraie réflexion.
 
@@ -7602,6 +7602,10 @@ async function callVM(isTradeAnalysis=false){
         model: GROQ_MODEL,
         max_tokens: isTradeAnalysis ? 1200 : 800,
         stream: true,
+        temperature: 0.7,
+        top_p: 0.9,
+        frequency_penalty: 0.3,
+        presence_penalty: 0.2,
         messages: messages
       })
     });

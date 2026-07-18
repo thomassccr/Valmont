@@ -9379,7 +9379,8 @@ function buildCalTradeMap() {
     const ds = raw.length >= 10 ? raw.slice(0,10) : raw;
     const parts = ds.split('-');
     if (parts.length < 3) return;
-    const key = parts[0] + '-' + parseInt(parts[1],10) + '-' + parseInt(parts[2],10);
+    // Mois indexé à partir de 0 pour correspondre à cellDate.getMonth() (sinon décalage d'un mois)
+    const key = parts[0] + '-' + (parseInt(parts[1],10) - 1) + '-' + parseInt(parts[2],10);
     const pnl = parseFloat(t.pnl || t.profit || 0);
     if (!map[key]) map[key] = { pnl: 0, trades: 0, wins: 0, tradeList: [] };
     map[key].pnl    += pnl;

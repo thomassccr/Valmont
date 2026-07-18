@@ -7649,8 +7649,8 @@ async function callVM(isTradeAnalysis=false){
     }
 
     // ── Typewriter : écrit caractère par caractère en texte brut ──
-    // Pause initiale avant de commencer à écrire (0.7–1.2s)
-    await new Promise(r => setTimeout(r, 700 + Math.random() * 500));
+    // Pause initiale avant de commencer à écrire (0.2–0.4s)
+    await new Promise(r => setTimeout(r, 200 + Math.random() * 200));
 
     // Nettoie le raw des balises internes avant affichage (SESSION_COMPLETE, CHIPS, VERDICT, etc)
     const displayRaw = raw

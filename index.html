@@ -7602,10 +7602,8 @@ async function callVM(isTradeAnalysis=false){
         model: GROQ_MODEL,
         max_tokens: isTradeAnalysis ? 1200 : 800,
         stream: true,
-        temperature: 0.7,
+        temperature: 0.6,
         top_p: 0.9,
-        frequency_penalty: 0.3,
-        presence_penalty: 0.2,
         messages: messages
       })
     });
@@ -7654,7 +7652,7 @@ async function callVM(isTradeAnalysis=false){
     const displayRaw = raw
       .replace(/SESSION_COMPLETE[\s\S]*/,'')
       .replace(/\[VERDICT:[^\]]*\]/g,'')
-      .replace(/\[CHIPS:[^\]]*\]/g,'')
+      .replace(/\[?CHIPS:\s*[^\]\n]*\]?/gi,'')
       .replace(/DATA:\{[\s\S]*?\}/g,'')
       .replace(/PS\s*:\s*[\d,\s]+/g,'')
       .trim();
@@ -7703,7 +7701,7 @@ async function callVM(isTradeAnalysis=false){
         txtEl.appendChild(badge);
       }
     } else {
-      const displayRaw = raw.replace(/\[CHIPS:[^\]]*\]/g,'').trim();
+      const displayRaw = raw.replace(/\[?CHIPS:\s*[^\]\n]*\]?/gi,'').trim();
       txtEl.innerHTML = renderMD(displayRaw);
       updTone(displayRaw); updSecAuto(); sugChips(raw);
     }
@@ -7731,7 +7729,7 @@ function renderMD(raw) {
   if (!raw) return '';
   // Strip internal tags before rendering
   let text = raw
-    .replace(/\[CHIPS:[^\]]*\]/g, '')
+    .replace(/\[?CHIPS:\s*[^\]\n]*\]?/gi, '')
     .replace(/SESSION_COMPLETE[\s\S]*/,'')
     .replace(/DATA:\{[\s\S]*$/, '')
     .replace(/\[VERDICT:[^\]]*\]/g, '')
@@ -7842,7 +7840,7 @@ function escMD(t) {
 function renderMDStream(raw) {
   // Strip internal tags
   const clean = raw
-    .replace(/\[CHIPS:[^\]]*\]/g, '')
+    .replace(/\[?CHIPS:\s*[^\]\n]*\]?/gi, '')
     .replace(/SESSION_COMPLETE[\s\S]*/,'')
     .replace(/DATA:\{[\s\S]*$/, '')
     .replace(/\[VERDICT:[^\]]*\]/g, '')
@@ -7945,7 +7943,7 @@ function showChips(opts){const c=document.getElementById('chips');c.innerHTML=''
 function clearChips(){document.getElementById('chips').innerHTML='';}
 function sugChips(txt){
   // Parse dynamic chips injected by the AI: [CHIPS: opt1, opt2, opt3]
-  const chipsMatch = txt.match(/\[CHIPS:\s*([^\]]+)\]/);
+  const chipsMatch = txt.match(/\[?CHIPS:\s*([^\]\n]+)\]?/i);
   if(chipsMatch){
     const opts = chipsMatch[1].split(',').map(s=>s.trim()).filter(Boolean);
     if(opts.length) return showChips(opts);

@@ -2341,8 +2341,8 @@ textarea::placeholder { color:var(--text3); }
 .cal-stats-group { display:flex; align-items:center; gap:20px; }
 .cal-stat-item { display:flex; align-items:center; gap:6px; font-family:'DM Mono',monospace; font-size:11px; color:var(--text2); }
 .cal-stat-val { font-size:13px; font-weight:600; }
-.cal-stat-val.pos { color:#4a97f5; }
-.cal-stat-val.neg { color:#e0574a; }
+.cal-stat-val.pos { color:#f0ede8; }
+.cal-stat-val.neg { color:#8a8680; }
 .cal-stat-val.neutral { color:var(--text); }
 .cal-settings-btn {
   width:30px; height:30px; border-radius:7px; background:var(--lift);
@@ -2395,25 +2395,26 @@ textarea::placeholder { color:var(--text3); }
   color:var(--text2); margin-bottom:6px; line-height:1;
   font-variant-numeric:tabular-nums; letter-spacing:.01em;
 }
-/* Cubes sobres — bleu (gain) / rouge (perte), sans lueur ni ligne */
+/* Jours neutres (noir & blanc) — gagnant en clair, perdant en gris foncé */
 .cal-cell-content {
   flex:1; display:flex; flex-direction:column; gap:3px; justify-content:center;
   padding:9px 12px; border-radius:9px; margin-top:2px;
 }
 .cal-cell-content.pos {
-  background:rgba(61,142,240,.13);
-  border:1px solid rgba(61,142,240,.32);
+  background:rgba(255,255,255,.075);
+  border:1px solid rgba(255,255,255,.20);
 }
 .cal-cell-content.neg {
-  background:rgba(224,87,74,.12);
-  border:1px solid rgba(224,87,74,.30);
+  background:rgba(255,255,255,.02);
+  border:1px solid rgba(255,255,255,.08);
 }
 .cal-cell-pnl {
   font-family:'DM Mono',monospace; font-size:14px; font-weight:600;
   letter-spacing:-.02em; font-variant-numeric:tabular-nums;
 }
-.cal-cell-content.pos .cal-cell-pnl { color:#6ab0f8; }
-.cal-cell-content.neg .cal-cell-pnl { color:#f0776a; }
+.cal-cell-content.pos .cal-cell-pnl { color:#f4f1ec; }
+.cal-cell-content.neg .cal-cell-pnl { color:#6f6c66; }
+.cal-cell-content.neg .cal-cell-meta { color:rgba(255,255,255,.28); }
 .cal-cell-trades {
   font-family:'DM Mono',monospace; font-size:10px; color:rgba(255,255,255,.42);
 }

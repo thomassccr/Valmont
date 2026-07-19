@@ -5845,15 +5845,12 @@ tbody tr:last-child td { border-bottom: none; }
         <div id="grw-note" style="display:none;"></div>
         <div id="grw-stats" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px;"></div>
 
-        <div class="emp-sec-title">Détail par compte</div>
-        <div id="grw-accounts" style="display:flex;flex-direction:column;gap:8px;margin-bottom:30px;"></div>
-
         <div class="emp-sec-title">Évolution du capital</div>
         <div style="background:#16161a;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px 16px 6px;margin-bottom:30px;">
           <canvas id="grw-chart" style="width:100%;height:220px;display:block;"></canvas>
         </div>
 
-        <div class="emp-sec-title">Jalons — route vers le million</div>
+        <div class="emp-sec-title">Paliers mensuels — objectif de gain par mois</div>
         <div id="grw-milestones" style="display:flex;flex-direction:column;gap:10px;"></div>
       </div>
     </div><!-- /v-growth -->
@@ -7411,7 +7408,7 @@ function submitEmp(){
 
 // ─── GROWTH (progression du capital) ─────────────────────────
 const GRW_START = 10000; // capital de départ par défaut
-const GRW_MILESTONES = [10000,25000,50000,100000,250000,500000,1000000];
+const GRW_MONTH_TARGETS = [1000, 5000, 10000, 25000, 50000];
 function grwFmt(v){ return '$'+Math.round(v).toLocaleString('fr-FR'); }
 // Un compte est "réel" s'il est funded ou live (via accType, sinon via le nom)
 function grwIsReal(acc){
@@ -7453,7 +7450,8 @@ function grwData(){
   const months=Object.keys(byMonth).sort();
   let run=start; const series=[{label:'Départ', cap:start}];
   months.forEach(function(m){ run+=byMonth[m]; series.push({label:m, cap:run}); });
-  let best=0; months.forEach(function(m){ if(byMonth[m]>best) best=byMonth[m]; });
+  let best=null; months.forEach(function(m){ if(best===null||byMonth[m]>best) best=byMonth[m]; });
+  if(best===null) best=0;
   return { start:start, total:total, current:current, growthPct: start? total/start*100 : 0, series:series, best:best, funded:funded, accounts:accounts };
 }
 function renderGrowth(){
@@ -7473,48 +7471,34 @@ function renderGrowth(){
     const pos = g.total>=0;
     const gcol = pos ? '#4ade80' : '#f0776a';
     const gsign = pos ? '+' : '−';
-    const next = GRW_MILESTONES.find(function(m){ return m>g.current; });
+    const bm = g.best;
+    const bmCol = bm>0 ? '#4ade80' : (bm<0 ? '#f0776a' : '#e8e4de');
+    const bmStr = (bm<0?'−':(bm>0?'+':''))+grwFmt(Math.abs(bm));
+    const next = GRW_MONTH_TARGETS.find(function(m){ return m>bm; });
     st.innerHTML =
       '<div class="emp-stat-tile"><div class="emp-stat-val" style="color:#63acf7">'+grwFmt(g.current)+'</div><div class="emp-stat-lbl">Capital actuel</div></div>'+
       '<div class="emp-stat-tile"><div class="emp-stat-val" style="color:'+gcol+'">'+gsign+Math.abs(g.growthPct).toFixed(1)+'%</div><div class="emp-stat-lbl">Croissance ('+gsign+grwFmt(Math.abs(g.total))+')</div></div>'+
-      '<div class="emp-stat-tile"><div class="emp-stat-val">'+grwFmt(g.best)+'</div><div class="emp-stat-lbl">Meilleur mois</div></div>'+
-      '<div class="emp-stat-tile"><div class="emp-stat-val">'+(next?grwFmt(next):'—')+'</div><div class="emp-stat-lbl">'+(next?'Prochain jalon':'Tous atteints 🎉')+'</div></div>';
-  }
-  // Détail par compte (funded / live)
-  const accBox = document.getElementById('grw-accounts');
-  if(accBox){
-    if(!g.accounts || !g.accounts.length){
-      accBox.innerHTML = '<div style="color:#666;font-size:13px;font-family:\'DM Sans\',sans-serif;padding:6px 2px;">Aucun compte funded / live pour l\'instant.</div>';
-    } else {
-      accBox.innerHTML = g.accounts.map(function(a){
-        var pos = a.profit>=0;
-        var col = pos ? '#4ade80' : '#f0776a';
-        var sign = pos ? '+' : '−';
-        return '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:#16161a;border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:13px 18px;">'+
-          '<div><div style="font-family:\'DM Sans\',sans-serif;font-size:14px;font-weight:500;color:#e8e4de;">'+empEsc(a.name)+'</div>'+
-          '<div style="font-family:\'DM Sans\',sans-serif;font-size:11.5px;color:#666;margin-top:2px;">Capital initial '+grwFmt(a.size)+'</div></div>'+
-          '<div style="text-align:right;"><div style="font-family:\'DM Mono\',monospace;font-size:15px;font-weight:600;color:'+col+';">'+sign+grwFmt(Math.abs(a.profit))+'</div>'+
-          '<div style="font-family:\'DM Sans\',sans-serif;font-size:11.5px;color:#666;margin-top:2px;">→ '+grwFmt(a.size+a.profit)+'</div></div>'+
-        '</div>';
-      }).join('');
-    }
+      '<div class="emp-stat-tile"><div class="emp-stat-val" style="color:'+bmCol+'">'+bmStr+'</div><div class="emp-stat-lbl">Meilleur mois</div></div>'+
+      '<div class="emp-stat-tile"><div class="emp-stat-val">'+(next?grwFmt(next)+' /m':'—')+'</div><div class="emp-stat-lbl">'+(next?'Prochain palier mensuel':'Tous atteints 🎉')+'</div></div>';
   }
   setTimeout(function(){ drawGrowthChart(g.series); }, 30);
+  // Paliers mensuels — basés sur le meilleur mois
   const box = document.getElementById('grw-milestones');
   if(box){
     let nextFound=false;
-    box.innerHTML = GRW_MILESTONES.map(function(m){
-      const reached = g.current >= m;
-      const pct = Math.max(0, Math.min(100, g.current/m*100));
+    const bm = g.best;
+    box.innerHTML = GRW_MONTH_TARGETS.map(function(m){
+      const reached = bm >= m;
+      const pct = Math.max(0, Math.min(100, bm/m*100));
       let cls, lbl;
       if(reached){ cls='reached'; lbl='Atteint'; }
       else if(!nextFound){ cls='current'; lbl='En cours'; nextFound=true; }
       else { cls='locked'; lbl='À venir'; }
-      const remain = Math.max(0, m-g.current);
+      const remain = Math.max(0, m-bm);
       return '<div class="grw-ms'+(reached?' reached':'')+'">'+
-        '<div class="grw-ms-head"><div class="grw-ms-target">'+grwFmt(m)+'</div><span class="grw-ms-status '+cls+'">'+lbl+'</span></div>'+
+        '<div class="grw-ms-head"><div class="grw-ms-target">'+grwFmt(m)+' <span style="font-size:12px;color:#777;font-weight:400;">/ mois</span></div><span class="grw-ms-status '+cls+'">'+lbl+'</span></div>'+
         '<div class="grw-ms-track"><div class="grw-ms-fill" style="width:'+pct.toFixed(1)+'%"></div></div>'+
-        '<div class="grw-ms-pct"><span>'+pct.toFixed(0)+'%</span><span>'+(reached?'✓':grwFmt(remain)+' restants')+'</span></div>'+
+        '<div class="grw-ms-pct"><span>'+pct.toFixed(0)+'%</span><span>'+(reached?'✓':grwFmt(remain)+' / mois restants')+'</span></div>'+
       '</div>';
     }).join('');
   }

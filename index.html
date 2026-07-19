@@ -7410,17 +7410,30 @@ function submitEmp(){
 const GRW_START = 10000; // capital de départ par défaut
 const GRW_MILESTONES = [10000,25000,50000,100000,250000,500000,1000000];
 function grwFmt(v){ return '$'+Math.round(v).toLocaleString('fr-FR'); }
-function grwParseSize(name){ const m=String(name||'').toLowerCase().match(/(\d+(?:[.,]\d+)?)\s*k\b/); return m?parseFloat(m[1].replace(',','.'))*1000:0; }
+// Un compte est "réel" s'il est funded ou live (via accType, sinon via le nom)
+function grwIsReal(acc){
+  var t = String(acc&&acc.accType||'').toLowerCase();
+  if (t) return t==='funded' || t==='live';
+  var n = String(acc&&acc.name||'').toLowerCase();
+  return n.indexOf('fund')!==-1 || n.indexOf('live')!==-1;
+}
+// Capital initial du compte (via accSize : "10k", "50k", custom… sinon via le nom)
+function grwSize(acc){
+  var raw = (acc&&acc.accSize!=null&&acc.accSize!=='') ? String(acc.accSize) : '';
+  if (raw) { var low=raw.toLowerCase(); var m=low.match(/(\d+(?:[.,]\d+)?)/); if(m){ var v=parseFloat(m[1].replace(',','.')); if(low.indexOf('k')!==-1 || v<1000) v*=1000; return v; } }
+  var mn = String(acc&&acc.name||'').toLowerCase().match(/(\d+(?:[.,]\d+)?)\s*k\b/);
+  if (mn) return parseFloat(mn[1].replace(',','.'))*1000;
+  return GRW_START;
+}
 function grwData(){
   // On ne compte QUE les comptes funded / live (pas challenge ni vérification)
   let trades=[], start=0, funded=0;
   try {
     if (typeof window.getDashAccounts==='function' && typeof window.loadTradesForAccount==='function') {
       (window.getDashAccounts()||[]).forEach(function(a){
-        const n = String(a&&a.name||'').toLowerCase();
-        if (n.indexOf('fund')!==-1 || n.indexOf('live')!==-1) {
+        if (grwIsReal(a)) {
           funded++;
-          start += (grwParseSize(a.name) || GRW_START);
+          start += grwSize(a);
           trades = trades.concat(window.loadTradesForAccount(a.id)||[]);
         }
       });

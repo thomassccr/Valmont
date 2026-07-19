@@ -7408,8 +7408,17 @@ function submitEmp(){
 
 // ─── GROWTH (progression du capital) ─────────────────────────
 const GRW_START = 10000; // capital de départ par défaut
-const GRW_MONTH_TARGETS = [1000, 5000, 10000, 25000, 50000];
+const GRW_MONTH_TARGETS = [1000, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000];
 function grwFmt(v){ return '$'+Math.round(v).toLocaleString('fr-FR'); }
+// Clé mois "YYYY-MM" robuste à plusieurs formats de date (ISO, avec points, JJ/MM/AAAA…)
+function grwMonthKey(d){
+  var s=String(d||'').trim();
+  var m=s.match(/(\d{4})[-\/.](\d{1,2})/);              // 2026-07-15, 2026/07, 2026.07.15
+  if(m) return m[1]+'-'+('0'+m[2]).slice(-2);
+  var m2=s.match(/(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})/); // 15/07/2026, 15.07.2026
+  if(m2){ var mo=parseInt(m2[2],10), da=parseInt(m2[1],10); if(mo>12 && da<=12){ var t=mo; mo=da; da=t; } return m2[3]+'-'+('0'+mo).slice(-2); }
+  return s.slice(0,7);
+}
 // Un compte est "réel" s'il est funded ou live (via accType, sinon via le nom)
 function grwIsReal(acc){
   var t = String(acc&&acc.accType||'').toLowerCase();
@@ -7427,7 +7436,7 @@ function grwSize(acc){
 }
 function grwData(){
   // On ne compte QUE les comptes funded / live (pas challenge ni vérification)
-  let trades=[], start=0, funded=0, accounts=[];
+  let trades=[], start=0, funded=0, accounts=[], bestAcc=null;
   try {
     if (typeof window.getDashAccounts==='function' && typeof window.loadTradesForAccount==='function') {
       (window.getDashAccounts()||[]).forEach(function(a){
@@ -7439,19 +7448,22 @@ function grwData(){
           start += sz;
           trades = trades.concat(accTr);
           accounts.push({ name:a.name, size:sz, profit:accProfit });
+          // Meilleur mois PAR COMPTE (un compte perdant n'annule pas un compte gagnant le même mois)
+          var accM={};
+          accTr.forEach(function(t){ var mm=grwMonthKey(t.date||t.closeTime||''); var pp=parseFloat(t.pnl||0)||0; if(mm) accM[mm]=(accM[mm]||0)+pp; });
+          Object.keys(accM).forEach(function(mm){ if(bestAcc===null||accM[mm]>bestAcc) bestAcc=accM[mm]; });
         }
       });
     }
   } catch(e){}
   if (!funded) start = GRW_START;
   let total=0; const byMonth={};
-  trades.forEach(function(t){ const p=parseFloat(t.pnl||0)||0; total+=p; const m=(t.date||'').slice(0,7); if(m) byMonth[m]=(byMonth[m]||0)+p; });
+  trades.forEach(function(t){ const p=parseFloat(t.pnl||0)||0; total+=p; const m=grwMonthKey(t.date||t.closeTime||''); if(m) byMonth[m]=(byMonth[m]||0)+p; });
   const current=start+total;
   const months=Object.keys(byMonth).sort();
   let run=start; const series=[{label:'Départ', cap:start}];
   months.forEach(function(m){ run+=byMonth[m]; series.push({label:m, cap:run}); });
-  let best=null; months.forEach(function(m){ if(best===null||byMonth[m]>best) best=byMonth[m]; });
-  if(best===null) best=0;
+  const best = (bestAcc===null ? 0 : bestAcc);
   return { start:start, total:total, current:current, growthPct: start? total/start*100 : 0, series:series, best:best, funded:funded, accounts:accounts };
 }
 function renderGrowth(){

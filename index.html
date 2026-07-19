@@ -1357,6 +1357,8 @@ body .main { margin-top:0 !important; height:100vh !important; }
 .grw-ms-track { height:7px;border-radius:6px;background:rgba(255,255,255,0.06);overflow:hidden; }
 .grw-ms-fill { height:100%;border-radius:6px;background:linear-gradient(90deg,#2f7ae0,#5aa8f5);transition:width .4s ease; }
 .grw-ms-pct { font-family:'DM Mono',monospace;font-size:11px;color:#888;margin-top:7px;display:flex;justify-content:space-between; }
+.grw-toggle { background:none;border:none;padding:6px 14px;border-radius:7px;color:#8a8680;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap; }
+.grw-toggle.on { background:#3d8ef0;color:#fff; }
 @keyframes viewIn { from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);} }
 
 /* HOME */
@@ -5832,12 +5834,18 @@ tbody tr:last-child td { border-bottom: none; }
 
     <div id="v-growth" class="view" style="background:#0d0d10;">
       <!-- Header -->
-      <div style="flex-shrink:0;padding:24px 28px 18px;border-bottom:1px solid rgba(255,255,255,0.07);">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#c8c4be" stroke-width="1.8" style="width:20px;height:20px;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-          <span style="font-size:18px;font-weight:600;color:#e0ddd8;font-family:'DM Sans',sans-serif;">Growth</span>
+      <div style="flex-shrink:0;padding:24px 28px 18px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#c8c4be" stroke-width="1.8" style="width:20px;height:20px;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            <span style="font-size:18px;font-weight:600;color:#e0ddd8;font-family:'DM Sans',sans-serif;">Growth</span>
+          </div>
+          <p id="grw-subtitle" style="font-size:13px;color:#666;font-family:'DM Sans',sans-serif;">Croissance réelle de ton capital <b style="color:#7fb4f5;font-weight:600;">funded</b> — les phases challenge et vérification ne comptent pas comme gains réels.</p>
         </div>
-        <p style="font-size:13px;color:#666;font-family:'DM Sans',sans-serif;">Croissance réelle de ton capital <b style="color:#7fb4f5;font-weight:600;">funded</b> — les phases challenge et vérification ne comptent pas comme gains réels.</p>
+        <div style="display:inline-flex;background:#1a1b1e;border:1px solid rgba(255,255,255,0.1);border-radius:9px;padding:3px;flex-shrink:0;">
+          <button id="grw-gross-btn" class="grw-toggle on" onclick="grwSetNet(false)">Gross</button>
+          <button id="grw-net-btn" class="grw-toggle" onclick="grwSetNet(true)">Net −20%</button>
+        </div>
       </div>
 
       <!-- Zone scrollable -->
@@ -7409,6 +7417,12 @@ function submitEmp(){
 // ─── GROWTH (progression du capital) ─────────────────────────
 const GRW_START = 10000; // capital de départ par défaut
 const GRW_MONTH_TARGETS = [1000, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000];
+try { if(typeof window.grwNet==='undefined') window.grwNet = (localStorage.getItem('vm_grw_net')==='1'); } catch(e){ window.grwNet=false; }
+function grwSetNet(net){
+  window.grwNet = !!net;
+  try{ localStorage.setItem('vm_grw_net', net?'1':'0'); }catch(e){}
+  if(typeof renderGrowth==='function') renderGrowth();
+}
 function grwFmt(v){ return '$'+Math.round(v).toLocaleString('fr-FR'); }
 // Clé mois "YYYY-MM" robuste à plusieurs formats de date (ISO, avec points, JJ/MM/AAAA…)
 function grwMonthKey(d){
@@ -7457,17 +7471,28 @@ function grwData(){
     }
   } catch(e){}
   if (!funded) start = GRW_START;
-  let total=0; const byMonth={};
-  trades.forEach(function(t){ const p=parseFloat(t.pnl||0)||0; total+=p; const m=grwMonthKey(t.date||t.closeTime||''); if(m) byMonth[m]=(byMonth[m]||0)+p; });
-  const current=start+total;
+  // Vue Net : la prop firm prend 20 % → on garde 80 % des gains (pas de "remise" sur les pertes)
+  const NET = !!window.grwNet;
+  const nf = function(v){ return (NET && v>0) ? v*0.8 : v; };
+  const byMonth={};
+  trades.forEach(function(t){ const p=parseFloat(t.pnl||0)||0; const m=grwMonthKey(t.date||t.closeTime||''); if(m) byMonth[m]=(byMonth[m]||0)+p; });
   const months=Object.keys(byMonth).sort();
-  let run=start; const series=[{label:'Départ', cap:start}];
-  months.forEach(function(m){ run+=byMonth[m]; series.push({label:m, cap:run}); });
-  const best = (bestAcc===null ? 0 : bestAcc);
-  return { start:start, total:total, current:current, growthPct: start? total/start*100 : 0, series:series, best:best, funded:funded, accounts:accounts };
+  let total=0, run=start; const series=[{label:'Départ', cap:start}];
+  months.forEach(function(m){ const d=nf(byMonth[m]); total+=d; run+=d; series.push({label:m, cap:run}); });
+  const current=start+total;
+  const best = (bestAcc===null ? 0 : nf(bestAcc));
+  return { start:start, total:total, current:current, growthPct: start? total/start*100 : 0, series:series, best:best, funded:funded, accounts:accounts, net:NET };
 }
 function renderGrowth(){
   const g = grwData();
+  const gnet = !!window.grwNet;
+  var _gb=document.getElementById('grw-gross-btn'), _nb=document.getElementById('grw-net-btn');
+  if(_gb) _gb.classList.toggle('on', !gnet);
+  if(_nb) _nb.classList.toggle('on', gnet);
+  var _sub=document.getElementById('grw-subtitle');
+  if(_sub) _sub.innerHTML = gnet
+    ? 'Vue <b style="color:#7fb4f5;font-weight:600;">nette</b> — après les 20 % pris par la prop firm (ce que tu touches réellement en payout).'
+    : 'Croissance <b style="color:#7fb4f5;font-weight:600;">brute</b> de ton capital funded — les phases challenge et vérification ne comptent pas.';
   const note = document.getElementById('grw-note');
   if(note){
     if(!g.funded){

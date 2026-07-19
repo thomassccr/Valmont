@@ -7614,7 +7614,11 @@ function renderGrowth(){
   const target = g.nextTarget || 0;
   const objVal = document.getElementById('grw-obj-val'); if(objVal) objVal.textContent = target?grwFmt(target):'palier';
   const objLeg = document.getElementById('grw-obj-legend'); if(objLeg) objLeg.style.display = target?'inline':'none';
-  setTimeout(function(){ drawGrowthChart(vis, target); drawGrowthBars(g.monthlyDeltas); }, 30);
+  // Mémorise les données pour le redraw (resize) et dessine une seule fois, après layout (pas de clignotement)
+  window._grwChart = { series:vis, target:target };
+  window._grwBars = g.monthlyDeltas;
+  if(window._grwDrawRaf) cancelAnimationFrame(window._grwDrawRaf);
+  window._grwDrawRaf = requestAnimationFrame(function(){ window._grwDrawRaf = requestAnimationFrame(function(){ drawGrowthChart(vis, target); drawGrowthBars(g.monthlyDeltas); }); });
   // Paliers mensuels — basés sur le meilleur mois
   const box = document.getElementById('grw-milestones');
   if(box){
@@ -7636,12 +7640,15 @@ function renderGrowth(){
     }).join('');
   }
 }
+function grwRoundRect(ctx,x,y,w,h,r){ r=Math.min(r,w/2,h/2); ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function grwCompact(v){ var a=Math.abs(v); if(a>=1000){ var k=Math.round(a/100)/10; return (k%1===0?k.toFixed(0):k.toFixed(1))+'k'; } return String(Math.round(a)); }
 function drawGrowthChart(series, target){
   const cv = document.getElementById('grw-chart'); if(!cv) return;
   const rect = cv.getBoundingClientRect();
-  const W = rect.width||600, H = rect.height||220;
+  const W = rect.width, H = rect.height||220;
+  if(!W || W<2) return; // conteneur pas encore mesuré → on attend (évite un dessin qui saute)
   const dpr = window.devicePixelRatio||1;
-  cv.width = W*dpr; cv.height = H*dpr;
+  cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
   const ctx = cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,W,H);
   let pts = series.slice();
@@ -7655,34 +7662,52 @@ function drawGrowthChart(series, target){
   }
   const allVals = caps.concat(obj||[]);
   let minV=Math.min.apply(null,allVals), maxV=Math.max.apply(null,allVals);
-  if(minV===maxV){ minV=minV-1; maxV=maxV+1; } else { const pad=(maxV-minV)*0.12; minV-=pad; maxV+=pad; }
-  const padL=6,padR=6,padT=14,padB=8;
+  if(minV===maxV){ minV=minV-1; maxV=maxV+1; } else { const pad=(maxV-minV)*0.14; minV-=pad; maxV+=pad; }
+  const padL=8,padR=8,padT=18,padB=10;
   const plotW=W-padL-padR, plotH=H-padT-padB;
   const x=function(i){ return padL + (pts.length===1?plotW/2:(i/(pts.length-1))*plotW); };
   const y=function(v){ return padT + plotH - ((v-minV)/((maxV-minV)||1))*plotH; };
-  // Aire + courbe réelle
+  // Lignes de repère subtiles
+  ctx.strokeStyle='rgba(255,255,255,0.045)'; ctx.lineWidth=1;
+  for(let gi=0;gi<=3;gi++){ const gy=Math.round(padT+(plotH/3)*gi)+0.5; ctx.beginPath(); ctx.moveTo(padL,gy); ctx.lineTo(W-padR,gy); ctx.stroke(); }
+  // Aire
   const grad=ctx.createLinearGradient(0,padT,0,padT+plotH);
-  grad.addColorStop(0,'rgba(61,142,240,0.30)'); grad.addColorStop(1,'rgba(61,142,240,0)');
+  grad.addColorStop(0,'rgba(61,142,240,0.26)'); grad.addColorStop(1,'rgba(61,142,240,0)');
   ctx.beginPath(); ctx.moveTo(x(0),y(caps[0]));
   for(let i=1;i<pts.length;i++) ctx.lineTo(x(i),y(caps[i]));
   ctx.lineTo(x(pts.length-1),padT+plotH); ctx.lineTo(x(0),padT+plotH); ctx.closePath();
   ctx.fillStyle=grad; ctx.fill();
-  // Courbe d'objectif (pointillés)
+  // Courbe d'objectif (pointillés doux)
   if(obj){
     ctx.save();
-    ctx.setLineDash([5,5]);
+    ctx.setLineDash([4,6]); ctx.lineCap='round';
     ctx.beginPath(); ctx.moveTo(x(0),y(obj[0]));
     for(let i=1;i<obj.length;i++) ctx.lineTo(x(i),y(obj[i]));
-    ctx.strokeStyle='rgba(245,180,60,0.75)'; ctx.lineWidth=1.8; ctx.lineJoin='round'; ctx.stroke();
+    ctx.strokeStyle='rgba(245,180,60,0.6)'; ctx.lineWidth=1.6; ctx.lineJoin='round'; ctx.stroke();
     ctx.restore();
   }
-  // Courbe réelle
+  // Courbe réelle avec halo (glow) + dégradé
+  ctx.save();
+  ctx.shadowColor='rgba(61,142,240,0.55)'; ctx.shadowBlur=12;
+  const lg=ctx.createLinearGradient(padL,0,W-padR,0); lg.addColorStop(0,'#3d8ef0'); lg.addColorStop(1,'#5ad1f0');
   ctx.beginPath(); ctx.moveTo(x(0),y(caps[0]));
   for(let i=1;i<pts.length;i++) ctx.lineTo(x(i),y(caps[i]));
-  ctx.strokeStyle='#3d8ef0'; ctx.lineWidth=2.2; ctx.lineJoin='round'; ctx.stroke();
+  ctx.strokeStyle=lg; ctx.lineWidth=2.6; ctx.lineJoin='round'; ctx.lineCap='round'; ctx.stroke();
+  ctx.restore();
+  // Point final : halo + pastille
   const li=pts.length-1;
-  ctx.beginPath(); ctx.arc(x(li),y(caps[li]),7,0,Math.PI*2); ctx.fillStyle='rgba(61,142,240,0.22)'; ctx.fill();
-  ctx.beginPath(); ctx.arc(x(li),y(caps[li]),4,0,Math.PI*2); ctx.fillStyle='#3d8ef0'; ctx.fill();
+  ctx.beginPath(); ctx.arc(x(li),y(caps[li]),8,0,Math.PI*2); ctx.fillStyle='rgba(90,209,240,0.18)'; ctx.fill();
+  ctx.beginPath(); ctx.arc(x(li),y(caps[li]),4.5,0,Math.PI*2); ctx.fillStyle='#5ad1f0'; ctx.fill();
+  ctx.beginPath(); ctx.arc(x(li),y(caps[li]),4.5,0,Math.PI*2); ctx.strokeStyle='rgba(255,255,255,0.9)'; ctx.lineWidth=1.3; ctx.stroke();
+  // Étiquette valeur du capital actuel
+  const val = grwFmt(caps[li]);
+  ctx.font="600 12px 'DM Sans',sans-serif"; ctx.textBaseline='middle';
+  const tw=ctx.measureText(val).width, pw=tw+16, ph=22;
+  let px=x(li)-pw-11; if(px<padL) px=x(li)+11; if(px+pw>W-padR) px=W-padR-pw;
+  let py=y(caps[li])-ph/2; if(py<padT) py=padT; if(py+ph>padT+plotH) py=padT+plotH-ph;
+  ctx.fillStyle='rgba(18,24,36,0.94)'; grwRoundRect(ctx,px,py,pw,ph,7); ctx.fill();
+  ctx.strokeStyle='rgba(90,209,240,0.4)'; ctx.lineWidth=1; grwRoundRect(ctx,px,py,pw,ph,7); ctx.stroke();
+  ctx.fillStyle='#dff2ff'; ctx.textAlign='left'; ctx.fillText(val,px+8,py+ph/2+0.5);
 }
 function drawGrowthBars(monthly){
   const cv = document.getElementById('grw-bars');
@@ -7692,46 +7717,69 @@ function drawGrowthBars(monthly){
   if(!data.length){ cv.style.display='none'; if(empty) empty.style.display='block'; return; }
   cv.style.display='block'; if(empty) empty.style.display='none';
   const rect = cv.getBoundingClientRect();
-  const W = rect.width||600, H = rect.height||180;
+  const W = rect.width, H = rect.height||180;
+  if(!W || W<2) return;
   const dpr = window.devicePixelRatio||1;
-  cv.width = W*dpr; cv.height = H*dpr;
+  cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
   const ctx = cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,W,H);
   const vals = data.map(function(d){return d.delta;});
   let maxAbs = Math.max.apply(null, vals.map(Math.abs)); if(!maxAbs||!isFinite(maxAbs)) maxAbs=1;
-  const padT=14, padB=26, padL=6, padR=6;
+  const padT=22, padB=26, padL=6, padR=6;
   const plotH = H-padT-padB, plotW = W-padL-padR;
   const zeroY = padT + plotH/2;
   const n = data.length;
   const slot = plotW/n;
   const bw = Math.min(46, slot*0.6);
   const MON=['janv','févr','mars','avr','mai','juin','juil','août','sept','oct','nov','déc'];
-  ctx.font = "10px 'DM Sans',sans-serif"; ctx.textAlign='center';
+  ctx.textAlign='center';
   // ligne zéro
   ctx.strokeStyle='rgba(255,255,255,0.10)'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(padL,zeroY); ctx.lineTo(W-padR,zeroY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(padL,Math.round(zeroY)+0.5); ctx.lineTo(W-padR,Math.round(zeroY)+0.5); ctx.stroke();
   data.forEach(function(d,i){
     const cx = padL + slot*i + slot/2;
-    const h = Math.abs(d.delta)/maxAbs * (plotH/2 - 6);
+    const h = Math.max(2, Math.abs(d.delta)/maxAbs * (plotH/2 - 8));
     const up = d.delta>=0;
     const bx = cx-bw/2;
     const by = up ? zeroY-h : zeroY;
     const g = ctx.createLinearGradient(0, by, 0, by+h);
-    if(up){ g.addColorStop(0,'#4ade80'); g.addColorStop(1,'rgba(74,222,128,0.55)'); }
-    else { g.addColorStop(0,'rgba(240,119,106,0.55)'); g.addColorStop(1,'#f0776a'); }
+    if(up){ g.addColorStop(0,'#4ade80'); g.addColorStop(1,'rgba(74,222,128,0.45)'); }
+    else { g.addColorStop(0,'rgba(240,119,106,0.45)'); g.addColorStop(1,'#f0776a'); }
+    ctx.save();
+    ctx.shadowColor = up ? 'rgba(74,222,128,0.35)' : 'rgba(240,119,106,0.35)'; ctx.shadowBlur=8; ctx.shadowOffsetY = up?2:-2;
     ctx.fillStyle=g;
     const r=Math.min(4,bw/2,h);
     ctx.beginPath();
     if(up){ ctx.moveTo(bx,by+h); ctx.lineTo(bx,by+r); ctx.arcTo(bx,by,bx+r,by,r); ctx.lineTo(bx+bw-r,by); ctx.arcTo(bx+bw,by,bx+bw,by+r,r); ctx.lineTo(bx+bw,by+h); }
     else { ctx.moveTo(bx,by); ctx.lineTo(bx+bw,by); ctx.lineTo(bx+bw,by+h-r); ctx.arcTo(bx+bw,by+h,bx+bw-r,by+h,r); ctx.lineTo(bx+r,by+h); ctx.arcTo(bx,by+h,bx,by+h-r,r); }
     ctx.closePath(); ctx.fill();
+    ctx.restore();
+    // valeur au-dessus / en-dessous de la barre
+    ctx.font="600 9.5px 'DM Sans',sans-serif";
+    ctx.fillStyle = up ? '#7fe0a4' : '#f2988e';
+    const vlbl = (d.delta>0?'+':(d.delta<0?'−':''))+grwCompact(d.delta);
+    ctx.fillText(vlbl, cx, up ? by-6 : by+h+11);
     // label mois
-    ctx.fillStyle='#777';
+    ctx.font="10px 'DM Sans',sans-serif"; ctx.fillStyle='#777';
     var parts=String(d.month).split('-'); var mi=parseInt(parts[1],10)-1;
     var lbl=(mi>=0&&mi<12?MON[mi]:parts[1])||'';
     ctx.fillText(lbl, cx, H-9);
   });
 }
+// Redessine les charts Growth quand leur conteneur change de taille (toggle sidebar, resize) → lignes toujours nettes, pas de clignotement
+(function initGrwResize(){
+  if(typeof ResizeObserver==='undefined') return;
+  var raf=null;
+  var ro=new ResizeObserver(function(){
+    if(raf) cancelAnimationFrame(raf);
+    raf=requestAnimationFrame(function(){
+      var v=document.getElementById('v-growth');
+      if(v && v.classList.contains('on') && window._grwChart){ drawGrowthChart(window._grwChart.series, window._grwChart.target); drawGrowthBars(window._grwBars||[]); }
+    });
+  });
+  function attach(){ var c=document.getElementById('grw-chart'); var bwrap=document.getElementById('grw-bars'); if(c&&c.parentElement) ro.observe(c.parentElement); if(bwrap&&bwrap.parentElement) ro.observe(bwrap.parentElement); }
+  if(document.readyState==='complete') attach(); else window.addEventListener('load', attach);
+})();
 
 // PROFILE
 function handleAvatar(e){

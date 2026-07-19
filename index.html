@@ -5842,9 +5842,17 @@ tbody tr:last-child td { border-bottom: none; }
           </div>
           <p id="grw-subtitle" style="font-size:13px;color:#666;font-family:'DM Sans',sans-serif;">Croissance réelle de ton capital <b style="color:#7fb4f5;font-weight:600;">funded</b> — les phases challenge et vérification ne comptent pas comme gains réels.</p>
         </div>
-        <div style="display:inline-flex;background:#1a1b1e;border:1px solid rgba(255,255,255,0.1);border-radius:9px;padding:3px;flex-shrink:0;">
-          <button id="grw-gross-btn" class="grw-toggle on" onclick="grwSetNet(false)">Gross</button>
-          <button id="grw-net-btn" class="grw-toggle" onclick="grwSetNet(true)">Net −20%</button>
+        <div style="position:relative;flex-shrink:0;" id="grw-mode-wrap">
+          <button onclick="grwToggleDropdown(event)" style="display:flex;align-items:center;gap:6px;padding:6px 14px;background:#18181c;border:1px solid rgba(255,255,255,0.11);border-radius:8px;color:#c8c4be;font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.22)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.11)'">
+            <span id="grw-mode-label">Gross earnings</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;color:#666;"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div id="grw-mode-dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:#18181c;border:1px solid rgba(255,255,255,0.12);border-radius:10px;box-shadow:0 16px 48px rgba(0,0,0,.85);z-index:2000;overflow:hidden;min-width:190px;">
+            <div style="padding:6px 0;">
+              <button onclick="grwSelectMode(false)" class="inflow-et-opt"><span class="inflow-et-check" id="grw-check-gross">✓</span>Gross earnings</button>
+              <button onclick="grwSelectMode(true)" class="inflow-et-opt"><span class="inflow-et-check" id="grw-check-net" style="opacity:0">✓</span>Net earnings</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -7423,6 +7431,9 @@ function grwSetNet(net){
   try{ localStorage.setItem('vm_grw_net', net?'1':'0'); }catch(e){}
   if(typeof renderGrowth==='function') renderGrowth();
 }
+function grwToggleDropdown(e){ if(e) e.stopPropagation(); var d=document.getElementById('grw-mode-dropdown'); if(d) d.style.display = (d.style.display==='none'||!d.style.display)?'block':'none'; }
+function grwSelectMode(net){ grwSetNet(net); var d=document.getElementById('grw-mode-dropdown'); if(d) d.style.display='none'; }
+document.addEventListener('mousedown', function(e){ var w=document.getElementById('grw-mode-wrap'); if(w && !w.contains(e.target)){ var d=document.getElementById('grw-mode-dropdown'); if(d) d.style.display='none'; } });
 function grwFmt(v){ return '$'+Math.round(v).toLocaleString('fr-FR'); }
 // Clé mois "YYYY-MM" robuste à plusieurs formats de date (ISO, avec points, JJ/MM/AAAA…)
 function grwMonthKey(d){
@@ -7486,12 +7497,13 @@ function grwData(){
 function renderGrowth(){
   const g = grwData();
   const gnet = !!window.grwNet;
-  var _gb=document.getElementById('grw-gross-btn'), _nb=document.getElementById('grw-net-btn');
-  if(_gb) _gb.classList.toggle('on', !gnet);
-  if(_nb) _nb.classList.toggle('on', gnet);
+  var _lbl=document.getElementById('grw-mode-label'); if(_lbl) _lbl.textContent = gnet?'Net earnings':'Gross earnings';
+  var _cg=document.getElementById('grw-check-gross'), _cn=document.getElementById('grw-check-net');
+  if(_cg) _cg.style.opacity = gnet?'0':'1';
+  if(_cn) _cn.style.opacity = gnet?'1':'0';
   var _sub=document.getElementById('grw-subtitle');
   if(_sub) _sub.innerHTML = gnet
-    ? 'Vue <b style="color:#7fb4f5;font-weight:600;">nette</b> — après les 20 % pris par la prop firm (ce que tu touches réellement en payout).'
+    ? 'Vue <b style="color:#7fb4f5;font-weight:600;">nette</b> — ce que tu touches réellement en payout.'
     : 'Croissance <b style="color:#7fb4f5;font-weight:600;">brute</b> de ton capital funded — les phases challenge et vérification ne comptent pas.';
   const note = document.getElementById('grw-note');
   if(note){

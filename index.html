@@ -10516,20 +10516,23 @@ function getEffectiveDashboardTrades() {
     const filterType = window._currentInflowEarningsType || 'gross';
     const sel = window._dashboardAccSelection || { mode:'aggregate', filterType:filterType, accountId:null };
     const allAccs = window.getDashAccounts() || [];
-    const filteredAccs = allAccs.filter(function(acc) {
-      if (!acc) return false;
-      if (filterType === 'gross') return true;
-      const n = String(acc.name || '').toLowerCase();
-      if (filterType === 'challenge') return n.indexOf('challenge') !== -1;
-      if (filterType === 'verification') return n.indexOf('verif') !== -1 || n.indexOf('verification') !== -1;
-      if (filterType === 'funded') return n.indexOf('fund') !== -1 || n.indexOf('live') !== -1;
-      return false;
-    });
 
+    // Un compte précis sélectionné → on l'affiche tel quel (profit = somme des pnl de ses trades)
     if (sel.mode === 'single' && sel.accountId) {
-      const acc = filteredAccs.find(function(a){ return a.id === sel.accountId; });
+      const acc = allAccs.find(function(a){ return a.id === sel.accountId; });
       if (acc) return window.loadTradesForAccount(acc.id) || [];
     }
+
+    // Agrégat = performances RÉELLES : uniquement les comptes funded + live.
+    // Challenge et vérification sont ignorés dans les statistiques globales.
+    const filteredAccs = allAccs.filter(function(acc) {
+      if (!acc) return false;
+      const n = String(acc.name || '').toLowerCase();
+      const isReal = n.indexOf('fund') !== -1 || n.indexOf('live') !== -1;
+      if (filterType === 'challenge')    return n.indexOf('challenge') !== -1;
+      if (filterType === 'verification') return n.indexOf('verif') !== -1 || n.indexOf('verification') !== -1;
+      return isReal; // gross + funded → funded/live seulement
+    });
 
     let merged = [];
     filteredAccs.forEach(function(acc) {

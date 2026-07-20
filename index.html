@@ -1366,7 +1366,7 @@ body .main { margin-top:0 !important; height:100vh !important; }
 .grw-proj svg { width:20px;height:20px;flex-shrink:0;color:#5aa8f5; }
 .grw-streak-flame { display:inline-flex;align-items:center;gap:4px; }
 .grw-chart-legend { display:flex;align-items:center;gap:16px;font-family:'DM Sans',sans-serif;font-size:11px;color:#888;padding:2px 4px 10px; }
-.grw-chart-legend .dot { display:inline-block;width:18px;height:0;border-top-width:2px;border-top-style:solid;vertical-align:middle;margin-right:6px; }
+.grw-chart-legend .grw-leg { display:inline-block;width:18px;height:0;border-top-width:2px;border-top-style:solid;vertical-align:middle;margin-right:6px;animation:none; }
 @keyframes viewIn { from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);} }
 
 /* HOME */
@@ -5883,8 +5883,8 @@ tbody tr:last-child td { border-bottom: none; }
           <canvas id="grw-chart" style="width:100%;height:220px;display:block;"></canvas>
         </div>
         <div class="grw-chart-legend" style="margin-bottom:30px;">
-          <span><span class="dot" style="border-top-color:#3d8ef0;"></span>Capital réel</span>
-          <span id="grw-obj-legend"><span class="dot" style="border-top-color:#e6c34d;border-top-style:dashed;"></span>Objectif (<span id="grw-obj-val">palier</span>/mois)</span>
+          <span><span class="grw-leg" style="border-top-color:#3d8ef0;"></span>Capital réel</span>
+          <span id="grw-obj-legend"><span class="grw-leg" style="border-top-color:#e6c34d;border-top-style:dashed;"></span>Objectif (<span id="grw-obj-val">palier</span>/mois)</span>
         </div>
 
         <div class="emp-sec-title">Gains par mois</div>

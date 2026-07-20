@@ -5884,7 +5884,7 @@ tbody tr:last-child td { border-bottom: none; }
         </div>
         <div class="grw-chart-legend" style="margin-bottom:30px;">
           <span><span class="dot" style="border-top-color:#3d8ef0;"></span>Capital réel</span>
-          <span id="grw-obj-legend"><span class="dot" style="border-top-color:#f5b43c;border-top-style:dashed;"></span>Objectif (<span id="grw-obj-val">palier</span>/mois)</span>
+          <span id="grw-obj-legend"><span class="dot" style="border-top-color:#e6c34d;border-top-style:dashed;"></span>Objectif (<span id="grw-obj-val">palier</span>/mois)</span>
         </div>
 
         <div class="emp-sec-title">Gains par mois</div>
@@ -7581,10 +7581,8 @@ function renderGrowth(){
       '<div class="emp-stat-tile"><div class="emp-stat-val" style="color:#63acf7">'+grwFmt(g.current)+'</div><div class="emp-stat-lbl">Capital actuel</div></div>'+
       '<div class="emp-stat-tile"><div class="emp-stat-val" style="color:'+gcol+'">'+gsign+Math.abs(g.growthPct).toFixed(1)+'%</div><div class="emp-stat-lbl">Croissance ('+gsign+grwFmt(Math.abs(g.total))+')</div></div>'+
       '<div class="emp-stat-tile"><div class="emp-stat-val" style="color:'+bmCol+'">'+bmStr+'</div><div class="emp-stat-lbl">Meilleur mois</div></div>'+
-      '<div class="emp-stat-tile"><div class="emp-stat-val" style="color:'+pcCol+'">'+pcStr+'</div><div class="emp-stat-lbl">Rythme (3 mois)</div></div>'+
       '<div class="emp-stat-tile"><div class="emp-stat-val" style="color:#63acf7">'+grwFmt(g.payoutTotal)+'</div><div class="emp-stat-lbl">Payouts encaissés</div></div>'+
       '<div class="emp-stat-tile"><div class="emp-stat-val" style="color:'+(g.curMonthPayout>0?'#4ade80':'#e8e4de')+'">'+(g.curMonthPayout>0?grwFmt(g.curMonthPayout):'—')+'</div><div class="emp-stat-lbl">Prochain payout estimé</div></div>'+
-      '<div class="emp-stat-tile"><div class="emp-stat-val">'+(g.streak>0?'<span class="grw-streak-flame">🔥 '+streakStr+'</span>':'—')+'</div><div class="emp-stat-lbl">Série de mois positifs</div></div>'+
       '<div class="emp-stat-tile"><div class="emp-stat-val">'+(next?grwFmt(next)+' /m':'—')+'</div><div class="emp-stat-lbl">'+(next?'Prochain palier mensuel':'Tous atteints 🎉')+'</div></div>';
   }
   // Projection « à ce rythme »
@@ -7663,51 +7661,34 @@ function drawGrowthChart(series, target){
   const allVals = caps.concat(obj||[]);
   let minV=Math.min.apply(null,allVals), maxV=Math.max.apply(null,allVals);
   if(minV===maxV){ minV=minV-1; maxV=maxV+1; } else { const pad=(maxV-minV)*0.14; minV-=pad; maxV+=pad; }
-  const padL=8,padR=8,padT=18,padB=10;
+  const padL=6,padR=6,padT=14,padB=8;
   const plotW=W-padL-padR, plotH=H-padT-padB;
   const x=function(i){ return padL + (pts.length===1?plotW/2:(i/(pts.length-1))*plotW); };
   const y=function(v){ return padT + plotH - ((v-minV)/((maxV-minV)||1))*plotH; };
-  // Lignes de repère subtiles
-  ctx.strokeStyle='rgba(255,255,255,0.045)'; ctx.lineWidth=1;
-  for(let gi=0;gi<=3;gi++){ const gy=Math.round(padT+(plotH/3)*gi)+0.5; ctx.beginPath(); ctx.moveTo(padL,gy); ctx.lineTo(W-padR,gy); ctx.stroke(); }
-  // Aire
+  // Aire sous la courbe (dégradé léger, comme avant)
   const grad=ctx.createLinearGradient(0,padT,0,padT+plotH);
-  grad.addColorStop(0,'rgba(61,142,240,0.26)'); grad.addColorStop(1,'rgba(61,142,240,0)');
+  grad.addColorStop(0,'rgba(61,142,240,0.30)'); grad.addColorStop(1,'rgba(61,142,240,0)');
   ctx.beginPath(); ctx.moveTo(x(0),y(caps[0]));
   for(let i=1;i<pts.length;i++) ctx.lineTo(x(i),y(caps[i]));
   ctx.lineTo(x(pts.length-1),padT+plotH); ctx.lineTo(x(0),padT+plotH); ctx.closePath();
   ctx.fillStyle=grad; ctx.fill();
-  // Courbe d'objectif (pointillés doux)
+  // Ligne d'objectif : fine, jaune, sans dégradé (pointillés)
   if(obj){
     ctx.save();
-    ctx.setLineDash([4,6]); ctx.lineCap='round';
+    ctx.setLineDash([5,5]);
     ctx.beginPath(); ctx.moveTo(x(0),y(obj[0]));
     for(let i=1;i<obj.length;i++) ctx.lineTo(x(i),y(obj[i]));
-    ctx.strokeStyle='rgba(245,180,60,0.6)'; ctx.lineWidth=1.6; ctx.lineJoin='round'; ctx.stroke();
+    ctx.strokeStyle='#e6c34d'; ctx.lineWidth=1.2; ctx.lineJoin='round'; ctx.stroke();
     ctx.restore();
   }
-  // Courbe réelle avec halo (glow) + dégradé
-  ctx.save();
-  ctx.shadowColor='rgba(61,142,240,0.55)'; ctx.shadowBlur=12;
-  const lg=ctx.createLinearGradient(padL,0,W-padR,0); lg.addColorStop(0,'#3d8ef0'); lg.addColorStop(1,'#5ad1f0');
+  // Courbe réelle : bleu plein, sans glow ni dégradé
   ctx.beginPath(); ctx.moveTo(x(0),y(caps[0]));
   for(let i=1;i<pts.length;i++) ctx.lineTo(x(i),y(caps[i]));
-  ctx.strokeStyle=lg; ctx.lineWidth=2.6; ctx.lineJoin='round'; ctx.lineCap='round'; ctx.stroke();
-  ctx.restore();
-  // Point final : halo + pastille
+  ctx.strokeStyle='#3d8ef0'; ctx.lineWidth=2.2; ctx.lineJoin='round'; ctx.stroke();
+  // Point final simple
   const li=pts.length-1;
-  ctx.beginPath(); ctx.arc(x(li),y(caps[li]),8,0,Math.PI*2); ctx.fillStyle='rgba(90,209,240,0.18)'; ctx.fill();
-  ctx.beginPath(); ctx.arc(x(li),y(caps[li]),4.5,0,Math.PI*2); ctx.fillStyle='#5ad1f0'; ctx.fill();
-  ctx.beginPath(); ctx.arc(x(li),y(caps[li]),4.5,0,Math.PI*2); ctx.strokeStyle='rgba(255,255,255,0.9)'; ctx.lineWidth=1.3; ctx.stroke();
-  // Étiquette valeur du capital actuel
-  const val = grwFmt(caps[li]);
-  ctx.font="600 12px 'DM Sans',sans-serif"; ctx.textBaseline='middle';
-  const tw=ctx.measureText(val).width, pw=tw+16, ph=22;
-  let px=x(li)-pw-11; if(px<padL) px=x(li)+11; if(px+pw>W-padR) px=W-padR-pw;
-  let py=y(caps[li])-ph/2; if(py<padT) py=padT; if(py+ph>padT+plotH) py=padT+plotH-ph;
-  ctx.fillStyle='rgba(18,24,36,0.94)'; grwRoundRect(ctx,px,py,pw,ph,7); ctx.fill();
-  ctx.strokeStyle='rgba(90,209,240,0.4)'; ctx.lineWidth=1; grwRoundRect(ctx,px,py,pw,ph,7); ctx.stroke();
-  ctx.fillStyle='#dff2ff'; ctx.textAlign='left'; ctx.fillText(val,px+8,py+ph/2+0.5);
+  ctx.beginPath(); ctx.arc(x(li),y(caps[li]),7,0,Math.PI*2); ctx.fillStyle='rgba(61,142,240,0.22)'; ctx.fill();
+  ctx.beginPath(); ctx.arc(x(li),y(caps[li]),4,0,Math.PI*2); ctx.fillStyle='#3d8ef0'; ctx.fill();
 }
 function drawGrowthBars(monthly){
   const cv = document.getElementById('grw-bars');

@@ -1362,8 +1362,15 @@ body .main { margin-top:0 !important; height:100vh !important; }
 .grw-ptab { background:transparent;border:none;padding:4px 12px;font-family:'DM Sans',sans-serif;font-size:12px;color:#666;cursor:pointer;border-radius:6px;transition:background .15s,color .15s; }
 .grw-ptab:hover { color:#c8c4be; }
 .grw-ptab.on { background:rgba(61,142,240,0.15);color:#7fb4f5;font-weight:600; }
-.grw-proj { background:linear-gradient(135deg,rgba(61,142,240,0.08),rgba(61,142,240,0.02));border:1px solid rgba(61,142,240,0.18);border-radius:12px;padding:14px 18px;margin-bottom:28px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#b9d4f5;line-height:1.5;display:flex;align-items:center;gap:12px; }
-.grw-proj svg { width:20px;height:20px;flex-shrink:0;color:#5aa8f5; }
+.grw-proj { display:flex;align-items:center;gap:14px;background:#141418;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:15px 20px;margin-bottom:30px;font-family:'DM Sans',sans-serif;font-size:13.5px;line-height:1.5; }
+.grw-proj .grw-proj-ic { width:38px;height:38px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center; }
+.grw-proj .grw-proj-ic svg { width:19px;height:19px; }
+.grw-proj .grw-proj-txt { color:#9a9fab; }
+.grw-proj .grw-proj-txt b { color:#e8e4de;font-weight:600; }
+.grw-proj.pos .grw-proj-ic { background:rgba(74,222,128,0.12);color:#4ade80; }
+.grw-proj.pos .grw-proj-hl { color:#5fe08f;font-weight:600; }
+.grw-proj.neg .grw-proj-ic { background:rgba(245,180,60,0.12);color:#f5b43c; }
+.grw-proj.neg .grw-proj-hl { color:#f0b350;font-weight:600; }
 .grw-streak-flame { display:inline-flex;align-items:center;gap:4px; }
 .grw-chart-legend { display:flex;align-items:center;gap:16px;font-family:'DM Sans',sans-serif;font-size:11px;color:#888;padding:2px 4px 10px; }
 .grw-chart-legend .grw-leg { display:inline-block;width:18px;height:0;border-top-width:2px;border-top-style:solid;vertical-align:middle;margin-right:6px;animation:none; }
@@ -5907,12 +5914,6 @@ tbody tr:last-child td { border-bottom: none; }
           <span id="grw-obj-legend"><span class="grw-leg" style="border-top-color:#e6c34d;border-top-style:dashed;"></span>Objectif (<span id="grw-obj-val">palier</span>/mois)</span>
         </div>
 
-        <div class="emp-sec-title">Gains par mois</div>
-        <div style="background:#16161a;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px 16px 10px;margin-bottom:30px;">
-          <canvas id="grw-bars" style="width:100%;height:180px;display:block;"></canvas>
-          <div id="grw-bars-empty" style="display:none;text-align:center;color:#666;font-family:'DM Sans',sans-serif;font-size:13px;padding:40px 0;">Aucun gain mensuel à afficher pour l'instant.</div>
-        </div>
-
         <div class="emp-sec-title">Paliers mensuels — objectif de gain par mois</div>
         <div id="grw-milestones" style="display:flex;flex-direction:column;gap:10px;"></div>
       </div>
@@ -7643,16 +7644,15 @@ function renderGrowth(){
   if(proj){
     if(g.pace>0){
       const in6 = g.current + g.pace*6;
-      proj.style.display = 'flex';
+      proj.className = 'grw-proj pos'; proj.style.display = 'flex';
       proj.innerHTML =
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>'+
-        '<span>À ce rythme (<b style="color:#7fd8a0;">'+grwFmt(g.pace)+' / mois</b>), ton capital passerait de '+grwFmt(g.current)+' à <b style="color:#e8e4de;">'+grwFmt(in6)+'</b> d\'ici <b>6 mois</b>'+(g.net?' (net)':'')+'.</span>';
+        '<div class="grw-proj-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>'+
+        '<div class="grw-proj-txt">À ce rythme (<span class="grw-proj-hl">'+grwFmt(g.pace)+' / mois</span>), ton capital passerait de '+grwFmt(g.current)+' à <b>'+grwFmt(in6)+'</b> d\'ici <b>6 mois</b>'+(g.net?' (net)':'')+'.</div>';
     } else if(g.monthlyDeltas.length){
-      proj.style.display = 'flex';
-      proj.style.borderColor = 'rgba(245,180,60,0.20)';
+      proj.className = 'grw-proj neg'; proj.style.display = 'flex';
       proj.innerHTML =
-        '<svg viewBox="0 0 24 24" fill="none" stroke="#f5b43c" stroke-width="1.9" style="color:#f5b43c;"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12" y2="16"/></svg>'+
-        '<span style="color:#e0c98a;">Ton rythme des 3 derniers mois est négatif — stabilise d\'abord tes résultats avant de viser le prochain palier.</span>';
+        '<div class="grw-proj-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12" y2="16"/></svg></div>'+
+        '<div class="grw-proj-txt">Ton rythme des 3 derniers mois est <span class="grw-proj-hl">négatif</span> — stabilise d\'abord tes résultats avant de viser le prochain palier.</div>';
     } else {
       proj.style.display = 'none';
     }
@@ -7669,7 +7669,7 @@ function renderGrowth(){
   window._grwChart = { series:vis, target:target };
   window._grwBars = g.monthlyDeltas;
   if(window._grwDrawRaf) cancelAnimationFrame(window._grwDrawRaf);
-  window._grwDrawRaf = requestAnimationFrame(function(){ window._grwDrawRaf = requestAnimationFrame(function(){ drawGrowthChart(vis, target); drawGrowthBars(g.monthlyDeltas); }); });
+  window._grwDrawRaf = requestAnimationFrame(function(){ window._grwDrawRaf = requestAnimationFrame(function(){ drawGrowthChart(vis, target); }); });
   // Paliers mensuels — basés sur le meilleur mois
   const box = document.getElementById('grw-milestones');
   if(box){
@@ -7831,10 +7831,10 @@ function drawGrowthBars(monthly){
       // On ne redessine QUE si la taille a réellement changé → aucun re-dessin inutile, pas de clignotement
       if(Math.round(r.width)===lastW && Math.round(r.height)===lastH) return;
       lastW=Math.round(r.width); lastH=Math.round(r.height);
-      drawGrowthChart(window._grwChart.series, window._grwChart.target); drawGrowthBars(window._grwBars||[]);
+      drawGrowthChart(window._grwChart.series, window._grwChart.target);
     });
   });
-  function attach(){ var c=document.getElementById('grw-chart'); var bwrap=document.getElementById('grw-bars'); if(c&&c.parentElement) ro.observe(c.parentElement); if(bwrap&&bwrap.parentElement) ro.observe(bwrap.parentElement); }
+  function attach(){ var c=document.getElementById('grw-chart'); if(c&&c.parentElement) ro.observe(c.parentElement); }
   if(document.readyState==='complete') attach(); else window.addEventListener('load', attach);
 })();
 

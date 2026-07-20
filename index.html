@@ -1367,6 +1367,14 @@ body .main { margin-top:0 !important; height:100vh !important; }
 .grw-streak-flame { display:inline-flex;align-items:center;gap:4px; }
 .grw-chart-legend { display:flex;align-items:center;gap:16px;font-family:'DM Sans',sans-serif;font-size:11px;color:#888;padding:2px 4px 10px; }
 .grw-chart-legend .grw-leg { display:inline-block;width:18px;height:0;border-top-width:2px;border-top-style:solid;vertical-align:middle;margin-right:6px;animation:none; }
+.grw-acc-bar { display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:22px; }
+.grw-acc-lbl { font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#666;margin-right:4px; }
+.grw-acc-chip { display:inline-flex;align-items:center;gap:7px;padding:6px 13px;background:#16161a;border:1px solid rgba(255,255,255,0.09);border-radius:20px;color:#c8c4be;font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;transition:background .15s,border-color .15s,opacity .15s,color .15s;user-select:none; }
+.grw-acc-chip:hover { border-color:rgba(255,255,255,0.22); }
+.grw-acc-chip .tick { width:15px;height:15px;border-radius:5px;border:1.5px solid rgba(255,255,255,0.25);display:inline-flex;align-items:center;justify-content:center;font-size:10px;line-height:1;color:#0d0d10;transition:background .15s,border-color .15s; }
+.grw-acc-chip.on { border-color:rgba(61,142,240,0.5);background:rgba(61,142,240,0.10);color:#e8e4de; }
+.grw-acc-chip.on .tick { background:#3d8ef0;border-color:#3d8ef0; }
+.grw-acc-chip.off { opacity:0.5; }
 @keyframes viewIn { from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);} }
 
 /* HOME */
@@ -5867,6 +5875,7 @@ tbody tr:last-child td { border-bottom: none; }
       <!-- Zone scrollable -->
       <div style="flex:1;overflow-y:auto;padding:22px 28px 40px;">
         <div id="grw-note" style="display:none;"></div>
+        <div id="grw-accounts" class="grw-acc-bar" style="display:none;"></div>
         <div id="grw-stats" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px;"></div>
 
         <div id="grw-projection" class="grw-proj" style="display:none;"></div>
@@ -7459,6 +7468,10 @@ function grwSetNet(net){
   if(typeof renderGrowth==='function') renderGrowth();
 }
 try { if(typeof window.grwPeriod==='undefined') window.grwPeriod='all'; } catch(e){ window.grwPeriod='all'; }
+try { window.grwExcluded = JSON.parse(localStorage.getItem('vm_grw_excluded')||'[]'); if(!Array.isArray(window.grwExcluded)) window.grwExcluded=[]; } catch(e){ window.grwExcluded=[]; }
+function grwEsc(s){ return String(s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function grwAccActive(id){ return window.grwExcluded.indexOf(String(id))===-1; }
+function grwToggleAccount(id){ id=String(id); var i=window.grwExcluded.indexOf(id); if(i===-1) window.grwExcluded.push(id); else window.grwExcluded.splice(i,1); try{ localStorage.setItem('vm_grw_excluded', JSON.stringify(window.grwExcluded)); }catch(e){} if(typeof renderGrowth==='function') renderGrowth(); }
 function grwSetPeriod(p){
   window.grwPeriod = p;
   ['3m','6m','all'].forEach(function(k){ var b=document.getElementById('grw-ptab-'+k); if(b) b.classList.toggle('on', k===p); });
@@ -7494,13 +7507,16 @@ function grwSize(acc){
 }
 function grwData(){
   // On ne compte QUE les comptes funded / live (pas challenge ni vérification)
-  let trades=[], start=0, funded=0, accounts=[], bestAcc=null;
+  let trades=[], start=0, funded=0, accounts=[], bestAcc=null, realAccounts=[];
   try {
     if (typeof window.getDashAccounts==='function' && typeof window.loadTradesForAccount==='function') {
       (window.getDashAccounts()||[]).forEach(function(a){
         if (grwIsReal(a)) {
-          funded++;
           var sz = grwSize(a);
+          var active = grwAccActive(a.id);
+          realAccounts.push({ id:a.id, name:a.name, size:sz, active:active });
+          if (!active) return; // compte décoché → exclu des calculs Growth
+          funded++;
           var accTr = window.loadTradesForAccount(a.id)||[];
           var accProfit = accTr.reduce(function(s,t){ return s+(parseFloat(t.pnl||0)||0); }, 0);
           start += sz;
@@ -7539,7 +7555,7 @@ function grwData(){
   const curMonthPayout = curMonthGross>0 ? curMonthGross*0.8 : 0;
   // Prochain palier mensuel (basé sur le meilleur mois)
   const nextTarget = GRW_MONTH_TARGETS.find(function(m){ return m>best; }) || null;
-  return { start:start, total:total, current:current, growthPct: start? total/start*100 : 0, series:series, monthlyDeltas:monthlyDeltas, best:best, pace:pace, streak:streak, payoutTotal:payoutTotal, curMonthPayout:curMonthPayout, curMonthGross:curMonthGross, nextTarget:nextTarget, funded:funded, accounts:accounts, net:NET };
+  return { start:start, total:total, current:current, growthPct: start? total/start*100 : 0, series:series, monthlyDeltas:monthlyDeltas, best:best, pace:pace, streak:streak, payoutTotal:payoutTotal, curMonthPayout:curMonthPayout, curMonthGross:curMonthGross, nextTarget:nextTarget, funded:funded, accounts:accounts, realAccounts:realAccounts, net:NET };
 }
 function renderGrowth(){
   const g = grwData();
@@ -7552,9 +7568,28 @@ function renderGrowth(){
   if(_sub) _sub.innerHTML = gnet
     ? 'Vue <b style="color:#7fb4f5;font-weight:600;">nette</b> — ce que tu touches réellement en payout.'
     : 'Croissance <b style="color:#7fb4f5;font-weight:600;">brute</b> de ton capital funded — les phases challenge et vérification ne comptent pas.';
+  // Sélecteur de comptes funded / live pris en compte (visible dès qu'il y en a au moins 2)
+  const accBar = document.getElementById('grw-accounts');
+  if(accBar){
+    const ra = g.realAccounts || [];
+    if(ra.length >= 2){
+      accBar.style.display = 'flex';
+      accBar.innerHTML = '<span class="grw-acc-lbl">Comptes pris en compte</span>' + ra.map(function(a){
+        return '<div class="grw-acc-chip '+(a.active?'on':'off')+'" onclick="grwToggleAccount(\''+grwEsc(a.id)+'\')"><span class="tick">'+(a.active?'✓':'')+'</span>'+grwEsc(a.name)+'</div>';
+      }).join('');
+    } else {
+      accBar.style.display = 'none';
+    }
+  }
   const note = document.getElementById('grw-note');
   if(note){
-    if(!g.funded){
+    const ra = g.realAccounts || [];
+    if(!g.funded && ra.length){
+      // Des comptes funded/live existent mais tous décochés
+      note.style.display = 'block';
+      note.style.cssText = 'display:block;background:rgba(245,180,60,.08);border:1px solid rgba(245,180,60,.22);border-radius:10px;padding:12px 16px;margin-bottom:20px;font-family:\'DM Sans\',sans-serif;font-size:13px;color:#e0c98a;';
+      note.innerHTML = '⚠️ Aucun compte sélectionné — coche au moins un compte ci-dessus pour voir ta croissance.';
+    } else if(!g.funded){
       note.style.display = 'block';
       note.style.cssText = 'display:block;background:rgba(245,180,60,.08);border:1px solid rgba(245,180,60,.22);border-radius:10px;padding:12px 16px;margin-bottom:20px;font-family:\'DM Sans\',sans-serif;font-size:13px;color:#e0c98a;';
       note.innerHTML = '⏳ Aucun compte <b>funded</b> pour l\'instant — tu es en phase challenge / vérification. Ta croissance réelle démarrera une fois ton compte financé. (Un compte est considéré funded si son nom contient « funded » ou « live ».)';

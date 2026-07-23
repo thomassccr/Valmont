@@ -244,9 +244,12 @@ if show_nyc and nyc_open
     label.delete(prev_nyc_bh), label.delete(prev_nyc_bl)
 
 // ─────────────────────────────────────────────
-//  HIGHS & LOWS 1H / 4H (multi-timeframe)
-//  Recuperes via request.security → restent affiches sur tous les TF.
-//  Mitigation : figer ou supprimer la ligne quand elle est balayee.
+//  HIGHS & LOWS 1H / 4H
+//  Meme principe que les sessions : suivi NATIF du plus haut / plus bas de
+//  chaque periode 1H et 4H sur les bougies du graphique, puis ligne ancree par
+//  bar_index sur la bougie de l'extreme. Aucun request.security → pas de repaint,
+//  les niveaux restent parfaitement accroches aux bougies sur tous les TF.
+//  Mitigation : figer (estomper) ou supprimer la ligne quand elle est balayee.
 // ─────────────────────────────────────────────
 type Lvl
     line   ln
@@ -256,31 +259,27 @@ type Lvl
     bool   active
     int    bornBar
     color  col
-    int    startT
 
 manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color colLo, string tag) =>
     var array<Lvl> levels = array.new<Lvl>()
+    var float ph    = na    // plus haut de la periode en cours
+    var float pl    = na    // plus bas  de la periode en cours
+    var int   phBar = na    // bougie du plus haut
+    var int   plBar = na    // bougie du plus bas
 
-    // Anti-repaint : on ne trace ce TF que si le graphique est sur un TF <= au TF demande.
-    // (Demander un TF inferieur au chart fait "sauter" les valeurs sur l'axe Y.)
-    tfOk = timeframe.in_seconds(tf) >= timeframe.in_seconds(timeframe.period)
+    // On ne suit ce TF que si le graphique est sur un TF <= (sinon non pertinent).
+    tfOk = timeframe.in_seconds(timeframe.period) <= timeframe.in_seconds(tf)
+    newP = timeframe.change(tf)   // true sur la 1re bougie d'une nouvelle periode 1H / 4H
 
-    // Valeurs de la DERNIERE bougie cloturee (non repaint) + son heure d'ouverture.
-    [htfHigh, htfLow, htfTime] = request.security(syminfo.tickerid, tf, [high[1], low[1], time[1]], lookahead=barmerge.lookahead_on, gaps=barmerge.gaps_off)
+    // Fin de periode → on fige le high & le low ecoules, accroches a LEUR bougie.
+    if show and tfOk and newP and not na(ph)
+        lnH = line.new(phBar, ph, bar_index, ph, color=colHi, width=line_width, style=f_style())
+        lbH = label.new(phBar, ph, show_labels ? tag + " High" : "", textcolor=colHi, style=label.style_none, size=size.small)
+        array.push(levels, Lvl.new(lnH, lbH, ph, true,  true, bar_index, colHi))
 
-    isNewClose = ta.change(htfTime) != 0
-
-    // Creation d'un High + Low a chaque cloture HTF.
-    // Valeurs issues de la bougie DEJA cloturee (high[1]/low[1]) → prix fige, pas de repaint sur Y.
-    // Le label est ancre sur la bougie d'origine (htfTime) → il reste sur la bougie.
-    if show and tfOk and isNewClose and not na(htfHigh)
-        lnH = line.new(x1=htfTime, y1=htfHigh, x2=time, y2=htfHigh, xloc=xloc.bar_time, color=colHi, width=line_width, style=f_style())
-        lbH = label.new(x=htfTime, y=htfHigh, xloc=xloc.bar_time, text=show_labels ? tag + " High" : "", textcolor=colHi, style=label.style_none, size=size.small)
-        array.push(levels, Lvl.new(lnH, lbH, htfHigh, true,  true, bar_index, colHi, htfTime))
-
-        lnL = line.new(x1=htfTime, y1=htfLow, x2=time, y2=htfLow, xloc=xloc.bar_time, color=colLo, width=line_width, style=f_style())
-        lbL = label.new(x=htfTime, y=htfLow, xloc=xloc.bar_time, text=show_labels ? tag + " Low" : "", textcolor=colLo, style=label.style_none, size=size.small)
-        array.push(levels, Lvl.new(lnL, lbL, htfLow, false, true, bar_index, colLo, htfTime))
+        lnL = line.new(plBar, pl, bar_index, pl, color=colLo, width=line_width, style=f_style())
+        lbL = label.new(plBar, pl, show_labels ? tag + " Low" : "", textcolor=colLo, style=label.style_none, size=size.small)
+        array.push(levels, Lvl.new(lnL, lbL, pl, false, true, bar_index, colLo))
 
         // On ne garde que les maxN derniers highs + maxN derniers lows.
         while array.size(levels) > maxN * 2
@@ -288,23 +287,28 @@ manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color
             line.delete(old.ln)
             label.delete(old.lb)
 
-    // Mise a jour + detection de balayage (a chaque barre).
+    // Suivi du plus haut / plus bas de la periode en cours (natif, sur les bougies).
+    if na(ph) or newP
+        ph := high, pl := low
+        phBar := bar_index, plBar := bar_index
+    else
+        if high >= ph
+            ph := high, phBar := bar_index
+        if low  <= pl
+            pl := low,  plBar := bar_index
+
+    // Extension des lignes actives jusqu'a la bougie courante + detection de balayage.
+    // Les labels restent ancres a la bougie de l'extreme (ils ne bougent pas).
     basisHi = sweepBasis == "Clôture" ? close : high
     basisLo = sweepBasis == "Clôture" ? close : low
-
-    // Les lignes/labels sont ancres aux TEMPS des bougies (xloc.bar_time) : ils
-    // ne bougent donc pas quand on deplace/zoome le graphique.
-    // - niveau ACTIF  : la ligne grandit jusqu'a la bougie courante puis s'arrete.
-    // - niveau BALAYE : la ligne est coupee net au point de balayage.
     if array.size(levels) > 0
         for i = array.size(levels) - 1 to 0
             lv = array.get(levels, i)
             if lv.active
                 swept = mitigate and bar_index > lv.bornBar and (lv.isHigh ? basisHi > lv.price : basisLo < lv.price)
                 if swept
-                    // Balaye : la ligne est coupee net au point de balayage.
                     lv.active := false
-                    line.set_x2(lv.ln, time)
+                    line.set_x2(lv.ln, bar_index)   // coupee net au balayage
                     if mitigateMode == "Supprimer"
                         array.remove(levels, i)
                         line.delete(lv.ln)
@@ -314,9 +318,7 @@ manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color
                         line.set_style(lv.ln, line.style_dashed)
                         label.set_text(lv.lb, "")
                 else
-                    // Toujours actif : la ligne s'etend jusqu'a la bougie courante.
-                    // Le label ne bouge pas : il reste ancre sur sa bougie d'origine.
-                    line.set_x2(lv.ln, time)
+                    line.set_x2(lv.ln, bar_index)   // s'etend jusqu'a la bougie courante
 
 manageTF("60",  show_1h, n_1h, col_1h_h, col_1h_l, "1h")
 manageTF("240", show_4h, n_4h, col_4h_h, col_4h_l, "4h")

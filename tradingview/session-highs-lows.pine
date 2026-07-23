@@ -294,9 +294,9 @@ manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color
                     line.set_x2(lv.ln, time)
                     label.set_x(lv.lb, time)
                     if mitigateMode == "Supprimer"
+                        array.remove(levels, i)
                         line.delete(lv.ln)
                         label.delete(lv.lb)
-                        array.remove(levels, i)
                     else
                         lv.active := false
                         if fadeSwept

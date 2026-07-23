@@ -261,14 +261,19 @@ type Lvl
 manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color colLo, string tag) =>
     var array<Lvl> levels = array.new<Lvl>()
 
+    // Anti-repaint : on ne trace ce TF que si le graphique est sur un TF <= au TF demande.
+    // (Demander un TF inferieur au chart fait "sauter" les valeurs sur l'axe Y.)
+    tfOk = timeframe.in_seconds(tf) >= timeframe.in_seconds(timeframe.period)
+
     // Valeurs de la DERNIERE bougie cloturee (non repaint) + son heure d'ouverture.
-    [htfHigh, htfLow, htfTime] = request.security(syminfo.tickerid, tf, [high[1], low[1], time[1]], lookahead=barmerge.lookahead_on)
+    [htfHigh, htfLow, htfTime] = request.security(syminfo.tickerid, tf, [high[1], low[1], time[1]], lookahead=barmerge.lookahead_on, gaps=barmerge.gaps_off)
 
     isNewClose = ta.change(htfTime) != 0
 
     // Creation d'un High + Low a chaque cloture HTF.
+    // Valeurs issues de la bougie DEJA cloturee (high[1]/low[1]) → prix fige, pas de repaint sur Y.
     // Le label est ancre sur la bougie d'origine (htfTime) → il reste sur la bougie.
-    if show and isNewClose and not na(htfHigh)
+    if show and tfOk and isNewClose and not na(htfHigh)
         lnH = line.new(x1=htfTime, y1=htfHigh, x2=time, y2=htfHigh, xloc=xloc.bar_time, color=colHi, width=line_width, style=f_style())
         lbH = label.new(x=htfTime, y=htfHigh, xloc=xloc.bar_time, text=show_labels ? tag + " High" : "", textcolor=colHi, style=label.style_none, size=size.small)
         array.push(levels, Lvl.new(lnH, lbH, htfHigh, true,  true, bar_index, colHi, htfTime))

@@ -259,8 +259,20 @@ type Lvl
     int    bornBar
     color  col
 
-manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color colLo, string tag) =>
-    var array<Lvl> levels = array.new<Lvl>()
+// Renvoie true si un niveau de meme sens (high/low) et de meme prix existe deja
+// dans le tableau de reference (ex: on masque un 4H si le 1H est identique).
+existsSame(array<Lvl> ref, float price, bool isHigh) =>
+    found = false
+    if not na(ref)
+        n = array.size(ref)
+        if n > 0
+            for j = 0 to n - 1
+                r = array.get(ref, j)
+                if r.isHigh == isHigh and math.abs(r.price - price) <= syminfo.mintick
+                    found := true
+    found
+
+manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color colLo, string tag, array<Lvl> levels, array<Lvl> refLevels) =>
     // Bougie HTF en cours de construction (open/close + extremes)
     var float cO = na, var float cC = na, var float cH = na, var float cL = na
     var int   cHBar = na, var int cLBar = na
@@ -280,12 +292,13 @@ manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color
         curBull = cC >= cO
         if not na(pO)
             prevBull = pC >= pO
-            if prevBull and not curBull
+            // Doublon 1H/4H : si le meme high/low existe deja en 1H, on n'affiche pas celui du 4H.
+            if prevBull and not curBull and not existsSame(refLevels, pH, true)
                 // La bougie precedente (blanche) est un sommet → on marque son high.
                 lnH = line.new(pHBar, pH, bar_index, pH, color=colHi, width=line_width, style=f_style())
                 lbH = label.new(bar_index, pH, show_labels ? tag + " High" : "", textcolor=colHi, style=label.style_label_left, color=color.new(color.white, 100), size=size.small)
                 array.push(levels, Lvl.new(lnH, lbH, pH, true, true, bar_index, colHi))
-            if (not prevBull) and curBull
+            if (not prevBull) and curBull and not existsSame(refLevels, pL, false)
                 // La bougie precedente (noire) est un creux → on marque son low.
                 lnL = line.new(pLBar, pL, bar_index, pL, color=colLo, width=line_width, style=f_style())
                 lbL = label.new(bar_index, pL, show_labels ? tag + " Low" : "", textcolor=colLo, style=label.style_label_left, color=color.new(color.white, 100), size=size.small)
@@ -335,8 +348,13 @@ manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color
                     line.set_x2(lv.ln, bar_index)   // s'etend jusqu'a la bougie courante
                     label.set_x(lv.lb, bar_index)   // texte a droite, suit le bout de la ligne
 
-manageTF("60",  show_1h, n_1h, col_1h_h, col_1h_l, "1h")
-manageTF("240", show_4h, n_4h, col_4h_h, col_4h_l, "4h")
+// Tableaux de niveaux (globaux) : le 4H recoit le 1H en reference pour eviter les doublons.
+var array<Lvl> levels1h = array.new<Lvl>()
+var array<Lvl> levels4h = array.new<Lvl>()
+var array<Lvl> noRef    = array.new<Lvl>()   // reference vide pour le 1H
+
+manageTF("60",  show_1h, n_1h, col_1h_h, col_1h_l, "1h", levels1h, noRef)
+manageTF("240", show_4h, n_4h, col_4h_h, col_4h_l, "4h", levels4h, levels1h)
 
 // ─────────────────────────────────────────────
 //  FOND DE SESSION

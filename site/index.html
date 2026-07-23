@@ -116,6 +116,9 @@
   .sc-frame img, .sc-frame video { display:block; width:100%; height:auto; }
   /* Vidéo : une image du dashboard couvre la vidéo tant qu'elle n'a pas démarré (aucun blanc) */
   .vid-wrap { position:relative; background:#0d0d10; }
+  /* Fond du lecteur = image du dashboard : même si le navigateur n'a pas encore d'image vidéo
+     (ou rend la vidéo au-dessus de l'overlay, cas Safari), on voit le dashboard, jamais de blanc. */
+  #demo-vid { background:#0d0d10 url('shots/dashboard.png') top left / cover no-repeat; }
   .vid-cover { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:top left; z-index:2; pointer-events:none; transition:opacity .5s ease; }
   .vid-wrap.revealed .vid-cover { opacity:0; }
   /* Bloc vidéo pleine largeur au-dessus des sections */

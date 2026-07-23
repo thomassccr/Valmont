@@ -615,7 +615,7 @@
     function reveal(){ if(revealed) return; revealed = true; wrap.classList.add('revealed'); }
     function cover(){ if(!revealed) return; revealed = false; wrap.classList.remove('revealed'); }
     // On révèle la vidéo une fois l'intro passée ; on remet le cache quand elle reboucle au début
-    v.addEventListener('timeupdate', function(){ if(v.currentTime > 2.6) reveal(); else if(v.currentTime < 0.5) cover(); });
+    v.addEventListener('timeupdate', function(){ if(v.currentTime > 4.5) reveal(); else if(v.currentTime < 0.6) cover(); });
     v.addEventListener('ended', cover);
     // Tentative de lecture (au cas où l'autoplay tarde)
     var pr = v.play && v.play(); if(pr && pr.catch) pr.catch(function(){});

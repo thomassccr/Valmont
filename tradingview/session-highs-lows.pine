@@ -256,6 +256,7 @@ type Lvl
     bool   active
     int    bornBar
     color  col
+    int    startT
 
 manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color colLo, string tag) =>
     var array<Lvl> levels = array.new<Lvl>()
@@ -266,14 +267,15 @@ manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color
     isNewClose = ta.change(htfTime) != 0
 
     // Creation d'un High + Low a chaque cloture HTF.
+    // Le label est ancre sur la bougie d'origine (htfTime) → il reste sur la bougie.
     if show and isNewClose and not na(htfHigh)
         lnH = line.new(x1=htfTime, y1=htfHigh, x2=time, y2=htfHigh, xloc=xloc.bar_time, color=colHi, width=line_width, style=f_style())
-        lbH = label.new(x=time, y=htfHigh, xloc=xloc.bar_time, text=show_labels ? tag + " High" : "", textcolor=colHi, style=label.style_none, size=size.small)
-        array.push(levels, Lvl.new(lnH, lbH, htfHigh, true,  true, bar_index, colHi))
+        lbH = label.new(x=htfTime, y=htfHigh, xloc=xloc.bar_time, text=show_labels ? tag + " High" : "", textcolor=colHi, style=label.style_none, size=size.small)
+        array.push(levels, Lvl.new(lnH, lbH, htfHigh, true,  true, bar_index, colHi, htfTime))
 
         lnL = line.new(x1=htfTime, y1=htfLow, x2=time, y2=htfLow, xloc=xloc.bar_time, color=colLo, width=line_width, style=f_style())
-        lbL = label.new(x=time, y=htfLow, xloc=xloc.bar_time, text=show_labels ? tag + " Low" : "", textcolor=colLo, style=label.style_none, size=size.small)
-        array.push(levels, Lvl.new(lnL, lbL, htfLow, false, true, bar_index, colLo))
+        lbL = label.new(x=htfTime, y=htfLow, xloc=xloc.bar_time, text=show_labels ? tag + " Low" : "", textcolor=colLo, style=label.style_none, size=size.small)
+        array.push(levels, Lvl.new(lnL, lbL, htfLow, false, true, bar_index, colLo, htfTime))
 
         // On ne garde que les maxN derniers highs + maxN derniers lows.
         while array.size(levels) > maxN * 2
@@ -295,9 +297,9 @@ manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color
             if lv.active
                 swept = mitigate and bar_index > lv.bornBar and (lv.isHigh ? basisHi > lv.price : basisLo < lv.price)
                 if swept
+                    // Balaye : la ligne est coupee net au point de balayage.
                     lv.active := false
                     line.set_x2(lv.ln, time)
-                    label.set_x(lv.lb, time)
                     if mitigateMode == "Supprimer"
                         array.remove(levels, i)
                         line.delete(lv.ln)
@@ -307,9 +309,9 @@ manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color
                         line.set_style(lv.ln, line.style_dashed)
                         label.set_text(lv.lb, "")
                 else
-                    // Toujours actif : on prolonge jusqu'a la bougie courante (bord des bougies reelles).
+                    // Toujours actif : la ligne s'etend jusqu'a la bougie courante.
+                    // Le label ne bouge pas : il reste ancre sur sa bougie d'origine.
                     line.set_x2(lv.ln, time)
-                    label.set_x(lv.lb, time)
 
 manageTF("60",  show_1h, n_1h, col_1h_h, col_1h_l, "1h")
 manageTF("240", show_4h, n_4h, col_4h_h, col_4h_l, "4h")

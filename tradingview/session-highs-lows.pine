@@ -266,13 +266,12 @@ manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color
     isNewClose = ta.change(htfTime) != 0
 
     // Creation d'un High + Low a chaque cloture HTF.
-    // extend.right : la ligne active se prolonge en continu vers la droite.
     if show and isNewClose and not na(htfHigh)
-        lnH = line.new(x1=htfTime, y1=htfHigh, x2=time, y2=htfHigh, xloc=xloc.bar_time, color=colHi, width=line_width, style=f_style(), extend=extend.right)
+        lnH = line.new(x1=htfTime, y1=htfHigh, x2=time, y2=htfHigh, xloc=xloc.bar_time, color=colHi, width=line_width, style=f_style())
         lbH = label.new(x=time, y=htfHigh, xloc=xloc.bar_time, text=show_labels ? tag + " High" : "", textcolor=colHi, style=label.style_none, size=size.small)
         array.push(levels, Lvl.new(lnH, lbH, htfHigh, true,  true, bar_index, colHi))
 
-        lnL = line.new(x1=htfTime, y1=htfLow, x2=time, y2=htfLow, xloc=xloc.bar_time, color=colLo, width=line_width, style=f_style(), extend=extend.right)
+        lnL = line.new(x1=htfTime, y1=htfLow, x2=time, y2=htfLow, xloc=xloc.bar_time, color=colLo, width=line_width, style=f_style())
         lbL = label.new(x=time, y=htfLow, xloc=xloc.bar_time, text=show_labels ? tag + " Low" : "", textcolor=colLo, style=label.style_none, size=size.small)
         array.push(levels, Lvl.new(lnL, lbL, htfLow, false, true, bar_index, colLo))
 
@@ -286,35 +285,31 @@ manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color
     basisHi = sweepBasis == "Clôture" ? close : high
     basisLo = sweepBasis == "Clôture" ? close : low
 
+    // Les lignes/labels sont ancres aux TEMPS des bougies (xloc.bar_time) : ils
+    // ne bougent donc pas quand on deplace/zoome le graphique.
+    // - niveau ACTIF  : la ligne grandit jusqu'a la bougie courante puis s'arrete.
+    // - niveau BALAYE : la ligne est coupee net au point de balayage.
     if array.size(levels) > 0
         for i = array.size(levels) - 1 to 0
             lv = array.get(levels, i)
             if lv.active
                 swept = mitigate and bar_index > lv.bornBar and (lv.isHigh ? basisHi > lv.price : basisLo < lv.price)
                 if swept
-                    // On fige la ligne : plus d'extension, elle s'arrete au balayage.
                     lv.active := false
-                    line.set_extend(lv.ln, extend.none)
                     line.set_x2(lv.ln, time)
+                    label.set_x(lv.lb, time)
                     if mitigateMode == "Supprimer"
                         array.remove(levels, i)
                         line.delete(lv.ln)
                         label.delete(lv.lb)
-                    else
-                        label.set_x(lv.lb, time)
-                        if fadeSwept
-                            line.set_color(lv.ln, color.new(lv.col, 65))
-                            line.set_style(lv.ln, line.style_dashed)
-                            label.set_text(lv.lb, "")
-
-    // Sur la derniere barre : les labels des niveaux ACTIFS se collent au bord
-    // droit de la zone visible → ils suivent quand on deplace/zoome le graphique.
-    if barstate.islast and array.size(levels) > 0
-        lblX = na(chart.right_visible_bar_time) ? time : chart.right_visible_bar_time
-        for i = 0 to array.size(levels) - 1
-            lv = array.get(levels, i)
-            if lv.active
-                label.set_x(lv.lb, lblX)
+                    else if fadeSwept
+                        line.set_color(lv.ln, color.new(lv.col, 65))
+                        line.set_style(lv.ln, line.style_dashed)
+                        label.set_text(lv.lb, "")
+                else
+                    // Toujours actif : on prolonge jusqu'a la bougie courante (bord des bougies reelles).
+                    line.set_x2(lv.ln, time)
+                    label.set_x(lv.lb, time)
 
 manageTF("60",  show_1h, n_1h, col_1h_h, col_1h_l, "1h")
 manageTF("240", show_4h, n_4h, col_4h_h, col_4h_l, "4h")

@@ -7569,12 +7569,12 @@ function grwData(){
   // Vue Net : la prop firm prend 20 % → on garde 80 % des gains (pas de "remise" sur les pertes)
   const NET = !!window.grwNet;
   const nf = function(v){ return (NET && v>0) ? v*0.8 : v; };
-  const byMonth={};
-  trades.forEach(function(t){ const p=parseFloat(t.pnl||0)||0; const m=grwMonthKey(t.date||t.closeTime||''); if(m) byMonth[m]=(byMonth[m]||0)+p; });
+  const byMonth={}; const lastDateByMonth={}; let firstDate='';
+  trades.forEach(function(t){ const p=parseFloat(t.pnl||0)||0; const raw=String(t.date||t.closeTime||'').slice(0,10); const m=grwMonthKey(t.date||t.closeTime||''); if(m){ byMonth[m]=(byMonth[m]||0)+p; if(raw && (!lastDateByMonth[m] || raw>lastDateByMonth[m])) lastDateByMonth[m]=raw; if(raw && (!firstDate || raw<firstDate)) firstDate=raw; } });
   const months=Object.keys(byMonth).sort();
-  let total=0, run=start; const series=[{label:'Départ', cap:start}];
+  let total=0, run=start; const series=[{label:'Départ', cap:start, date:firstDate}];
   const monthlyDeltas=[];
-  months.forEach(function(m){ const d=nf(byMonth[m]); total+=d; run+=d; series.push({label:m, cap:run}); monthlyDeltas.push({ month:m, delta:d }); });
+  months.forEach(function(m){ const d=nf(byMonth[m]); total+=d; run+=d; series.push({label:m, cap:run, date:lastDateByMonth[m]||(m+'-01')}); monthlyDeltas.push({ month:m, delta:d }); });
   const current=start+total;
   const best = (bestAcc===null ? 0 : nf(bestAcc));
   // Rythme = moyenne des gains (nets selon le mode) sur les 3 derniers mois d'activité
@@ -7729,6 +7729,13 @@ function grwMonthLabel(s){
   if(m){ var mi=parseInt(m[2],10)-1; return (mi>=0&&mi<12?GRW_MON_ABBR[mi]:m[2]); }
   return String(s||'').slice(0,6);
 }
+// Étiquette de vraie date "10 juin" à partir d'une date ISO ; libellé du point sinon
+function grwPointDate(pt){
+  if(!pt) return '';
+  if(pt.label==='Départ') return 'Départ';
+  if(pt.date){ var m=String(pt.date).match(/(\d{4})-(\d{1,2})-(\d{1,2})/); if(m){ var d=parseInt(m[3],10), mi=parseInt(m[2],10)-1; return d+' '+(mi>=0&&mi<12?GRW_MON_ABBR[mi]:m[2]); } }
+  return grwMonthLabel(pt.label);
+}
 function grwNiceTicks(min,max,count){
   const range=(max-min)||1; const raw=range/Math.max(1,count);
   const mag=Math.pow(10,Math.floor(Math.log10(raw))); const norm=raw/mag;
@@ -7800,8 +7807,8 @@ function drawGrowthChart(series, target){
   const nX=pts.length; const stepX=Math.max(1, Math.ceil(nX/8));
   for(let i=0;i<nX;i++){
     if(i%stepX!==0 && i!==nX-1) continue;
-    let lx=x(i); if(lx<padL+8) lx=padL+8; if(lx>W-padR-8) lx=W-padR-8;
-    ctx.fillText(grwMonthLabel(pts[i].label), lx, H-9);
+    let lx=x(i); if(lx<padL+12) lx=padL+12; if(lx>W-padR-12) lx=W-padR-12;
+    ctx.fillText(grwPointDate(pts[i]), lx, H-9);
   }
 }
 function drawGrowthBars(monthly){

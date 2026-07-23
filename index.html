@@ -7722,6 +7722,13 @@ function renderGrowth(){
 }
 function grwRoundRect(ctx,x,y,w,h,r){ r=Math.min(r,w/2,h/2); ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 function grwCompact(v){ var a=Math.abs(v); if(a>=1000){ var k=Math.round(a/100)/10; return (k%1===0?k.toFixed(0):k.toFixed(1))+'k'; } return String(Math.round(a)); }
+var GRW_MON_ABBR=['janv','févr','mars','avr','mai','juin','juil','août','sept','oct','nov','déc'];
+function grwMonthLabel(s){
+  if(s==='Départ') return 'Départ';
+  var m=String(s||'').match(/(\d{4})-(\d{1,2})/);
+  if(m){ var mi=parseInt(m[2],10)-1; return (mi>=0&&mi<12?GRW_MON_ABBR[mi]:m[2]); }
+  return String(s||'').slice(0,6);
+}
 function grwNiceTicks(min,max,count){
   const range=(max-min)||1; const raw=range/Math.max(1,count);
   const mag=Math.pow(10,Math.floor(Math.log10(raw))); const norm=raw/mag;
@@ -7752,7 +7759,7 @@ function drawGrowthChart(series, target){
   const allVals = caps.concat(obj||[]);
   let minV=Math.min.apply(null,allVals), maxV=Math.max.apply(null,allVals);
   if(minV===maxV){ minV=minV-1; maxV=maxV+1; } else { const pad=(maxV-minV)*0.14; minV-=pad; maxV+=pad; }
-  const padL=52,padR=10,padT=16,padB=10;   // padL élargi pour les valeurs de l'axe
+  const padL=52,padR=12,padT=16,padB=28;   // padL élargi pour les valeurs Y, padB pour l'axe X (dates)
   const plotW=W-padL-padR, plotH=H-padT-padB;
   const x=function(i){ return padL + (pts.length===1?plotW/2:(i/(pts.length-1))*plotW); };
   const y=function(v){ return padT + plotH - ((v-minV)/((maxV-minV)||1))*plotH; };
@@ -7788,6 +7795,14 @@ function drawGrowthChart(series, target){
   // Point final : pastille pleine simple (statique, ne clignote pas)
   const li=pts.length-1;
   ctx.beginPath(); ctx.arc(x(li),y(caps[li]),4,0,Math.PI*2); ctx.fillStyle='#3d8ef0'; ctx.fill();
+  // Axe X : dates sous le graphique (on espace pour éviter le chevauchement)
+  ctx.font="9.5px 'DM Mono',monospace"; ctx.textAlign='center'; ctx.textBaseline='alphabetic'; ctx.fillStyle='#7a7770';
+  const nX=pts.length; const stepX=Math.max(1, Math.ceil(nX/8));
+  for(let i=0;i<nX;i++){
+    if(i%stepX!==0 && i!==nX-1) continue;
+    let lx=x(i); if(lx<padL+8) lx=padL+8; if(lx>W-padR-8) lx=W-padR-8;
+    ctx.fillText(grwMonthLabel(pts[i].label), lx, H-9);
+  }
 }
 function drawGrowthBars(monthly){
   const cv = document.getElementById('grw-bars');

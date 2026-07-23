@@ -1,5 +1,5 @@
 //@version=6
-indicator("Thomas| Trading Session Highs & Lows", overlay=true, max_lines_count=500, max_labels_count=500)
+indicator("Thomas | Trading Session Highs & Lows", overlay=true, max_lines_count=500, max_labels_count=500)
 
 // ─────────────────────────────────────────────
 //  INPUTS
@@ -8,7 +8,7 @@ grp_asia = "🌏 Session Asiatique"
 grp_lon  = "🇬🇧 Session Londres"
 grp_nyc  = "🗽 Session New York"
 grp_htf  = "📈 Highs & Lows 1H / 4H"
-grp_mit  = "🎯 Mitigation (niveaux balayés)"
+grp_mit  = "🎯 Mitigation (1H / 4H)"
 grp_disp = "⚙️ Affichage"
 
 show_asia = input.bool(true, "Afficher Session Asie",    group=grp_asia)
@@ -28,21 +28,20 @@ col_nyc_h  = input.color(color.new(#FF5252, 0), "Couleur High NYC",     group=gr
 col_nyc_l  = input.color(color.new(#FF5252, 0), "Couleur Low NYC",      group=grp_nyc)
 
 // ── Highs & Lows 1H / 4H ──────────────────────
-show_1h = input.bool(true, "Afficher 1H",                   group=grp_htf)
-n_1h    = input.int(6, "Nombre de bougies 1H à garder",     minval=1, maxval=100, group=grp_htf)
-col_1h_h = input.color(color.new(color.white, 0),  "Couleur High 1H", group=grp_htf, inline="c1")
-col_1h_l = input.color(color.new(color.white, 0),  "Couleur Low 1H",  group=grp_htf, inline="c1")
-
-show_4h = input.bool(true, "Afficher 4H",                   group=grp_htf)
-n_4h    = input.int(6, "Nombre de bougies 4H à garder",     minval=1, maxval=100, group=grp_htf)
-col_4h_h = input.color(color.new(color.orange, 0), "Couleur High 4H", group=grp_htf, inline="c4")
-col_4h_l = input.color(color.new(color.orange, 0), "Couleur Low 4H",  group=grp_htf, inline="c4")
+show_1h  = input.bool(true, "Afficher 1H",                group=grp_htf)
+n_1h     = input.int(6, "Nombre de 1H à garder",          minval=1, maxval=100, group=grp_htf)
+col_1h_h = input.color(color.new(color.white, 0),  "High 1H", group=grp_htf, inline="h1")
+col_1h_l = input.color(color.new(color.white, 0),  "Low 1H",  group=grp_htf, inline="h1")
+show_4h  = input.bool(true, "Afficher 4H",                group=grp_htf)
+n_4h     = input.int(6, "Nombre de 4H à garder",          minval=1, maxval=100, group=grp_htf)
+col_4h_h = input.color(color.new(color.orange, 0), "High 4H", group=grp_htf, inline="h4")
+col_4h_l = input.color(color.new(color.orange, 0), "Low 4H",  group=grp_htf, inline="h4")
 
 // ── Mitigation (s'applique aux niveaux 1H / 4H) ─
-mitigate     = input.bool(true,     "Arrêter les lignes balayées",                             group=grp_mit)
-mitigateMode = input.string("Figer", "Action quand balayé", options=["Figer", "Supprimer"],    group=grp_mit)
-sweepBasis   = input.string("Mèche", "Balayage sur",        options=["Mèche", "Clôture"],       group=grp_mit)
-fadeSwept    = input.bool(true,     "Estomper les lignes figées",                              group=grp_mit)
+mitigate     = input.bool(true,     "Arrêter les lignes balayées",                          group=grp_mit)
+mitigateMode = input.string("Figer", "Action quand balayé", options=["Figer","Supprimer"],  group=grp_mit)
+sweepBasis   = input.string("Mèche", "Balayage sur",        options=["Mèche","Clôture"],     group=grp_mit)
+fadeSwept    = input.bool(true,     "Estomper les lignes figées",                           group=grp_mit)
 
 line_width  = input.int(1, "Épaisseur des lignes", minval=1, maxval=4, group=grp_disp)
 line_style  = input.string("Solide", "Style des lignes", options=["Solide", "Pointillé", "Tirets"], group=grp_disp)
@@ -245,11 +244,11 @@ if show_nyc and nyc_open
 
 // ─────────────────────────────────────────────
 //  HIGHS & LOWS 1H / 4H
-//  Meme principe que les sessions : suivi NATIF du plus haut / plus bas de
-//  chaque periode 1H et 4H sur les bougies du graphique, puis ligne ancree par
-//  bar_index sur la bougie de l'extreme. Aucun request.security → pas de repaint,
-//  les niveaux restent parfaitement accroches aux bougies sur tous les TF.
-//  Mitigation : figer (estomper) ou supprimer la ligne quand elle est balayee.
+//  Meme principe que les sessions : suivi natif du plus haut / plus bas de
+//  chaque periode 1H et 4H sur les bougies du graphique, ligne ancree par
+//  bar_index sur la bougie de l'extreme. Nouvelle periode detectee via
+//  ta.change(time(tf)) (meme famille que la detection de session).
+//  On garde les N dernieres periodes. Mitigation : figer ou supprimer.
 // ─────────────────────────────────────────────
 type Lvl
     line   ln
@@ -269,7 +268,8 @@ manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color
 
     // On ne suit ce TF que si le graphique est sur un TF <= (sinon non pertinent).
     tfOk = timeframe.in_seconds(timeframe.period) <= timeframe.in_seconds(tf)
-    newP = timeframe.change(tf)   // true sur la 1re bougie d'une nouvelle periode 1H / 4H
+    // Nouvelle periode 1H / 4H : l'heure d'ouverture de la periode change.
+    newP = ta.change(time(tf)) != 0
 
     // Fin de periode → on fige le high & le low ecoules, accroches a LEUR bougie.
     if show and tfOk and newP and not na(ph)
@@ -281,7 +281,6 @@ manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color
         lbL = label.new(plBar, pl, show_labels ? tag + " Low" : "", textcolor=colLo, style=label.style_none, size=size.small)
         array.push(levels, Lvl.new(lnL, lbL, pl, false, true, bar_index, colLo))
 
-        // On ne garde que les maxN derniers highs + maxN derniers lows.
         while array.size(levels) > maxN * 2
             old = array.shift(levels)
             line.delete(old.ln)
@@ -298,7 +297,6 @@ manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color
             pl := low,  plBar := bar_index
 
     // Extension des lignes actives jusqu'a la bougie courante + detection de balayage.
-    // Les labels restent ancres a la bougie de l'extreme (ils ne bougent pas).
     basisHi = sweepBasis == "Clôture" ? close : high
     basisLo = sweepBasis == "Clôture" ? close : low
     if array.size(levels) > 0

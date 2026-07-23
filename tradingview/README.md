@@ -25,6 +25,15 @@ des bougies 1H et 4H continuent d'être tracés.
 | **Afficher les labels** | Affiche ou masque le texte (`1h High`, `4h Low`…). |
 | **Épaisseur / Style de ligne** | Épaisseur (1–5) et style (plein, tirets, pointillés). |
 
+### Mitigation (niveaux balayés)
+
+| Réglage | Description |
+| --- | --- |
+| **Arrêter les lignes balayées** | Active la détection de balayage : une ligne cesse de suivre le prix dès qu'elle est prise. |
+| **Action quand balayé** | `Figer` = la ligne s'arrête au point de balayage. `Supprimer` = la ligne est retirée. |
+| **Balayage sur** | `Mèche` = balayé dès qu'une mèche traverse le niveau. `Clôture` = balayé seulement si la bougie clôture au-delà. |
+| **Estomper les lignes figées** | En mode `Figer`, rend la ligne balayée transparente + tirets et masque son label. |
+
 ## Notes
 
 - Les valeurs utilisées sont celles de la **dernière bougie clôturée**

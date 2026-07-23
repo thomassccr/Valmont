@@ -1,46 +1,253 @@
-//@version=5
-// =============================================================================
-//  Thomas | Highs & Lows 1H / 4H
-// -----------------------------------------------------------------------------
-//  Trace le HIGH et le LOW de chaque bougie cloturee en 1H et en 4H sous forme
-//  de lignes horizontales avec un label ("1h High", "1h Low", "4h High"...).
-//
-//  Les niveaux sont recuperes via request.security : ils restent donc affiches
-//  quel que soit le timeframe du graphique. Tu peux descendre en 15m / 5m / 1m,
-//  les highs & lows des bougies 1H et 4H continuent d'etre traces.
-//
-//  Mitigation : quand un niveau est balaye par le prix, la ligne est soit
-//  figee au point de balayage (et estompee), soit supprimee.
-// =============================================================================
-indicator("Thomas | Highs & Lows 1H / 4H", overlay = true, max_lines_count = 500, max_labels_count = 500)
+//@version=6
+indicator("Thomas| Trading Session Highs & Lows", overlay=true, max_lines_count=500, max_labels_count=500)
 
-// ============================== INPUTS =======================================
-g1 = "1H"
-show1h  = input.bool(true,  "Afficher 1H",                        group = g1)
-n1h     = input.int(6,      "Nombre de bougies 1H a garder",      minval = 1, maxval = 100, group = g1)
-c1hHi   = input.color(color.new(color.white, 0),  "Couleur High 1H", group = g1, inline = "c1")
-c1hLo   = input.color(color.new(color.white, 0),  "Couleur Low 1H",  group = g1, inline = "c1")
+// ─────────────────────────────────────────────
+//  INPUTS
+// ─────────────────────────────────────────────
+grp_asia = "🌏 Session Asiatique"
+grp_lon  = "🇬🇧 Session Londres"
+grp_nyc  = "🗽 Session New York"
+grp_htf  = "📈 Highs & Lows 1H / 4H"
+grp_mit  = "🎯 Mitigation (niveaux balayés)"
+grp_disp = "⚙️ Affichage"
 
-g4 = "4H"
-show4h  = input.bool(true,  "Afficher 4H",                        group = g4)
-n4h     = input.int(6,      "Nombre de bougies 4H a garder",      minval = 1, maxval = 100, group = g4)
-c4hHi   = input.color(color.new(color.orange, 0), "Couleur High 4H", group = g4, inline = "c4")
-c4hLo   = input.color(color.new(color.orange, 0), "Couleur Low 4H",  group = g4, inline = "c4")
+show_asia = input.bool(true, "Afficher Session Asie",    group=grp_asia)
+show_lon  = input.bool(true, "Afficher Session Londres", group=grp_lon)
+show_nyc  = input.bool(true, "Afficher Session NYC",     group=grp_nyc)
 
-gS = "Style"
-showLbl   = input.bool(true,    "Afficher les labels",   group = gS)
-lineWidth = input.int(1,        "Epaisseur des lignes",  minval = 1, maxval = 5, group = gS)
-styleStr  = input.string("Solid", "Style de ligne", options = ["Solid", "Dashed", "Dotted"], group = gS)
+TZ = "Europe/Paris"
+asia_session = input.session("0200-1100", "Horaires Asie (Paris)",    group=grp_asia)
+lon_session  = input.session("0900-1800", "Horaires Londres (Paris)", group=grp_lon)
+nyc_session  = input.session("1530-2300", "Horaires NYC (Paris)",     group=grp_nyc)
 
-gM = "Mitigation (niveaux balayes)"
-mitigate     = input.bool(true,     "Arreter les lignes balayees",                                group = gM)
-mitigateMode = input.string("Figer", "Action quand balaye", options = ["Figer", "Supprimer"],     group = gM)
-sweepBasis   = input.string("Meche", "Balayage sur",        options = ["Meche", "Cloture"],        group = gM)
-fadeSwept    = input.bool(true,     "Estomper les lignes figees",                                  group = gM)
+col_asia_h = input.color(color.new(#00BFA5, 0), "Couleur High Asie",    group=grp_asia)
+col_asia_l = input.color(color.new(#00BFA5, 0), "Couleur Low Asie",     group=grp_asia)
+col_lon_h  = input.color(color.new(#2196F3, 0), "Couleur High Londres", group=grp_lon)
+col_lon_l  = input.color(color.new(#2196F3, 0), "Couleur Low Londres",  group=grp_lon)
+col_nyc_h  = input.color(color.new(#FF5252, 0), "Couleur High NYC",     group=grp_nyc)
+col_nyc_l  = input.color(color.new(#FF5252, 0), "Couleur Low NYC",      group=grp_nyc)
 
-lineStyle = styleStr == "Dashed" ? line.style_dashed : styleStr == "Dotted" ? line.style_dotted : line.style_solid
+// ── Highs & Lows 1H / 4H ──────────────────────
+show_1h = input.bool(true, "Afficher 1H",                   group=grp_htf)
+n_1h    = input.int(6, "Nombre de bougies 1H à garder",     minval=1, maxval=100, group=grp_htf)
+col_1h_h = input.color(color.new(color.white, 0),  "Couleur High 1H", group=grp_htf, inline="c1")
+col_1h_l = input.color(color.new(color.white, 0),  "Couleur Low 1H",  group=grp_htf, inline="c1")
 
-// ============================== TYPE =========================================
+show_4h = input.bool(true, "Afficher 4H",                   group=grp_htf)
+n_4h    = input.int(6, "Nombre de bougies 4H à garder",     minval=1, maxval=100, group=grp_htf)
+col_4h_h = input.color(color.new(color.orange, 0), "Couleur High 4H", group=grp_htf, inline="c4")
+col_4h_l = input.color(color.new(color.orange, 0), "Couleur Low 4H",  group=grp_htf, inline="c4")
+
+// ── Mitigation (s'applique aux niveaux 1H / 4H) ─
+mitigate     = input.bool(true,     "Arrêter les lignes balayées",                             group=grp_mit)
+mitigateMode = input.string("Figer", "Action quand balayé", options=["Figer", "Supprimer"],    group=grp_mit)
+sweepBasis   = input.string("Mèche", "Balayage sur",        options=["Mèche", "Clôture"],       group=grp_mit)
+fadeSwept    = input.bool(true,     "Estomper les lignes figées",                              group=grp_mit)
+
+line_width  = input.int(1, "Épaisseur des lignes", minval=1, maxval=4, group=grp_disp)
+line_style  = input.string("Solide", "Style des lignes", options=["Solide", "Pointillé", "Tirets"], group=grp_disp)
+show_labels = input.bool(true, "Afficher les labels", group=grp_disp)
+show_bg     = input.bool(false, "Afficher le fond des sessions", group=grp_disp)
+
+// ─────────────────────────────────────────────
+//  UTILITAIRES
+// ─────────────────────────────────────────────
+f_style() =>
+    switch line_style
+        "Pointillé" => line.style_dotted
+        "Tirets"    => line.style_dashed
+        =>             line.style_solid
+
+// ─────────────────────────────────────────────
+//  DÉTECTION DES SESSIONS
+// ─────────────────────────────────────────────
+in_asia = not na(time(timeframe.period, asia_session, TZ))
+in_lon  = not na(time(timeframe.period, lon_session,  TZ))
+in_nyc  = not na(time(timeframe.period, nyc_session,  TZ))
+
+asia_open  = in_asia and not in_asia[1]
+lon_open   = in_lon  and not in_lon[1]
+nyc_open   = in_nyc  and not in_nyc[1]
+
+asia_close = not in_asia and in_asia[1]
+lon_close  = not in_lon  and in_lon[1]
+nyc_close  = not in_nyc  and in_nyc[1]
+
+// ─────────────────────────────────────────────
+//  SUIVI HIGH / LOW + BARRE DU EXTREME
+// ─────────────────────────────────────────────
+var float asia_h = na,  var float asia_l = na
+var int   asia_h_bar = na, var int asia_l_bar = na
+
+var float lon_h = na,   var float lon_l = na
+var int   lon_h_bar = na,  var int lon_l_bar = na
+
+var float nyc_h = na,   var float nyc_l = na
+var int   nyc_h_bar = na,  var int nyc_l_bar = na
+
+// Reset à l'ouverture
+if asia_open
+    asia_h := high,  asia_l := low
+    asia_h_bar := bar_index, asia_l_bar := bar_index
+
+// Init si la première barre visible est déjà dans la session
+if in_asia and na(asia_h)
+    asia_h := high,  asia_l := low
+    asia_h_bar := bar_index, asia_l_bar := bar_index
+
+// Mise à jour pendant la session (barre suivante)
+if in_asia and not asia_open
+    if high >= asia_h
+        asia_h := high, asia_h_bar := bar_index
+    if low  <= asia_l
+        asia_l := low,  asia_l_bar := bar_index
+
+if lon_open
+    lon_h := high,  lon_l := low
+    lon_h_bar := bar_index, lon_l_bar := bar_index
+
+// Init si la première barre visible est déjà dans la session
+if in_lon and na(lon_h)
+    lon_h := high,  lon_l := low
+    lon_h_bar := bar_index, lon_l_bar := bar_index
+
+if in_lon and not lon_open
+    if high >= lon_h
+        lon_h := high, lon_h_bar := bar_index
+    if low  <= lon_l
+        lon_l := low,  lon_l_bar := bar_index
+
+if nyc_open
+    nyc_h := high,  nyc_l := low
+    nyc_h_bar := bar_index, nyc_l_bar := bar_index
+
+// Init si la première barre visible est déjà dans la session
+if in_nyc and na(nyc_h)
+    nyc_h := high,  nyc_l := low
+    nyc_h_bar := bar_index, nyc_l_bar := bar_index
+
+if in_nyc and not nyc_open
+    if high >= nyc_h
+        nyc_h := high, nyc_h_bar := bar_index
+    if low  <= nyc_l
+        nyc_l := low,  nyc_l_bar := bar_index
+
+// ─────────────────────────────────────────────
+//  LIGNES LIVE — recréées à chaque barre
+//  x1 = barre du high/low exact
+//  x2 = barre actuelle (grandit jusqu'à fin session)
+// ─────────────────────────────────────────────
+var line  live_asia_h = na, var line  live_asia_l = na
+var label live_asia_bh = na, var label live_asia_bl = na
+
+var line  live_lon_h = na,  var line  live_lon_l = na
+var label live_lon_bh = na, var label live_lon_bl = na
+
+var line  live_nyc_h = na,  var line  live_nyc_l = na
+var label live_nyc_bh = na, var label live_nyc_bl = na
+
+// ── ASIE LIVE ─────────────────────────────────
+if show_asia and in_asia and not na(asia_h) and not na(asia_h_bar) and not na(asia_l_bar)
+    line.delete(live_asia_h), line.delete(live_asia_l)
+    live_asia_h := line.new(asia_h_bar, asia_h, bar_index, asia_h, color=col_asia_h, width=line_width, style=f_style())
+    live_asia_l := line.new(asia_l_bar, asia_l, bar_index, asia_l, color=col_asia_l, width=line_width, style=f_style())
+    if show_labels
+        label.delete(live_asia_bh), label.delete(live_asia_bl)
+        live_asia_bh := label.new(bar_index, asia_h, "Asia High", color=color.new(color.white, 100), textcolor=col_asia_h, style=label.style_label_lower_left, size=size.small)
+        live_asia_bl := label.new(bar_index, asia_l, "Asia Low",  color=color.new(color.white, 100), textcolor=col_asia_l, style=label.style_label_lower_left, size=size.small)
+
+if show_asia and asia_close
+    line.delete(live_asia_h),   line.delete(live_asia_l)
+    label.delete(live_asia_bh), label.delete(live_asia_bl)
+    live_asia_h := na, live_asia_l := na
+    live_asia_bh := na, live_asia_bl := na
+
+// ── LONDRES LIVE ──────────────────────────────
+if show_lon and in_lon and not na(lon_h) and not na(lon_h_bar) and not na(lon_l_bar)
+    line.delete(live_lon_h), line.delete(live_lon_l)
+    live_lon_h := line.new(lon_h_bar, lon_h, bar_index, lon_h, color=col_lon_h, width=line_width, style=f_style())
+    live_lon_l := line.new(lon_l_bar, lon_l, bar_index, lon_l, color=col_lon_l, width=line_width, style=f_style())
+    if show_labels
+        label.delete(live_lon_bh), label.delete(live_lon_bl)
+        live_lon_bh := label.new(bar_index, lon_h, "London High", color=color.new(color.white, 100), textcolor=col_lon_h, style=label.style_label_lower_left, size=size.small)
+        live_lon_bl := label.new(bar_index, lon_l, "London Low",  color=color.new(color.white, 100), textcolor=col_lon_l, style=label.style_label_lower_left, size=size.small)
+
+if show_lon and lon_close
+    line.delete(live_lon_h),   line.delete(live_lon_l)
+    label.delete(live_lon_bh), label.delete(live_lon_bl)
+    live_lon_h := na, live_lon_l := na
+    live_lon_bh := na, live_lon_bl := na
+
+// ── NYC LIVE ──────────────────────────────────
+if show_nyc and in_nyc and not na(nyc_h) and not na(nyc_h_bar) and not na(nyc_l_bar)
+    line.delete(live_nyc_h), line.delete(live_nyc_l)
+    live_nyc_h := line.new(nyc_h_bar, nyc_h, bar_index, nyc_h, color=col_nyc_h, width=line_width, style=f_style())
+    live_nyc_l := line.new(nyc_l_bar, nyc_l, bar_index, nyc_l, color=col_nyc_l, width=line_width, style=f_style())
+    if show_labels
+        label.delete(live_nyc_bh), label.delete(live_nyc_bl)
+        live_nyc_bh := label.new(bar_index, nyc_h, "New-York High", color=color.new(color.white, 100), textcolor=col_nyc_h, style=label.style_label_lower_left, size=size.small)
+        live_nyc_bl := label.new(bar_index, nyc_l, "New-York Low",  color=color.new(color.white, 100), textcolor=col_nyc_l, style=label.style_label_lower_left, size=size.small)
+
+if show_nyc and nyc_close
+    line.delete(live_nyc_h),   line.delete(live_nyc_l)
+    label.delete(live_nyc_bh), label.delete(live_nyc_bl)
+    live_nyc_h := na, live_nyc_l := na
+    live_nyc_bh := na, live_nyc_bl := na
+
+// ─────────────────────────────────────────────
+//  LIGNES POST-SESSION
+//  x1 = barre du high/low, x2 = dernière barre session
+// ─────────────────────────────────────────────
+var line  prev_asia_lh = na, var line  prev_asia_ll = na
+var label prev_asia_bh = na, var label prev_asia_bl = na
+
+var line  prev_lon_lh = na,  var line  prev_lon_ll = na
+var label prev_lon_bh = na,  var label prev_lon_bl = na
+
+var line  prev_nyc_lh = na,  var line  prev_nyc_ll = na
+var label prev_nyc_bh = na,  var label prev_nyc_bl = na
+
+// ── ASIE POST ─────────────────────────────────
+if show_asia and asia_close and not na(asia_h)
+    prev_asia_lh := line.new(asia_h_bar, asia_h, bar_index, asia_h, color=col_asia_h, width=line_width, style=f_style())
+    prev_asia_ll := line.new(asia_l_bar, asia_l, bar_index, asia_l, color=col_asia_l, width=line_width, style=f_style())
+    if show_labels
+        prev_asia_bh := label.new(bar_index, asia_h, "Asia High", color=color.new(color.white, 100), textcolor=col_asia_h, style=label.style_label_lower_left, size=size.small)
+        prev_asia_bl := label.new(bar_index, asia_l, "Asia Low",  color=color.new(color.white, 100), textcolor=col_asia_l, style=label.style_label_lower_left, size=size.small)
+
+if show_asia and asia_open
+    line.delete(prev_asia_lh),  line.delete(prev_asia_ll)
+    label.delete(prev_asia_bh), label.delete(prev_asia_bl)
+
+// ── LONDRES POST ──────────────────────────────
+if show_lon and lon_close and not na(lon_h)
+    prev_lon_lh := line.new(lon_h_bar, lon_h, bar_index, lon_h, color=col_lon_h, width=line_width, style=f_style())
+    prev_lon_ll := line.new(lon_l_bar, lon_l, bar_index, lon_l, color=col_lon_l, width=line_width, style=f_style())
+    if show_labels
+        prev_lon_bh := label.new(bar_index, lon_h, "London High", color=color.new(color.white, 100), textcolor=col_lon_h, style=label.style_label_lower_left, size=size.small)
+        prev_lon_bl := label.new(bar_index, lon_l, "London Low",  color=color.new(color.white, 100), textcolor=col_lon_l, style=label.style_label_lower_left, size=size.small)
+
+if show_lon and lon_open
+    line.delete(prev_lon_lh),  line.delete(prev_lon_ll)
+    label.delete(prev_lon_bh), label.delete(prev_lon_bl)
+
+// ── NYC POST ──────────────────────────────────
+if show_nyc and nyc_close and not na(nyc_h)
+    prev_nyc_lh := line.new(nyc_h_bar, nyc_h, bar_index, nyc_h, color=col_nyc_h, width=line_width, style=f_style())
+    prev_nyc_ll := line.new(nyc_l_bar, nyc_l, bar_index, nyc_l, color=col_nyc_l, width=line_width, style=f_style())
+    if show_labels
+        prev_nyc_bh := label.new(bar_index, nyc_h, "New-York High", color=color.new(color.white, 100), textcolor=col_nyc_h, style=label.style_label_lower_left, size=size.small)
+        prev_nyc_bl := label.new(bar_index, nyc_l, "New-York Low",  color=color.new(color.white, 100), textcolor=col_nyc_l, style=label.style_label_lower_left, size=size.small)
+
+if show_nyc and nyc_open
+    line.delete(prev_nyc_lh),  line.delete(prev_nyc_ll)
+    label.delete(prev_nyc_bh), label.delete(prev_nyc_bl)
+
+// ─────────────────────────────────────────────
+//  HIGHS & LOWS 1H / 4H (multi-timeframe)
+//  Recuperes via request.security → restent affiches sur tous les TF.
+//  Mitigation : figer ou supprimer la ligne quand elle est balayee.
+// ─────────────────────────────────────────────
 type Lvl
     line   ln
     label  lb
@@ -50,37 +257,33 @@ type Lvl
     int    bornBar
     color  col
 
-// ============================== HELPER =======================================
-// Gere l'ensemble des niveaux pour un timeframe donne.
-// Les variables `var` sont persistantes et propres a chaque site d'appel,
-// donc un appel par TF garde ses propres tableaux.
 manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color colLo, string tag) =>
     var array<Lvl> levels = array.new<Lvl>()
 
     // Valeurs de la DERNIERE bougie cloturee (non repaint) + son heure d'ouverture.
-    [htfHigh, htfLow, htfTime] = request.security(syminfo.tickerid, tf, [high[1], low[1], time[1]], lookahead = barmerge.lookahead_on)
+    [htfHigh, htfLow, htfTime] = request.security(syminfo.tickerid, tf, [high[1], low[1], time[1]], lookahead=barmerge.lookahead_on)
 
     isNewClose = ta.change(htfTime) != 0
 
-    // ----- Creation d'un nouveau High + Low a chaque cloture HTF -----
+    // Creation d'un High + Low a chaque cloture HTF.
     if show and isNewClose and not na(htfHigh)
-        lnH = line.new(x1 = htfTime, y1 = htfHigh, x2 = time, y2 = htfHigh, xloc = xloc.bar_time, color = colHi, width = lineWidth, style = lineStyle)
-        lbH = label.new(x = time, y = htfHigh, xloc = xloc.bar_time, text = showLbl ? tag + " High" : "", textcolor = colHi, style = label.style_none, size = size.small)
+        lnH = line.new(x1=htfTime, y1=htfHigh, x2=time, y2=htfHigh, xloc=xloc.bar_time, color=colHi, width=line_width, style=f_style())
+        lbH = label.new(x=time, y=htfHigh, xloc=xloc.bar_time, text=show_labels ? tag + " High" : "", textcolor=colHi, style=label.style_none, size=size.small)
         array.push(levels, Lvl.new(lnH, lbH, htfHigh, true,  true, bar_index, colHi))
 
-        lnL = line.new(x1 = htfTime, y1 = htfLow, x2 = time, y2 = htfLow, xloc = xloc.bar_time, color = colLo, width = lineWidth, style = lineStyle)
-        lbL = label.new(x = time, y = htfLow, xloc = xloc.bar_time, text = showLbl ? tag + " Low" : "", textcolor = colLo, style = label.style_none, size = size.small)
+        lnL = line.new(x1=htfTime, y1=htfLow, x2=time, y2=htfLow, xloc=xloc.bar_time, color=colLo, width=line_width, style=f_style())
+        lbL = label.new(x=time, y=htfLow, xloc=xloc.bar_time, text=show_labels ? tag + " Low" : "", textcolor=colLo, style=label.style_none, size=size.small)
         array.push(levels, Lvl.new(lnL, lbL, htfLow, false, true, bar_index, colLo))
 
-        // On ne garde que les maxN*2 derniers objets (maxN highs + maxN lows).
+        // On ne garde que les maxN derniers highs + maxN derniers lows.
         while array.size(levels) > maxN * 2
             old = array.shift(levels)
             line.delete(old.ln)
             label.delete(old.lb)
 
-    // ----- Mise a jour + detection de balayage (a chaque barre) -----
-    basisHi = sweepBasis == "Cloture" ? close : high
-    basisLo = sweepBasis == "Cloture" ? close : low
+    // Mise a jour + detection de balayage (a chaque barre).
+    basisHi = sweepBasis == "Clôture" ? close : high
+    basisLo = sweepBasis == "Clôture" ? close : low
 
     if array.size(levels) > 0
         for i = array.size(levels) - 1 to 0
@@ -101,10 +304,15 @@ manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color
                             line.set_style(lv.ln, line.style_dashed)
                             label.set_text(lv.lb, "")
                 else
-                    // Toujours active : on prolonge jusqu'au bord droit.
                     line.set_x2(lv.ln, time)
                     label.set_x(lv.lb, time)
 
-// ============================== APPELS =======================================
-manageTF("60",  show1h, n1h, c1hHi, c1hLo, "1h")
-manageTF("240", show4h, n4h, c4hHi, c4hLo, "4h")
+manageTF("60",  show_1h, n_1h, col_1h_h, col_1h_l, "1h")
+manageTF("240", show_4h, n_4h, col_4h_h, col_4h_l, "4h")
+
+// ─────────────────────────────────────────────
+//  FOND DE SESSION
+// ─────────────────────────────────────────────
+bgcolor(show_bg and in_asia and show_asia ? color.new(#00BFA5, 92) : na, title="Fond Asie")
+bgcolor(show_bg and in_lon  and show_lon  ? color.new(#2196F3, 92) : na, title="Fond Londres")
+bgcolor(show_bg and in_nyc  and show_nyc  ? color.new(#FF5252, 92) : na, title="Fond NYC")

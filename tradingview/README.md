@@ -1,42 +1,57 @@
-# Indicateur TradingView — Highs & Lows 1H / 4H
+# Indicateur TradingView — Trading Session Highs & Lows
 
-Indicateur Pine Script (v5) qui marque les **highs** et **lows** des bougies
-**1H** et **4H** sous forme de lignes horizontales avec un label
-(`1h High`, `1h Low`, `4h High`, `4h Low`).
+Indicateur Pine Script (**v6**) qui regroupe **en un seul outil** :
 
-Les niveaux sont récupérés via `request.security`, donc ils **restent affichés
-sur tous les timeframes** : tu peux descendre en 15m, 5m ou 1m, les highs & lows
-des bougies 1H et 4H continuent d'être tracés.
+1. **Highs & Lows des sessions** Asie / Londres / New-York (lignes live pendant
+   la session, puis lignes conservées après clôture).
+2. **Highs & Lows 1H / 4H** : le high et le low de chaque bougie 1H et 4H,
+   récupérés via `request.security` — ils **restent affichés sur tous les
+   timeframes** (tu peux descendre en 15m, 5m, 1m, ils continuent de s'afficher).
 
 ## Installation
 
 1. Ouvre [TradingView](https://www.tradingview.com/) puis un graphique.
-2. En bas, ouvre l'onglet **Pine Editor** (Éditeur Pine).
+2. En bas, ouvre le **Pine Editor** (Éditeur Pine).
 3. Copie/colle le contenu de [`session-highs-lows.pine`](./session-highs-lows.pine).
-4. Clique sur **Save** (Enregistrer), puis **Add to chart** (Ajouter au graphique).
+4. Clique sur **Save** puis **Add to chart**.
 
 ## Réglages
 
-| Réglage | Description |
-| --- | --- |
-| **Afficher 1H / 4H** | Active ou désactive chaque timeframe. |
-| **Nombre de bougies à garder** | Nombre de highs/lows récents conservés à l'écran (par TF). |
-| **Couleurs High / Low** | Couleur des lignes et labels pour chaque TF. |
-| **Afficher les labels** | Affiche ou masque le texte (`1h High`, `4h Low`…). |
-| **Épaisseur / Style de ligne** | Épaisseur (1–5) et style (plein, tirets, pointillés). |
-
-### Mitigation (niveaux balayés)
+### Sessions (Asie / Londres / New-York)
 
 | Réglage | Description |
 | --- | --- |
-| **Arrêter les lignes balayées** | Active la détection de balayage : une ligne cesse de suivre le prix dès qu'elle est prise. |
-| **Action quand balayé** | `Figer` = la ligne s'arrête au point de balayage. `Supprimer` = la ligne est retirée. |
-| **Balayage sur** | `Mèche` = balayé dès qu'une mèche traverse le niveau. `Clôture` = balayé seulement si la bougie clôture au-delà. |
+| **Afficher la session** | Active/désactive chaque session. |
+| **Horaires (Paris)** | Plage horaire de la session (fuseau `Europe/Paris`). |
+| **Couleurs High / Low** | Couleur des lignes et labels par session. |
+
+### Highs & Lows 1H / 4H
+
+| Réglage | Description |
+| --- | --- |
+| **Afficher 1H / 4H** | Active/désactive chaque timeframe. |
+| **Nombre de bougies à garder** | Nombre de highs/lows récents conservés (par TF). |
+| **Couleurs High / Low** | Couleur des lignes et labels (blanc 1H, orange 4H par défaut). |
+
+### Mitigation (niveaux balayés — s'applique aux niveaux 1H / 4H)
+
+| Réglage | Description |
+| --- | --- |
+| **Arrêter les lignes balayées** | Une ligne cesse de suivre le prix dès qu'elle est prise. |
+| **Action quand balayé** | `Figer` = la ligne s'arrête au point de balayage · `Supprimer` = elle est retirée. |
+| **Balayage sur** | `Mèche` = balayé dès qu'une mèche traverse · `Clôture` = seulement si la bougie clôture au-delà. |
 | **Estomper les lignes figées** | En mode `Figer`, rend la ligne balayée transparente + tirets et masque son label. |
+
+### Affichage (commun)
+
+| Réglage | Description |
+| --- | --- |
+| **Épaisseur / Style de ligne** | Épaisseur (1–4) et style (solide, pointillé, tirets). |
+| **Afficher les labels** | Affiche ou masque le texte. |
+| **Afficher le fond des sessions** | Colore l'arrière-plan pendant chaque session. |
 
 ## Notes
 
-- Les valeurs utilisées sont celles de la **dernière bougie clôturée**
-  (`high[1]` / `low[1]` avec `lookahead_on`) : l'indicateur **ne repeint pas**.
-- Les lignes sont prolongées jusqu'au bord droit et les labels y sont recalés,
-  comme sur la capture de référence.
+- Les niveaux 1H/4H utilisent la **dernière bougie clôturée** (`high[1]` / `low[1]`
+  avec `lookahead_on`) : **pas de repeint**.
+- Le balayage ne peut pas se déclencher sur la bougie qui a créé le niveau.

@@ -1,0 +1,88 @@
+//@version=5
+// =============================================================================
+//  Thomas | Highs & Lows 1H / 4H
+// -----------------------------------------------------------------------------
+//  Trace le HIGH et le LOW de chaque bougie cloturee en 1H et en 4H sous forme
+//  de lignes horizontales avec un label ("1h High", "1h Low", "4h High"...).
+//
+//  Les niveaux sont recuperes via request.security : ils restent donc affiches
+//  quel que soit le timeframe du graphique. Tu peux descendre en 15m / 5m / 1m,
+//  les highs & lows des bougies 1H et 4H continuent d'etre traces.
+// =============================================================================
+indicator("Thomas | Highs & Lows 1H / 4H", overlay = true, max_lines_count = 500, max_labels_count = 500)
+
+// ============================== INPUTS =======================================
+g1 = "1H"
+show1h  = input.bool(true,  "Afficher 1H",                        group = g1)
+n1h     = input.int(6,      "Nombre de bougies 1H a garder",      minval = 1, maxval = 100, group = g1)
+c1hHi   = input.color(color.new(color.white, 0),  "Couleur High 1H", group = g1, inline = "c1")
+c1hLo   = input.color(color.new(color.white, 0),  "Couleur Low 1H",  group = g1, inline = "c1")
+
+g4 = "4H"
+show4h  = input.bool(true,  "Afficher 4H",                        group = g4)
+n4h     = input.int(6,      "Nombre de bougies 4H a garder",      minval = 1, maxval = 100, group = g4)
+c4hHi   = input.color(color.new(color.orange, 0), "Couleur High 4H", group = g4, inline = "c4")
+c4hLo   = input.color(color.new(color.orange, 0), "Couleur Low 4H",  group = g4, inline = "c4")
+
+gS = "Style"
+showLbl   = input.bool(true,    "Afficher les labels",   group = gS)
+lineWidth = input.int(1,        "Epaisseur des lignes",  minval = 1, maxval = 5, group = gS)
+styleStr  = input.string("Solid", "Style de ligne", options = ["Solid", "Dashed", "Dotted"], group = gS)
+
+lineStyle = styleStr == "Dashed" ? line.style_dashed : styleStr == "Dotted" ? line.style_dotted : line.style_solid
+
+// ============================== HELPER =======================================
+// Gere l'ensemble des lignes/labels pour un timeframe donne.
+// Les variables `var` sont persistantes et propres a chaque site d'appel,
+// donc un appel par TF garde ses propres tableaux.
+manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color colLo, string tag) =>
+    var array<line>  hiLines = array.new_line()
+    var array<label> hiLabs  = array.new_label()
+    var array<line>  loLines = array.new_line()
+    var array<label> loLabs  = array.new_label()
+
+    // Valeurs de la DERNIERE bougie cloturee (non repaint) + son heure d'ouverture.
+    [htfHigh, htfLow, htfTime] = request.security(syminfo.tickerid, tf, [high[1], low[1], time[1]], lookahead = barmerge.lookahead_on)
+
+    isNewClose = ta.change(htfTime) != 0
+
+    if show and isNewClose and not na(htfHigh)
+        // ----- HIGH -----
+        lnH = line.new(x1 = htfTime, y1 = htfHigh, x2 = time, y2 = htfHigh, xloc = xloc.bar_time, color = colHi, width = lineWidth, style = lineStyle)
+        array.push(hiLines, lnH)
+        lbH = label.new(x = time, y = htfHigh, xloc = xloc.bar_time, text = tag + " High", textcolor = colHi, style = label.style_none, size = size.small)
+        array.push(hiLabs, lbH)
+
+        // ----- LOW -----
+        lnL = line.new(x1 = htfTime, y1 = htfLow, x2 = time, y2 = htfLow, xloc = xloc.bar_time, color = colLo, width = lineWidth, style = lineStyle)
+        array.push(loLines, lnL)
+        lbL = label.new(x = time, y = htfLow, xloc = xloc.bar_time, text = tag + " Low", textcolor = colLo, style = label.style_none, size = size.small)
+        array.push(loLabs, lbL)
+
+        // ----- On ne garde que les maxN derniers -----
+        if array.size(hiLines) > maxN
+            line.delete(array.shift(hiLines))
+            label.delete(array.shift(hiLabs))
+        if array.size(loLines) > maxN
+            line.delete(array.shift(loLines))
+            label.delete(array.shift(loLabs))
+
+    // Sur la derniere barre : on prolonge chaque ligne jusqu'au bord droit
+    // et on recale les labels au bord droit (comportement de la capture).
+    if barstate.islast
+        if array.size(hiLines) > 0
+            for i = 0 to array.size(hiLines) - 1
+                line.set_x2(array.get(hiLines, i), time)
+                lb = array.get(hiLabs, i)
+                label.set_x(lb, time)
+                label.set_text(lb, showLbl ? tag + " High" : "")
+        if array.size(loLines) > 0
+            for i = 0 to array.size(loLines) - 1
+                line.set_x2(array.get(loLines, i), time)
+                lb = array.get(loLabs, i)
+                label.set_x(lb, time)
+                label.set_text(lb, showLbl ? tag + " Low" : "")
+
+// ============================== APPELS =======================================
+manageTF("60",  show1h, n1h, c1hHi, c1hLo, "1h")
+manageTF("240", show4h, n4h, c4hHi, c4hLo, "4h")

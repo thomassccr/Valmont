@@ -1,0 +1,26 @@
+# Déploiement rapide du bot via la CLI Wrangler (optionnel).
+# Si tu préfères, tu peux tout faire depuis le dashboard Cloudflare
+# en suivant INSTALLER-LE-BOT.md — ce fichier n'est pas obligatoire.
+
+name = "valmont-shutdown-bot"
+main = "shutdown-worker.js"
+compatibility_date = "2025-01-01"
+
+# Stockage du streak et des logs quotidiens.
+# Remplace <ton-kv-id> par l'ID renvoyé par :
+#   npx wrangler kv namespace create SHUTDOWN_KV
+kv_namespaces = [
+  { binding = "SHUTDOWN_KV", id = "<ton-kv-id>" }
+]
+
+# 00h30 à Paris. Cloudflare raisonne en UTC :
+#   été  (CEST, UTC+2) → 22h30 UTC → "30 22 * * *"
+#   hiver (CET,  UTC+1) → 23h30 UTC → "30 23 * * *"
+[triggers]
+crons = ["30 22 * * *"]
+
+# Les secrets ne se mettent PAS ici (ils resteraient en clair).
+# Ajoute-les avec :
+#   npx wrangler secret put BOT_TOKEN
+#   npx wrangler secret put WEBHOOK_SECRET
+#   npx wrangler secret put CHAT_ID

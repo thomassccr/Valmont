@@ -261,40 +261,55 @@ type Lvl
 
 manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color colLo, string tag) =>
     var array<Lvl> levels = array.new<Lvl>()
-    var float ph    = na    // plus haut de la periode en cours
-    var float pl    = na    // plus bas  de la periode en cours
-    var int   phBar = na    // bougie du plus haut
-    var int   plBar = na    // bougie du plus bas
+    // Bougie HTF en cours de construction (open/close + extremes)
+    var float cO = na, var float cC = na, var float cH = na, var float cL = na
+    var int   cHBar = na, var int cLBar = na
+    // Bougie HTF precedente (deja terminee)
+    var float pO = na, var float pC = na, var float pH = na, var float pL = na
+    var int   pHBar = na, var int pLBar = na
 
     // On ne suit ce TF que si le graphique est sur un TF <= (sinon non pertinent).
     tfOk = timeframe.in_seconds(timeframe.period) <= timeframe.in_seconds(tf)
-    // Nouvelle periode 1H / 4H : l'heure d'ouverture de la periode change.
+    // Nouvelle bougie 1H / 4H : l'heure d'ouverture de la periode change.
     newP = ta.change(time(tf)) != 0
 
-    // Fin de periode → on fige le high & le low ecoules, accroches a LEUR bougie.
-    if show and tfOk and newP and not na(ph)
-        lnH = line.new(phBar, ph, bar_index, ph, color=colHi, width=line_width, style=f_style())
-        lbH = label.new(phBar, ph, show_labels ? tag + " High" : "", textcolor=colHi, style=label.style_none, size=size.small)
-        array.push(levels, Lvl.new(lnH, lbH, ph, true,  true, bar_index, colHi))
+    // Fin d'une bougie HTF → on teste le retournement de couleur avec la precedente.
+    //   High = bougie BLANCHE (haussiere) suivie d'une bougie NOIRE (baissiere)  → sommet
+    //   Low  = bougie NOIRE  (baissiere) suivie d'une bougie BLANCHE (haussiere) → creux
+    if show and tfOk and newP and not na(cO)
+        curBull = cC >= cO
+        if not na(pO)
+            prevBull = pC >= pO
+            if prevBull and not curBull
+                // La bougie precedente (blanche) est un sommet → on marque son high.
+                lnH = line.new(pHBar, pH, bar_index, pH, color=colHi, width=line_width, style=f_style())
+                lbH = label.new(pHBar, pH, show_labels ? tag + " High" : "", textcolor=colHi, style=label.style_none, size=size.small)
+                array.push(levels, Lvl.new(lnH, lbH, pH, true, true, bar_index, colHi))
+            if (not prevBull) and curBull
+                // La bougie precedente (noire) est un creux → on marque son low.
+                lnL = line.new(pLBar, pL, bar_index, pL, color=colLo, width=line_width, style=f_style())
+                lbL = label.new(pLBar, pL, show_labels ? tag + " Low" : "", textcolor=colLo, style=label.style_none, size=size.small)
+                array.push(levels, Lvl.new(lnL, lbL, pL, false, true, bar_index, colLo))
 
-        lnL = line.new(plBar, pl, bar_index, pl, color=colLo, width=line_width, style=f_style())
-        lbL = label.new(plBar, pl, show_labels ? tag + " Low" : "", textcolor=colLo, style=label.style_none, size=size.small)
-        array.push(levels, Lvl.new(lnL, lbL, pl, false, true, bar_index, colLo))
+            while array.size(levels) > maxN * 2
+                old = array.shift(levels)
+                line.delete(old.ln)
+                label.delete(old.lb)
 
-        while array.size(levels) > maxN * 2
-            old = array.shift(levels)
-            line.delete(old.ln)
-            label.delete(old.lb)
+        // La bougie qui vient de se terminer devient la "precedente".
+        pO := cO, pC := cC, pH := cH, pL := cL
+        pHBar := cHBar, pLBar := cLBar
 
-    // Suivi du plus haut / plus bas de la periode en cours (natif, sur les bougies).
-    if na(ph) or newP
-        ph := high, pl := low
-        phBar := bar_index, plBar := bar_index
+    // Construction de la bougie HTF en cours (natif, sur les bougies du graphique).
+    if na(cO) or newP
+        cO := open, cC := close, cH := high, cL := low
+        cHBar := bar_index, cLBar := bar_index
     else
-        if high >= ph
-            ph := high, phBar := bar_index
-        if low  <= pl
-            pl := low,  plBar := bar_index
+        cC := close
+        if high >= cH
+            cH := high, cHBar := bar_index
+        if low  <= cL
+            cL := low,  cLBar := bar_index
 
     // Extension des lignes actives jusqu'a la bougie courante + detection de balayage.
     basisHi = sweepBasis == "Clôture" ? close : high

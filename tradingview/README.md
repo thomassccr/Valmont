@@ -52,10 +52,13 @@ Indicateur Pine Script (**v6**) qui regroupe **en un seul outil** :
 
 ## Notes
 
-- Les niveaux 1H/4H sont suivis **nativement** sur les bougies du graphique (comme
-  les sessions) et ancrés par `bar_index` sur la bougie de l'extrême : **aucun
-  `request.security`, donc aucun repeint** et des lignes **parfaitement accrochées
-  aux bougies** sur tous les timeframes.
+- Un **High 1H/4H** = une bougie **blanche** (haussière) suivie d'une bougie
+  **noire** (baissière) → le **sommet** de la bougie blanche. Un **Low** = une
+  bougie **noire** suivie d'une bougie **blanche** → le **creux** de la bougie noire.
+  (Détection du retournement de couleur sur les bougies 1H et 4H.)
+- Tout est calculé **nativement** sur les bougies du graphique et ancré par
+  `bar_index` : **aucun `request.security`, aucun repeint**, lignes accrochées
+  aux bougies sur tous les timeframes.
 - Un timeframe n'est tracé que si le graphique est sur un TF **inférieur ou égal**
   (ex. sur un chart 4H, le 1H n'est pas tracé).
 - Le balayage ne peut pas se déclencher sur la bougie qui a créé le niveau.

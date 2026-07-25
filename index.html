@@ -10978,7 +10978,7 @@ function animateBars() {
   const dur = 640, t0 = (typeof performance!=='undefined'?performance.now():Date.now());
   _barAnimP = 0;
   (function step(now){
-    let e = (now - t0) / dur; if (e > 1) e = 1;
+    let e = (now - t0) / dur; if (e > 1) e = 1; if (e < 0) e = 0;
     _barAnimP = 1 - Math.pow(1 - e, 3); // easeOutCubic
     if (chartParams && chartParams.bars) drawChart(chartParams.bars);
     if (e < 1) { _barAnimRAF = requestAnimationFrame(step); }
@@ -11075,10 +11075,11 @@ function drawChart(bars) {
       if (v === 0 && !b.hasData) return;
       ctx.fillStyle = v >= 0 ? '#4287f5' : '#e5484d';
       // Hauteur pleine puis mise à l'échelle par la progression d'animation (part de 0)
+      const p = _barAnimP < 0 ? 0 : (_barAnimP > 1 ? 1 : _barAnimP);
       const fullH = Math.max(2, Math.abs(fy(v) - y0));
-      const bH = fullH * _barAnimP;
+      const bH = fullH * p;
       const yTop = v >= 0 ? (y0 - bH) : y0;   // gains montent, pertes descendent depuis la ligne du zéro
-      const rr = Math.min(r, bH / 2);
+      const rr = Math.max(0, Math.min(r, bH / 2));
       ctx.beginPath();
       if (ctx.roundRect) {
         // coins arrondis du côté extérieur (haut pour gains, bas pour pertes)
@@ -12771,7 +12772,7 @@ document.addEventListener('mousedown', function(e) {
     }
 
     if (typeof ensureChartInit==='function') ensureChartInit();
-    if (typeof drawChart==='function') { window.chartParams={bars:bars}; drawChart(bars); }
+    if (typeof drawChart==='function') { window.chartParams={bars:bars}; drawChart(bars); if (typeof animateBars==='function' && (typeof chartType==='undefined' || chartType==='bar')) animateBars(); }
     if (typeof refreshCumulChart==='function') setTimeout(function(){ cumulSelectedIds = null; refreshCumulChart(); }, 40);
     if (typeof renderTable==='function') renderTable(trades);
     if (typeof renderChannels==='function') renderChannels(trades, totalPnl);

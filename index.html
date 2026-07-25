@@ -10970,6 +10970,21 @@ function getTradesInRange(start, end) {
 // ─── CHART ───
 let chartCanvas, chartCtx, chartParams = null, hoveredIdx = -1;
 let chartType = 'bar'; // 'bar' | 'line'
+// Animation d'apparition des barres : elles partent de 0 (ligne du zéro) et s'étendent jusqu'à leur valeur
+let _barAnimP = 1, _barAnimRAF = null;
+function animateBars() {
+  if (chartType !== 'bar') { _barAnimP = 1; return; }
+  if (_barAnimRAF) cancelAnimationFrame(_barAnimRAF);
+  const dur = 640, t0 = (typeof performance!=='undefined'?performance.now():Date.now());
+  _barAnimP = 0;
+  (function step(now){
+    let e = (now - t0) / dur; if (e > 1) e = 1;
+    _barAnimP = 1 - Math.pow(1 - e, 3); // easeOutCubic
+    if (chartParams && chartParams.bars) drawChart(chartParams.bars);
+    if (e < 1) { _barAnimRAF = requestAnimationFrame(step); }
+    else { _barAnimP = 1; _barAnimRAF = null; }
+  })(t0);
+}
 
 function setChartType(type) {
   chartType = type;
@@ -10985,7 +11000,7 @@ function setChartType(type) {
     _lc.style.display = type === 'line' ? 'flex' : 'none';
     _lc.innerHTML = '<div class="leg-line" style="background:rgba(61,142,240,0.9)"></div> P&L cumulatif';
   }
-  if (chartParams?.bars) drawChart(chartParams.bars);
+  if (chartParams?.bars) { drawChart(chartParams.bars); if (type === 'bar') animateBars(); }
 }
 
 function drawChart(bars) {
@@ -11059,12 +11074,15 @@ function drawChart(bars) {
       const x = fxB(i);
       if (v === 0 && !b.hasData) return;
       ctx.fillStyle = v >= 0 ? '#4287f5' : '#e5484d';
-      const yTop = v >= 0 ? fy(v) : y0;
-      const bH = Math.max(2, Math.abs(fy(v) - y0));
+      // Hauteur pleine puis mise à l'échelle par la progression d'animation (part de 0)
+      const fullH = Math.max(2, Math.abs(fy(v) - y0));
+      const bH = fullH * _barAnimP;
+      const yTop = v >= 0 ? (y0 - bH) : y0;   // gains montent, pertes descendent depuis la ligne du zéro
+      const rr = Math.min(r, bH / 2);
       ctx.beginPath();
       if (ctx.roundRect) {
         // coins arrondis du côté extérieur (haut pour gains, bas pour pertes)
-        ctx.roundRect(x, yTop, barW, bH, v >= 0 ? [r, r, 0, 0] : [0, 0, r, r]);
+        ctx.roundRect(x, yTop, barW, bH, v >= 0 ? [rr, rr, 0, 0] : [0, 0, rr, rr]);
       } else {
         ctx.rect(x, yTop, barW, bH);
       }
@@ -11307,7 +11325,7 @@ function render() {
 
   // Chart
   const bars = buildBarsForView(currentView, currentOffset);
-  setTimeout(() => drawChart(bars), 30);
+  setTimeout(() => { drawChart(bars); animateBars(); }, 30);
 
   // Table
   renderTable(trades);

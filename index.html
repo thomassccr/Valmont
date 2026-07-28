@@ -1435,7 +1435,9 @@ body .main { margin-top:0 !important; height:100vh !important; }
 /* Cartes sans contour (façon Infloww : séparation par l'espace, pas par des traits).
    Le contenu respire et dépasse la hauteur d'écran : la page défile de haut en bas. */
 #v-dashboard .chart-card { background:#17181a; border:none; }
-#v-dashboard .content { gap:18px; padding:18px 30px 32px; overflow-y:auto; min-height:0; }
+/* Toute la page défile (KPI compris) : c'est #v-dashboard qui scrolle, pas .content */
+#v-dashboard .content { gap:18px; padding:18px 30px 32px; overflow:visible; flex:0 0 auto; }
+#v-dashboard > * { flex-shrink:0; }
 #v-dashboard .content > * { flex-shrink:0; }
 #v-dashboard .chart-card { padding:20px 24px; }
 #v-dashboard .chart-card-header { margin-bottom:14px; }

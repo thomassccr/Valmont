@@ -1344,6 +1344,40 @@ body::after { content:''; position:fixed; inset:0; background-image:url("data:im
 .sidebar:not(.expanded):not(.mob-open) .sb-sub { display:none !important; }
 .sidebar:not(.expanded):not(.mob-open) .sb-chev { display:none; }
 
+/* ─── MENU VOLANT AU SURVOL (sidebar réduite) ───
+   Survoler un groupe affiche sa liste à droite : accès direct en un clic. */
+/* La nav rogne horizontalement (overflow-x:hidden) : on la libère quand la sidebar
+   est réduite, sinon le menu volant est coupé. Les icônes seules tiennent sans scroll. */
+.sidebar:not(.expanded):not(.mob-open) .sb-nav { overflow:visible; }
+.sidebar:not(.expanded):not(.mob-open) .sb-group { position:relative; }
+.sidebar:not(.expanded):not(.mob-open) .sb-group:hover > .sb-sub {
+  display:flex !important;
+  position:absolute; left:100%; top:-6px;
+  min-width:208px; padding:6px 6px 6px 10px; /* padding gauche = pont anti-perte de survol */
+  z-index:1200; gap:1px;
+}
+/* Le fond visible du panneau (le padding gauche reste transparent pour faire le pont) */
+.sidebar:not(.expanded):not(.mob-open) .sb-group:hover > .sb-sub::before {
+  content:''; position:absolute; left:10px; right:0; top:0; bottom:0;
+  background:var(--panel); border:1px solid var(--border2); border-radius:12px;
+  box-shadow:0 18px 50px rgba(0,0,0,.6); z-index:-1;
+}
+.sidebar:not(.expanded):not(.mob-open) .sb-group:hover > .sb-sub .nav-btn.sub {
+  padding:9px 14px; font-size:13px; border-radius:8px; white-space:nowrap;
+  justify-content:flex-start; /* annule le centrage des icônes de la sidebar réduite */
+}
+/* Les libellés sont masqués en sidebar réduite : on les réaffiche dans le menu volant */
+.sidebar:not(.expanded):not(.mob-open) .sb-group:hover > .sb-sub .nav-btn.sub span:not(.nav-tooltip) { display:inline; }
+.sidebar:not(.expanded):not(.mob-open) .sb-group:hover > .sb-sub .nav-btn.sub:hover { background:var(--lift); color:var(--text); }
+/* Titre du groupe en tête du panneau (injecté au chargement) */
+.sb-fly-title {
+  font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--text3); padding:7px 14px 6px; display:none; white-space:nowrap;
+}
+.sidebar:not(.expanded):not(.mob-open) .sb-group:hover > .sb-sub .sb-fly-title { display:block; }
+/* Pas de libellé flottant en doublon sur les groupes qui ont un menu */
+.sidebar:not(.expanded):not(.mob-open) .sb-group:hover > .nav-btn .nav-tooltip { opacity:0 !important; }
+
 /* ─── BOUTON OUVRIR/FERMER (haut de sidebar, style OF) ─── */
 .sb-toggle-row { padding:10px 12px 0; display:flex; flex-shrink:0; }
 .sb-toggle { width:32px; height:32px; border-radius:8px; background:transparent; border:none; color:#9a9aa0; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; padding:0; }
@@ -4763,6 +4797,24 @@ tbody tr:last-child td { border-bottom: none; }
     }
     g.classList.toggle('open');
   }
+  // Titre du groupe en tête du menu volant (sidebar réduite)
+  (function initSbFlyoutTitles(){
+    function build(){
+      document.querySelectorAll('.sb-group').forEach(function(g){
+        var sub = g.querySelector(':scope > .sb-sub');
+        if (!sub || sub.querySelector('.sb-fly-title')) return;
+        var btn = g.querySelector(':scope > .nav-btn');
+        var label = btn ? (btn.querySelector('span:not(.nav-tooltip)') || {}).textContent : '';
+        if (!label) return;
+        var t = document.createElement('div');
+        t.className = 'sb-fly-title';
+        t.textContent = label.trim();
+        sub.insertBefore(t, sub.firstChild);
+      });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
+    else build();
+  })();
   function sbSoon(name) {
     try { showToast(name + ' — bientôt disponible', 'info', '✦', 2600); } catch(e) {}
   }

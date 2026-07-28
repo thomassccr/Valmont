@@ -171,6 +171,106 @@ window.VMB = (function(){
   --shadow-md: 0 8px 32px rgba(0,0,0,.5);
   --shadow-glow: 0 0 20px rgba(61,142,240,.08);
 }
+/* ─── THÈME CLAIR ─── */
+body.theme-light {
+  --bg: #f4f5f7; --sidebar: #ffffff; --panel: #ffffff; --lift: #eef0f3;
+  --border: rgba(0,0,0,0.09); --border2: rgba(0,0,0,0.14);
+  --gold-dim: rgba(61,142,240,0.12); --gold-glow: rgba(61,142,240,0.10);
+  --text: #16181d; --text2: #5c6069; --text3: #8b9099;
+  --shadow-sm: 0 2px 8px rgba(15,20,30,.07);
+  --shadow-md: 0 8px 32px rgba(15,20,30,.12);
+  --shadow-glow: 0 0 20px rgba(61,142,240,.10);
+}
+body.theme-light::after { opacity:0.12; }
+/* Ossature de l'app */
+body.theme-light .main { background:#e9ebef; }
+body.theme-light .view { background:#ffffff; border-color:rgba(0,0,0,0.09); }
+body.theme-light #v-dashboard, body.theme-light #v-growth, body.theme-light #v-roadmap,
+body.theme-light #v-calendar, body.theme-light #v-employees, body.theme-light #v-leaderboard { background:#ffffff; }
+body.theme-light #v-dashboard .chart-card { background:#f7f8fa; }
+body.theme-light .chart-card { background:#ffffff; border-color:rgba(0,0,0,0.09); }
+body.theme-light .sidebar { border-right:1px solid rgba(0,0,0,0.08); }
+body.theme-light .tb-item { color:#2a2d33; }
+body.theme-light .tb-item svg, body.theme-light .tb-icon-btn { color:#5c6069; }
+body.theme-light .tb-btn:hover { background:rgba(0,0,0,0.05); }
+body.theme-light .tb-sep { background:rgba(0,0,0,0.12); }
+body.theme-light .tb-icon-btn { background:#eef1f6; border-color:rgba(0,0,0,0.12); }
+body.theme-light .nav-btn { color:#4a4f57; }
+body.theme-light .nav-btn:hover { background:rgba(0,0,0,0.05); color:#111; }
+body.theme-light .nav-btn.active { background:rgba(61,142,240,0.12); color:#1f6fd0; }
+/* Page d'accueil */
+body.theme-light .home-logo { color:#16181d; }
+body.theme-light #v-home { background:#f7f8fa; }
+body.theme-light #v-home::after { background:radial-gradient(ellipse 70% 60% at 50% 40%, rgba(61,142,240,0.09) 0%, transparent 70%); }
+body.theme-light .home-box { background:#ffffff; border-color:rgba(0,0,0,0.14); box-shadow:0 2px 10px rgba(15,20,30,.06); }
+body.theme-light .home-box input, body.theme-light .home-box textarea { color:#16181d; }
+body.theme-light .home-box input::placeholder, body.theme-light .home-box textarea::placeholder { color:#8b9099; }
+/* Champs de saisie génériques */
+body.theme-light input, body.theme-light textarea, body.theme-light select { color:#16181d; }
+body.theme-light .pm-input, body.theme-light .pm-select { background:#ffffff; border-color:rgba(0,0,0,0.14); color:#16181d; }
+/* Textes trop clairs sur fond blanc */
+body.theme-light .sum-total-val, body.theme-light .sum-val, body.theme-light .stat-val { color:#16181d; }
+body.theme-light .pms-row-label, body.theme-light .pms-title { color:#16181d; }
+body.theme-light .emp-sec-title, body.theme-light .pms-row-desc { color:#6b7078; }
+/* Surfaces sombres codées en dur → surfaces claires (classes connues) */
+body.theme-light .sc-frame, body.theme-light .rm-card, body.theme-light .rm-hero,
+body.theme-light .rm-hdr-btn, body.theme-light .rm-hdr-dd,
+body.theme-light .grw-proj, body.theme-light .emp-stat-tile { background:#ffffff; border-color:rgba(0,0,0,0.10); }
+body.theme-light .rm-hero { background:linear-gradient(180deg,#ffffff 0%,#f7f8fa 100%); }
+body.theme-light .rm-row.is-now .rm-card { background:#f6f8fb; border-color:rgba(0,0,0,0.2); }
+body.theme-light .rm-fchip { background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.08); color:#3c4048; }
+body.theme-light .rm-timeline::before { background:rgba(0,0,0,0.10); }
+body.theme-light .rm-line { background:linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.12) 100%); }
+body.theme-light .rm-dot { background:#ffffff; border-color:#c7cad0; }
+body.theme-light .rm-row.is-done .rm-dot { background:#16181d; border-color:#16181d; }
+body.theme-light .rm-row.is-now .rm-dot { background:#16181d; border-color:rgba(0,0,0,0.35); box-shadow:0 0 0 4px rgba(0,0,0,0.08); }
+body.theme-light .rm-row .rm-item::before { background:rgba(0,0,0,0.12); }
+body.theme-light .rm-row.is-done .rm-item::before, body.theme-light .rm-row.is-now .rm-item::before { background:rgba(0,0,0,0.4); }
+body.theme-light .rm-bar { background:rgba(0,0,0,0.08); }
+body.theme-light .rm-hero::before { background:linear-gradient(180deg,rgba(0,0,0,0.8),rgba(0,0,0,0.08)); }
+body.theme-light .rm-card-tier, body.theme-light .rm-hero-val, body.theme-light .rm-metric-val,
+body.theme-light .rm-req b, body.theme-light .rm-progress-top b { color:#16181d; }
+body.theme-light .rm-tag.done, body.theme-light .rm-tag.now { color:#16181d; }
+body.theme-light .rm-tag.done .rm-tag-dot, body.theme-light .rm-tag.now .rm-tag-dot { background:#16181d; }
+body.theme-light .inflow-et-opt { color:#3c4048; }
+body.theme-light .inflow-et-opt:hover { background:rgba(0,0,0,0.05); color:#000; }
+/* Styles inline sombres les plus fréquents (sélecteurs d'attribut) */
+body.theme-light [style*="background:#18181c"], body.theme-light [style*="background:#17181a"],
+body.theme-light [style*="background:#16161a"], body.theme-light [style*="background:#0d0d10"],
+body.theme-light [style*="background:#131318"], body.theme-light [style*="background:#141416"],
+body.theme-light [style*="background:#0e0e11"], body.theme-light [style*="background:#1b1d20"],
+body.theme-light [style*="background:#0a0a0a"], body.theme-light [style*="background:#111115"] {
+  background:#ffffff !important; border-color:rgba(0,0,0,0.10) !important;
+}
+body.theme-light [style*="color:#e0ddd8"], body.theme-light [style*="color:#e8e4de"],
+body.theme-light [style*="color:#c8c4be"], body.theme-light [style*="color:#eae6e0"],
+body.theme-light [style*="color:#f0ede8"], body.theme-light [style*="color:#ddd8cc"],
+body.theme-light [style*="color:#fff"] { color:#16181d !important; }
+body.theme-light [style*="color:#666"], body.theme-light [style*="color:#555"] { color:#6b7078 !important; }
+body.theme-light [style*="border-bottom:1px solid rgba(255,255,255"],
+body.theme-light [style*="border:1px solid rgba(255,255,255"],
+body.theme-light [style*="border-top:1px solid rgba(255,255,255"] { border-color:rgba(0,0,0,0.10) !important; }
+/* Aperçus de thème dans les réglages */
+.pms-themes { display:flex; gap:14px; width:100%; }
+.pms-theme { flex:1; border:1px solid var(--border2); border-radius:12px; overflow:hidden; cursor:pointer; background:transparent; padding:0; text-align:left; transition:border-color .16s, box-shadow .16s; }
+.pms-theme:hover { border-color:var(--gold); }
+.pms-theme.on { border-color:var(--gold); box-shadow:0 0 0 2px var(--gold-dim); }
+.pms-theme-prev { padding:16px; display:flex; flex-direction:column; gap:11px; }
+.pms-theme-prev .ln { display:flex; align-items:center; gap:10px; }
+.pms-theme-prev .cir { width:19px; height:19px; border-radius:50%; flex-shrink:0; }
+.pms-theme-prev .bar { height:19px; border-radius:5px; flex:1; }
+.pms-theme[data-theme="light"] .pms-theme-prev { background:#ffffff; }
+.pms-theme[data-theme="light"] .cir { background:#ffffff; border:1px solid #d8dade; }
+.pms-theme[data-theme="light"] .ln:first-child .bar { background:#f1f2f4; }
+.pms-theme[data-theme="light"] .ln:last-child .bar { background:#ccd9f5; }
+.pms-theme[data-theme="dark"] .pms-theme-prev { background:#17181a; }
+.pms-theme[data-theme="dark"] .cir { background:#3a3c41; }
+.pms-theme[data-theme="dark"] .ln:first-child .bar { background:#2e3034; }
+.pms-theme[data-theme="dark"] .ln:last-child .bar { background:#2f56c4; }
+.pms-theme-foot { display:flex; align-items:center; gap:9px; padding:11px 14px; border-top:1px solid var(--border); font-size:13px; color:var(--text); }
+.pms-theme-radio { width:15px; height:15px; border-radius:50%; border:1.5px solid var(--text3); flex-shrink:0; position:relative; transition:border-color .16s; }
+.pms-theme.on .pms-theme-radio { border-color:var(--gold); }
+.pms-theme.on .pms-theme-radio::after { content:''; position:absolute; inset:3px; border-radius:50%; background:var(--gold); }
 html, body { height: 100%; overflow: hidden; }
 body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; line-height: 1.6; display: flex; }
 body::after { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events:none; z-index:9999; opacity:0.35; }
@@ -7496,6 +7596,33 @@ document.getElementById('reg-pw-in')?.addEventListener('keydown',e=>{if(e.key===
 renderAccountsList();
 
 // VIEWS
+// ─── THÈME CLAIR / SOMBRE ───────────────────────────────
+function vmGetTheme(){ try { return localStorage.getItem('vm_theme')==='light' ? 'light' : 'dark'; } catch(e){ return 'dark'; } }
+// Encre des graphiques (canvas) : blanche en sombre, noire en clair
+function vmInk(a){ return vmGetTheme()==='light' ? 'rgba(0,0,0,'+a+')' : 'rgba(255,255,255,'+a+')'; }
+function vmApplyTheme(t){
+  document.body.classList.toggle('theme-light', t==='light');
+  var l=document.getElementById('pm-theme-light'), d=document.getElementById('pm-theme-dark');
+  if(l) l.classList.toggle('on', t==='light');
+  if(d) d.classList.toggle('on', t!=='light');
+  // Les graphiques sont dessinés au canvas : il faut les redessiner avec la bonne encre
+  try { if (typeof chartParams!=='undefined' && chartParams && chartParams.bars && typeof drawChart==='function') drawChart(chartParams.bars); } catch(e){}
+  try { if (typeof refreshCumulChart==='function') refreshCumulChart(); } catch(e){}
+  try { if (document.getElementById('v-growth') && document.getElementById('v-growth').classList.contains('on') && typeof renderGrowth==='function') renderGrowth(); } catch(e){}
+}
+function vmSetTheme(t){
+  t = (t==='light') ? 'light' : 'dark';
+  try { localStorage.setItem('vm_theme', t); } catch(e){}
+  vmApplyTheme(t);
+}
+window.vmSetTheme = vmSetTheme; window.vmGetTheme = vmGetTheme; window.vmInk = vmInk;
+// Application au chargement (avant le premier rendu visible)
+(function(){
+  function init(){ vmApplyTheme(vmGetTheme()); }
+  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+
 function showV(n){
   // close any open modals
   const sm = document.getElementById('strategy-modal');
@@ -8045,7 +8172,7 @@ function drawGrowthChart(series, target){
   ctx.font="10px 'DM Mono',monospace"; ctx.textAlign='right'; ctx.textBaseline='middle';
   ticks.forEach(function(tv){
     const gy=y(tv);
-    ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=1;
+    ctx.strokeStyle=vmInk(0.05); ctx.lineWidth=1;
     ctx.beginPath(); ctx.moveTo(padL,Math.round(gy)+0.5); ctx.lineTo(W-padR,Math.round(gy)+0.5); ctx.stroke();
     ctx.fillStyle='#7a7770'; ctx.fillText('$'+grwCompact(tv), padL-8, gy);
   });
@@ -8106,7 +8233,7 @@ function drawGrowthBars(monthly){
   const MON=['janv','févr','mars','avr','mai','juin','juil','août','sept','oct','nov','déc'];
   ctx.textAlign='center';
   // ligne zéro
-  ctx.strokeStyle='rgba(255,255,255,0.10)'; ctx.lineWidth=1;
+  ctx.strokeStyle=vmInk(0.10); ctx.lineWidth=1;
   ctx.beginPath(); ctx.moveTo(padL,Math.round(zeroY)+0.5); ctx.lineTo(W-padR,Math.round(zeroY)+0.5); ctx.stroke();
   data.forEach(function(d,i){
     const cx = padL + slot*i + slot/2;
@@ -10154,7 +10281,7 @@ function saveProfile() {
         ctx.beginPath();
         ctx.moveTo(0, H * i / 5);
         ctx.lineTo(W, H * i / 5);
-        ctx.strokeStyle = 'rgba(255,255,255,0.025)';
+        ctx.strokeStyle = vmInk(0.025);
         ctx.lineWidth = 1;
         ctx.stroke();
       }
@@ -10698,6 +10825,28 @@ const _origCalNext = calNext;
               <button class="active" id="pm-lang-fr" onclick="pmSetLang('fr')">Français</button>
               <button id="pm-lang-en" onclick="pmSetLang('en')">English</button>
             </div>
+          </div>
+        </div>
+        <div class="pms-row" style="flex-direction:column;align-items:stretch;gap:14px;">
+          <div class="pms-row-info">
+            <div class="pms-row-label">Affichage</div>
+            <div class="pms-row-desc">Choisis l'apparence de Valmont : mode clair ou mode sombre</div>
+          </div>
+          <div class="pms-themes">
+            <button class="pms-theme" data-theme="light" id="pm-theme-light" onclick="vmSetTheme('light')" type="button">
+              <div class="pms-theme-prev">
+                <div class="ln"><span class="cir"></span><span class="bar"></span></div>
+                <div class="ln"><span class="cir"></span><span class="bar" style="max-width:62%;"></span></div>
+              </div>
+              <div class="pms-theme-foot"><span class="pms-theme-radio"></span>Mode clair</div>
+            </button>
+            <button class="pms-theme" data-theme="dark" id="pm-theme-dark" onclick="vmSetTheme('dark')" type="button">
+              <div class="pms-theme-prev">
+                <div class="ln"><span class="cir"></span><span class="bar"></span></div>
+                <div class="ln"><span class="cir"></span><span class="bar" style="max-width:62%;"></span></div>
+              </div>
+              <div class="pms-theme-foot"><span class="pms-theme-radio"></span>Mode sombre</div>
+            </button>
           </div>
         </div>
         <div class="pms-row">
@@ -11284,7 +11433,7 @@ function drawChart(bars) {
   ctx.save(); ctx.scale(1, 1);
 
   if (!bars || bars.length === 0) {
-    ctx.font = '10px monospace'; ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.font = '10px monospace'; ctx.fillStyle = vmInk(0.2);
     ctx.textAlign = 'center'; ctx.fillText('AUCUN TRADE', W/2, H/2);
     ctx.restore(); return;
   }
@@ -11313,23 +11462,23 @@ function drawChart(bars) {
   const fxB = i => fxC(i) - barW/2;
 
   // Grid lines (quadrillage horizontal clair façon Infloww)
-  ctx.strokeStyle = 'rgba(255,255,255,0.07)'; ctx.lineWidth = 1;
+  ctx.strokeStyle = vmInk(0.07); ctx.lineWidth = 1;
   for (let g = 0; g <= 5; g++) {
     const y = Math.round(padT + (g/5) * chartH) + 0.5;
     ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W-padR, y); ctx.stroke();
     const val = maxV - (g/5) * range;
-    ctx.fillStyle = 'rgba(255,255,255,0.32)'; ctx.font = "9px 'DM Mono', monospace"; ctx.textAlign = 'right';
+    ctx.fillStyle = vmInk(0.32); ctx.font = "9px 'DM Mono', monospace"; ctx.textAlign = 'right';
     ctx.fillText((val>=0?'+':'') + Math.round(val), padL-8, y+3);
   }
 
   // Zero line
   const y0 = fy(0);
-  ctx.strokeStyle = 'rgba(255,255,255,0.14)'; ctx.setLineDash([4,4]); ctx.lineWidth = 1;
+  ctx.strokeStyle = vmInk(0.14); ctx.setLineDash([4,4]); ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(padL, y0); ctx.lineTo(W-padR, y0); ctx.stroke();
   ctx.setLineDash([]);
 
   // X labels
-  ctx.fillStyle = 'rgba(255,255,255,0.22)'; ctx.font = '8px monospace'; ctx.textAlign = 'center';
+  ctx.fillStyle = vmInk(0.22); ctx.font = '8px monospace'; ctx.textAlign = 'center';
   bars.forEach((b, i) => {
     if (n <= 14 || i % Math.ceil(n/14) === 0) {
       ctx.fillText(b.label || '', fxC(i), H - padB + 14);
@@ -11418,7 +11567,7 @@ function drawChart(bars) {
           : (lastCum >= 0 ? 'rgba(61,142,240,0.9)' : 'rgba(192,57,43,0.85)');
         ctx.fill();
         if (isHovered) {
-          ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+          ctx.strokeStyle = vmInk(0.5);
           ctx.lineWidth = 1.5;
           ctx.stroke();
         }
@@ -11829,7 +11978,7 @@ function drawCumulChart(accData) {
   cumulCtx.clearRect(0, 0, W, H);
 
   // Dark background fill like image 1
-  cumulCtx.fillStyle = 'rgba(0,0,0,0.25)';
+  cumulCtx.fillStyle = (typeof vmGetTheme==='function'&&vmGetTheme()==='light') ? 'rgba(0,0,0,0.03)' : 'rgba(0,0,0,0.25)';
   cumulCtx.roundRect ? cumulCtx.roundRect(0, 0, W, H, 6) : cumulCtx.rect(0, 0, W, H);
   cumulCtx.fill();
 
@@ -11849,7 +11998,7 @@ function drawCumulChart(accData) {
   const metaEl = document.getElementById('cumul-meta');
 
   if (!accData.length) {
-    cumulCtx.fillStyle = 'rgba(255,255,255,0.2)'; cumulCtx.font = '10px monospace'; cumulCtx.textAlign = 'center';
+    cumulCtx.fillStyle = vmInk(0.2); cumulCtx.font = '10px monospace'; cumulCtx.textAlign = 'center';
     cumulCtx.fillText('AUCUN TRADE', W/2, H/2);
     if (metaEl) metaEl.textContent = '—';
     return;
@@ -11876,7 +12025,7 @@ function drawCumulChart(accData) {
   }).filter(s => s.pts.length > 0);
 
   if (!series.length) {
-    cumulCtx.fillStyle = 'rgba(255,255,255,0.2)'; cumulCtx.font = '10px monospace'; cumulCtx.textAlign = 'center';
+    cumulCtx.fillStyle = vmInk(0.2); cumulCtx.font = '10px monospace'; cumulCtx.textAlign = 'center';
     cumulCtx.fillText('AUCUN TRADE', W/2, H/2);
     if (metaEl) metaEl.textContent = '—';
     return;
@@ -11924,16 +12073,16 @@ function drawCumulChart(accData) {
   const gridLines = 5;
   for (let g = 0; g <= gridLines; g++) {
     const y = padT + (g / gridLines) * cH;
-    cumulCtx.strokeStyle = 'rgba(255,255,255,0.045)'; cumulCtx.lineWidth = 1;
+    cumulCtx.strokeStyle = vmInk(0.045); cumulCtx.lineWidth = 1;
     cumulCtx.beginPath(); cumulCtx.moveTo(padL, y); cumulCtx.lineTo(W - padR, y); cumulCtx.stroke();
     const val = yMax - (g / gridLines) * yRange;
-    cumulCtx.fillStyle = 'rgba(255,255,255,0.22)'; cumulCtx.font = '9px monospace'; cumulCtx.textAlign = 'right';
+    cumulCtx.fillStyle = vmInk(0.22); cumulCtx.font = '9px monospace'; cumulCtx.textAlign = 'right';
     cumulCtx.fillText((val >= 0 ? '+' : '') + Math.round(val), padL - 5, y + 3);
   }
 
   // Zero line (dashed, white)
   const y0 = fy(0);
-  cumulCtx.strokeStyle = 'rgba(255,255,255,0.14)'; cumulCtx.setLineDash([4, 5]); cumulCtx.lineWidth = 1;
+  cumulCtx.strokeStyle = vmInk(0.14); cumulCtx.setLineDash([4, 5]); cumulCtx.lineWidth = 1;
   cumulCtx.beginPath(); cumulCtx.moveTo(padL, y0); cumulCtx.lineTo(W - padR, y0); cumulCtx.stroke();
   cumulCtx.setLineDash([]);
 
@@ -11977,7 +12126,7 @@ function drawCumulChart(accData) {
   });
 
   // X labels — based on shared date scale
-  cumulCtx.fillStyle = 'rgba(255,255,255,0.22)'; cumulCtx.font = '8px monospace'; cumulCtx.textAlign = 'center';
+  cumulCtx.fillStyle = vmInk(0.22); cumulCtx.font = '8px monospace'; cumulCtx.textAlign = 'center';
   const step = Math.max(1, Math.ceil(allDates.length / 8));
   allDates.forEach((date, i) => {
     if (i % step !== 0 && i !== allDates.length - 1) return;

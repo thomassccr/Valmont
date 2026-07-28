@@ -114,13 +114,40 @@
   .sc-bar { display:flex; align-items:center; gap:7px; padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.06); }
   .sc-dot { width:11px; height:11px; border-radius:50%; }
   .sc-frame img, .sc-frame video { display:block; width:100%; height:auto; }
-  /* Vidéo : une image du dashboard couvre la vidéo tant qu'elle n'a pas démarré (aucun blanc) */
-  .vid-wrap { position:relative; background:#0d0d10; }
+  /* Vidéo : l'aperçu du dashboard reste affiché tant que le visiteur n'a pas cliqué sur Play */
+  .vid-wrap { position:relative; background:#0d0d10; cursor:pointer; }
   /* Fond du lecteur = image du dashboard : même si le navigateur n'a pas encore d'image vidéo
      (ou rend la vidéo au-dessus de l'overlay, cas Safari), on voit le dashboard, jamais de blanc. */
   #demo-vid { background:#0d0d10 url('shots/dashboard.png') top left / cover no-repeat; }
-  .vid-cover { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:top left; z-index:2; pointer-events:none; transition:opacity .5s ease; }
-  .vid-wrap.revealed .vid-cover { opacity:0; }
+  .vid-cover { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:top left; z-index:2; pointer-events:none; transition:opacity .45s ease; }
+  .vid-wrap.playing .vid-cover { opacity:0; }
+  /* Voile sombre + bouton play au centre (façon lecteur vidéo) */
+  .vid-veil {
+    position:absolute; inset:0; z-index:3; display:flex; flex-direction:column; gap:20px;
+    align-items:center; justify-content:center;
+    background:linear-gradient(180deg, rgba(8,9,12,.28) 0%, rgba(8,9,12,.52) 100%);
+    transition:opacity .45s ease; opacity:1;
+  }
+  .vid-wrap.playing .vid-veil { opacity:0; pointer-events:none; }
+  .vid-play {
+    position:relative; width:92px; height:92px; border-radius:50%; border:none; padding:0; cursor:pointer;
+    background:rgba(18,19,23,.72); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    box-shadow:0 12px 44px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.22);
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .22s cubic-bezier(.3,1.4,.5,1), background .22s;
+  }
+  .vid-play svg { width:34px; height:34px; margin-left:5px; fill:#fff; }
+  .vid-wrap:hover .vid-play { transform:scale(1.09); background:rgba(28,30,36,.86); }
+  .vid-play::after {
+    content:''; position:absolute; inset:-1px; border-radius:50%;
+    border:1px solid rgba(255,255,255,.5); animation:vidPing 2.4s ease-out infinite;
+  }
+  .vid-label {
+    font-family:'DM Mono',monospace; font-size:10.5px; letter-spacing:.22em; text-transform:uppercase;
+    color:rgba(255,255,255,.8); pointer-events:none; text-shadow:0 2px 12px rgba(0,0,0,.7);
+  }
+  @keyframes vidPing { 0%{transform:scale(1);opacity:.6;} 100%{transform:scale(1.5);opacity:0;} }
+  @media (max-width:880px){ .vid-play { width:70px; height:70px; } .vid-play svg { width:26px; height:26px; } }
   /* Bloc vidéo pleine largeur au-dessus des sections */
   .feat.vwide { display:block; transform:translate(0,48px); }
   .feat.vwide.in { transform:translate(0,0); }
@@ -303,10 +330,16 @@
       <div class="feat-shot sc-frame">
         <div class="sc-bar"><span class="sc-dot" style="background:#ff5f57;"></span><span class="sc-dot" style="background:#febc2e;"></span><span class="sc-dot" style="background:#28c840;"></span></div>
         <div class="vid-wrap" id="demo-vid-wrap">
-          <video id="demo-vid" autoplay muted loop playsinline preload="auto" poster="shots/dashboard.png" aria-label="Démonstration de Valmont">
+          <video id="demo-vid" muted playsinline preload="metadata" poster="shots/dashboard.png" aria-label="Démonstration de Valmont">
             <source src="media/demo-v6.webm" type="video/webm">
           </video>
           <img class="vid-cover" src="shots/dashboard.png" alt="" aria-hidden="true">
+          <div class="vid-veil" id="demo-vid-veil">
+            <button class="vid-play" id="demo-vid-play" type="button" aria-label="Lire la démonstration de Valmont">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <div class="vid-label">Voir Valmont en action</div>
+          </div>
         </div>
       </div>
     </div>
@@ -608,20 +641,34 @@
   })();
   </script>
 
-  <!-- Vidéo démo : on ne révèle la vidéo qu'une fois qu'elle joue vraiment (jamais de blanc) -->
+  <!-- Vidéo démo : lecture uniquement au clic du visiteur (aperçu + bouton play tant qu'on n'a pas cliqué) -->
   <script>
   (function(){
     var wrap = document.getElementById('demo-vid-wrap');
-    var v = document.getElementById('demo-vid');
-    if(!wrap || !v) return;
-    var revealed = false;
-    function reveal(){ if(revealed) return; revealed = true; wrap.classList.add('revealed'); }
-    function cover(){ if(!revealed) return; revealed = false; wrap.classList.remove('revealed'); }
-    // On révèle la vidéo une fois l'intro passée ; on remet le cache quand elle reboucle au début
-    v.addEventListener('timeupdate', function(){ if(v.currentTime > 4.5) reveal(); else if(v.currentTime < 0.6) cover(); });
-    v.addEventListener('ended', cover);
-    // Tentative de lecture (au cas où l'autoplay tarde)
-    var pr = v.play && v.play(); if(pr && pr.catch) pr.catch(function(){});
+    var v    = document.getElementById('demo-vid');
+    var btn  = document.getElementById('demo-vid-play');
+    if(!wrap || !v || !btn) return;
+    var started = false;
+
+    function start(){
+      // L'intro de la vidéo est une image fixe du dashboard : on démarre après pour entrer direct dans l'app
+      if(!started){ started = true; try { if(v.duration && v.duration > 5) v.currentTime = 4.6; } catch(e){} }
+      wrap.classList.add('playing');
+      v.controls = true;
+      var pr = v.play(); if(pr && pr.catch) pr.catch(function(){});
+    }
+    function backToCover(){
+      wrap.classList.remove('playing');
+      v.controls = false;
+      started = false;
+      try { v.currentTime = 0; } catch(e){}
+    }
+
+    btn.addEventListener('click', function(e){ e.stopPropagation(); start(); });
+    // Clic n'importe où sur l'aperçu = lancer la vidéo
+    wrap.addEventListener('click', function(){ if(!wrap.classList.contains('playing')) start(); });
+    v.addEventListener('ended', backToCover);
+    v.addEventListener('pause', function(){ if(v.ended) backToCover(); });
   })();
   </script>
 

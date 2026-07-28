@@ -1405,24 +1405,25 @@ body .main { margin-top:0 !important; height:100vh !important; }
 @keyframes viewIn { from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);} }
 
 /* ─── ROADMAP ─── */
-.rm-hero { display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap;padding:2px 2px 24px;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:22px; }
-.rm-hero-main { display:flex;flex-direction:column;gap:6px; }
-.rm-hero-lbl { font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#726e67; }
-.rm-hero-val { font-family:'DM Sans',sans-serif;font-size:34px;font-weight:600;color:#e8e4de;line-height:1;font-variant-numeric:tabular-nums; }
-.rm-hero-val .u { font-size:15px;color:#726e67;font-weight:500;margin-left:3px; }
-.rm-hero-sub { font-family:'DM Sans',sans-serif;font-size:12.5px;color:#726e67; }
-.rm-hero-metrics { display:flex;gap:0; }
-.rm-metric { padding:2px 22px;border-left:1px solid rgba(255,255,255,0.08); }
+.rm-hdr-btn { display:flex;align-items:center;gap:6px;padding:6px 14px;background:#18181c;border:1px solid rgba(255,255,255,0.11);border-radius:8px;color:#c8c4be;font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;transition:border-color .15s;white-space:nowrap; }
+.rm-hdr-btn:hover { border-color:rgba(255,255,255,0.22); }
+.rm-hdr-btn .chev { width:12px;height:12px;color:#666; }
+.rm-hdr-dd { display:none;position:absolute;right:0;top:calc(100% + 6px);background:#18181c;border:1px solid rgba(255,255,255,0.12);border-radius:10px;box-shadow:0 16px 48px rgba(0,0,0,.85);z-index:2000;overflow:hidden;min-width:210px; }
+.rm-dd-title { padding:8px 14px 6px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#666; }
+.rm-opt-note { margin-left:auto;padding-left:16px;color:#5f5b55;font-size:11px; }
+.rm-hero { position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap;padding:22px 26px;margin-bottom:26px;background:linear-gradient(135deg,#151a24 0%,#111319 62%);border:1px solid rgba(61,142,240,0.18);border-radius:16px;overflow:hidden; }
+.rm-hero::before { content:'';position:absolute;top:-45%;right:-3%;width:300px;height:300px;background:radial-gradient(circle,rgba(61,142,240,0.16),transparent 70%);pointer-events:none; }
+.rm-hero-main { position:relative;display:flex;flex-direction:column;gap:8px;z-index:1; }
+.rm-hero-lbl { font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#8a97ac; }
+.rm-hero-val { font-family:'DM Sans',sans-serif;font-size:38px;font-weight:700;color:#f2f0ec;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-0.01em; }
+.rm-hero-val .u { font-size:15px;color:#7f8ba0;font-weight:500;margin-left:3px; }
+.rm-hero-sub { font-family:'DM Sans',sans-serif;font-size:12.5px;color:#8a8680; }
+.rm-hero-sub b { color:#b8c4d6;font-weight:600; }
+.rm-hero-metrics { position:relative;display:flex;gap:0;z-index:1; }
+.rm-metric { padding:2px 22px;border-left:1px solid rgba(255,255,255,0.09); }
 .rm-metric:first-child { padding-left:0;border-left:none; }
-.rm-metric-val { font-family:'DM Sans',sans-serif;font-size:20px;font-weight:600;color:#e8e4de;line-height:1;font-variant-numeric:tabular-nums; }
-.rm-metric-lbl { font-family:'DM Sans',sans-serif;font-size:11.5px;color:#726e67;margin-top:8px; }
-.rm-settings { display:flex;gap:34px;flex-wrap:wrap;background:#131316;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px 20px; }
-.rm-set-block { display:flex;flex-direction:column;gap:9px; }
-.rm-set-lbl { font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#726e67; }
-.rm-chips { display:flex;gap:7px; }
-.rm-chip { padding:6px 15px;background:#18181c;border:1px solid rgba(255,255,255,0.1);border-radius:9px;color:#9a9691;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;font-variant-numeric:tabular-nums; }
-.rm-chip:hover { border-color:rgba(255,255,255,0.24);color:#c8c4be; }
-.rm-chip.on { background:rgba(61,142,240,0.13);border-color:rgba(61,142,240,0.5);color:#9fc6f8; }
+.rm-metric-val { font-family:'DM Sans',sans-serif;font-size:21px;font-weight:600;color:#e8e4de;line-height:1;font-variant-numeric:tabular-nums; }
+.rm-metric-lbl { font-family:'DM Sans',sans-serif;font-size:11.5px;color:#8a8680;margin-top:8px; }
 .rm-track { position:relative;display:flex;flex-direction:column;gap:0; }
 .rm-node { position:relative;display:flex;gap:20px;padding-bottom:18px; }
 .rm-node:last-child { padding-bottom:0; }
@@ -5997,14 +5998,35 @@ tbody tr:last-child td { border-bottom: none; }
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;">
           <div style="position:relative;" id="rm-acc-wrap">
-            <button onclick="rmToggleAccDropdown(event)" style="display:flex;align-items:center;gap:6px;padding:6px 14px;background:#18181c;border:1px solid rgba(255,255,255,0.11);border-radius:8px;color:#c8c4be;font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.22)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.11)'">
+            <button onclick="rmToggleAccDropdown(event)" class="rm-hdr-btn">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px;color:#888;"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="8"/><rect x="12" y="6" width="3" height="12"/><rect x="17" y="13" width="3" height="5"/></svg>
               <span id="rm-acc-label">Comptes de départ</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;color:#666;"><polyline points="6 9 12 15 18 9"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chev"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
-            <div id="rm-acc-dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:#18181c;border:1px solid rgba(255,255,255,0.12);border-radius:10px;box-shadow:0 16px 48px rgba(0,0,0,.85);z-index:2000;overflow:hidden;min-width:230px;max-width:300px;">
-              <div style="padding:8px 14px 6px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#666;">Comptes avec lesquels tu démarres</div>
+            <div id="rm-acc-dropdown" class="rm-hdr-dd" style="max-width:300px;">
+              <div class="rm-dd-title">Comptes avec lesquels tu démarres</div>
               <div id="rm-acc-list" style="padding:2px 0 6px;"></div>
+            </div>
+          </div>
+          <div style="position:relative;" id="rm-ret-wrap">
+            <button onclick="rmToggleRetDropdown(event)" class="rm-hdr-btn">
+              <span style="color:#726e67;">Rendement</span>
+              <span id="rm-ret-label" style="font-weight:600;">8 %/mois</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chev"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div id="rm-ret-dropdown" class="rm-hdr-dd">
+              <div class="rm-dd-title">Rendement mensuel visé</div>
+              <div id="rm-ret-list" style="padding:2px 0 6px;"></div>
+            </div>
+          </div>
+          <div style="position:relative;" id="rm-split-wrap">
+            <button onclick="rmToggleSplitDropdown(event)" class="rm-hdr-btn">
+              <span id="rm-split-label" style="font-weight:600;">Tu gardes 80 %</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chev"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div id="rm-split-dropdown" class="rm-hdr-dd">
+              <div class="rm-dd-title">Part que tu gardes (après split prop firm)</div>
+              <div id="rm-split-list" style="padding:2px 0 6px;"></div>
             </div>
           </div>
         </div>
@@ -6014,19 +6036,7 @@ tbody tr:last-child td { border-bottom: none; }
       <div style="flex:1;overflow-y:auto;padding:22px 28px 40px;">
         <div id="rm-hero" class="rm-hero"></div>
 
-        <!-- Réglages -->
-        <div class="rm-settings">
-          <div class="rm-set-block">
-            <div class="rm-set-lbl">Rendement mensuel visé</div>
-            <div class="rm-chips" id="rm-return-chips"></div>
-          </div>
-          <div class="rm-set-block">
-            <div class="rm-set-lbl">Part que tu gardes <span style="color:#555;">(après split prop firm)</span></div>
-            <div class="rm-chips" id="rm-split-chips"></div>
-          </div>
-        </div>
-
-        <div class="emp-sec-title" style="margin-top:26px;">Ta feuille de route</div>
+        <div class="emp-sec-title" style="margin-top:4px;">Ta feuille de route</div>
         <div id="rm-roadmap"></div>
       </div>
     </div><!-- /v-roadmap -->
@@ -7697,10 +7707,17 @@ function rmFmt(v){ v=Math.round(v); return '$'+v.toLocaleString('fr-FR'); }
 function rmFmtK(v){ var a=Math.abs(v); if(a>=1000000) return '$'+(v/1000000).toFixed(v%1000000===0?0:1).replace('.',',')+'M'; if(a>=1000) return '$'+Math.round(v/1000)+'k'; return '$'+Math.round(v); }
 function rmAccActive(id){ return window.rmExcluded.indexOf(String(id))===-1; }
 function rmToggleAccount(id){ id=String(id); var i=window.rmExcluded.indexOf(id); if(i===-1) window.rmExcluded.push(id); else window.rmExcluded.splice(i,1); try{ localStorage.setItem('vm_rm_excluded', JSON.stringify(window.rmExcluded)); }catch(e){} renderRoadmap(); }
-function rmToggleAccDropdown(e){ if(e) e.stopPropagation(); var d=document.getElementById('rm-acc-dropdown'); if(d) d.style.display=(d.style.display==='none'||!d.style.display)?'block':'none'; }
-document.addEventListener('mousedown', function(e){ var w=document.getElementById('rm-acc-wrap'); if(w && !w.contains(e.target)){ var d=document.getElementById('rm-acc-dropdown'); if(d) d.style.display='none'; } });
-function rmSetReturn(v){ window.rmReturn=v; try{ localStorage.setItem('vm_rm_return', String(v)); }catch(e){} renderRoadmap(); }
-function rmSetSplit(v){ window.rmSplit=v; try{ localStorage.setItem('vm_rm_split', String(v)); }catch(e){} renderRoadmap(); }
+function rmCloseDropdowns(except){ ['rm-acc-dropdown','rm-ret-dropdown','rm-split-dropdown'].forEach(function(id){ if(id!==except){ var d=document.getElementById(id); if(d) d.style.display='none'; } }); }
+function rmToggleDD(id, e){ if(e) e.stopPropagation(); var d=document.getElementById(id); if(!d) return; var open=(d.style.display==='block'); rmCloseDropdowns(); d.style.display=open?'none':'block'; }
+function rmToggleAccDropdown(e){ rmToggleDD('rm-acc-dropdown', e); }
+function rmToggleRetDropdown(e){ rmToggleDD('rm-ret-dropdown', e); }
+function rmToggleSplitDropdown(e){ rmToggleDD('rm-split-dropdown', e); }
+document.addEventListener('mousedown', function(e){
+  ['rm-acc-wrap','rm-ret-wrap','rm-split-wrap'].forEach(function(wid){ var w=document.getElementById(wid); if(w && !w.contains(e.target)){ var d=w.querySelector('.rm-hdr-dd'); if(d) d.style.display='none'; } });
+});
+function rmSetReturn(v){ window.rmReturn=v; try{ localStorage.setItem('vm_rm_return', String(v)); }catch(e){} rmCloseDropdowns(); renderRoadmap(); }
+function rmSetSplit(v){ window.rmSplit=v; try{ localStorage.setItem('vm_rm_split', String(v)); }catch(e){} rmCloseDropdowns(); renderRoadmap(); }
+const RM_RETURN_NOTE = {5:'prudent', 8:'réaliste', 12:'ambitieux'};
 function rmCapitalFor(income){ var r=(window.rmReturn/100)*(window.rmSplit/100); return r>0 ? income/r : 0; }
 
 function rmData(){
@@ -7733,11 +7750,14 @@ function renderRoadmap(){
   }
   var lbl = document.getElementById('rm-acc-label');
   if (lbl) { var on=d.accts.filter(function(a){return a.active;}).length, tot=d.accts.length; lbl.textContent = (tot && on===tot)?'Tous les comptes':(on+'/'+tot+' compte'+(on>1?'s':'')); }
-  // chips
-  var rc=document.getElementById('rm-return-chips');
-  if (rc) rc.innerHTML = RM_RETURN_OPTS.map(function(v){ return '<button class="rm-chip'+(window.rmReturn===v?' on':'')+'" onclick="rmSetReturn('+v+')">'+v+'%</button>'; }).join('');
-  var sc=document.getElementById('rm-split-chips');
-  if (sc) sc.innerHTML = RM_SPLIT_OPTS.map(function(v){ return '<button class="rm-chip'+(window.rmSplit===v?' on':'')+'" onclick="rmSetSplit('+v+')">'+v+'%</button>'; }).join('');
+  // rendement (dropdown)
+  var rl=document.getElementById('rm-ret-list');
+  if (rl) rl.innerHTML = RM_RETURN_OPTS.map(function(v){ return '<button onclick="rmSetReturn('+v+')" class="inflow-et-opt"><span class="inflow-et-check" style="opacity:'+(window.rmReturn===v?1:0)+'">✓</span>'+v+' % / mois<span class="rm-opt-note">'+(RM_RETURN_NOTE[v]||'')+'</span></button>'; }).join('');
+  var rlab=document.getElementById('rm-ret-label'); if(rlab) rlab.textContent=window.rmReturn+' %/mois';
+  // part gardée (dropdown façon gross earnings)
+  var sl=document.getElementById('rm-split-list');
+  if (sl) sl.innerHTML = RM_SPLIT_OPTS.map(function(v){ return '<button onclick="rmSetSplit('+v+')" class="inflow-et-opt"><span class="inflow-et-check" style="opacity:'+(window.rmSplit===v?1:0)+'">✓</span>Tu gardes '+v+' %'+(v===80?'<span class="rm-opt-note">standard</span>':(v===100?'<span class="rm-opt-note">100 % à toi</span>':''))+'</button>'; }).join('');
+  var slab=document.getElementById('rm-split-label'); if(slab) slab.textContent='Tu gardes '+window.rmSplit+' %';
   // hero
   var hero=document.getElementById('rm-hero');
   if (hero) hero.innerHTML =

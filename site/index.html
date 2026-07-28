@@ -123,31 +123,21 @@
   .vid-wrap.playing .vid-cover { opacity:0; }
   /* Voile sombre + bouton play au centre (façon lecteur vidéo) */
   .vid-veil {
-    position:absolute; inset:0; z-index:3; display:flex; flex-direction:column; gap:20px;
+    position:absolute; inset:0; z-index:3; display:flex;
     align-items:center; justify-content:center;
     background:linear-gradient(180deg, rgba(8,9,12,.28) 0%, rgba(8,9,12,.52) 100%);
     transition:opacity .45s ease; opacity:1;
   }
   .vid-wrap.playing .vid-veil { opacity:0; pointer-events:none; }
   .vid-play {
-    position:relative; width:92px; height:92px; border-radius:50%; border:none; padding:0; cursor:pointer;
-    background:rgba(18,19,23,.72); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
-    box-shadow:0 12px 44px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.22);
+    position:relative; width:68px; height:68px; border-radius:50%; border:none; padding:0; cursor:pointer;
+    background:#26292e; outline:none; -webkit-tap-highlight-color:transparent;
     display:flex; align-items:center; justify-content:center;
-    transition:transform .22s cubic-bezier(.3,1.4,.5,1), background .22s;
+    transition:transform .18s cubic-bezier(.3,1.4,.5,1);
   }
-  .vid-play svg { width:34px; height:34px; margin-left:5px; fill:#fff; }
-  .vid-wrap:hover .vid-play { transform:scale(1.09); background:rgba(28,30,36,.86); }
-  .vid-play::after {
-    content:''; position:absolute; inset:-1px; border-radius:50%;
-    border:1px solid rgba(255,255,255,.5); animation:vidPing 2.4s ease-out infinite;
-  }
-  .vid-label {
-    font-family:'DM Mono',monospace; font-size:10.5px; letter-spacing:.22em; text-transform:uppercase;
-    color:rgba(255,255,255,.8); pointer-events:none; text-shadow:0 2px 12px rgba(0,0,0,.7);
-  }
-  @keyframes vidPing { 0%{transform:scale(1);opacity:.6;} 100%{transform:scale(1.5);opacity:0;} }
-  @media (max-width:880px){ .vid-play { width:70px; height:70px; } .vid-play svg { width:26px; height:26px; } }
+  .vid-play svg { width:26px; height:26px; margin-left:3px; fill:#fff; }
+  .vid-play:active { transform:scale(1.08); }
+  @media (max-width:880px){ .vid-play { width:56px; height:56px; } .vid-play svg { width:22px; height:22px; } }
   /* Bloc vidéo pleine largeur au-dessus des sections */
   .feat.vwide { display:block; transform:translate(0,48px); }
   .feat.vwide.in { transform:translate(0,0); }
@@ -338,7 +328,6 @@
             <button class="vid-play" id="demo-vid-play" type="button" aria-label="Lire la démonstration de Valmont">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
             </button>
-            <div class="vid-label">Voir Valmont en action</div>
           </div>
         </div>
       </div>

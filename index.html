@@ -1432,18 +1432,25 @@ body .main { margin-top:0 !important; height:100vh !important; }
    Sidebar et barre du haut restent noires ; seules les autres vues gardent la carte arrondie. */
 .main:has(#v-dashboard.on) { padding:0; }
 #v-dashboard { border:none; border-radius:12px 0 0 0; background:#17181a; }
-/* Cartes sans contour + sections resserrées (façon Infloww : séparation par l'espace, pas par des traits).
-   Tout est compacté pour tenir sur une page sans scroll. */
+/* Cartes sans contour (façon Infloww : séparation par l'espace, pas par des traits).
+   Le contenu respire et dépasse la hauteur d'écran : la page défile de haut en bas. */
 #v-dashboard .chart-card { background:#17181a; border:none; }
-#v-dashboard .content { gap:6px; padding:8px 24px 10px; overflow:hidden; }
+#v-dashboard .content { gap:18px; padding:18px 30px 32px; overflow-y:auto; min-height:0; }
 #v-dashboard .content > * { flex-shrink:0; }
-#v-dashboard .chart-card { padding:12px 16px; }
-#v-dashboard .chart-card-header { margin-bottom:8px; }
-/* Les deux cartes graphiques se partagent tout l'espace restant : la page ne scrolle jamais.
+#v-dashboard .chart-card { padding:20px 24px; }
+#v-dashboard .chart-card-header { margin-bottom:14px; }
+/* Les graphiques ont une hauteur généreuse et fixe (plus de compression pour tenir à l'écran).
    Les canvas sont en absolu dans leur zone ; le JS mesure la zone et redessine (ResizeObserver). */
-#v-dashboard .chart-card { flex:1 1 0; min-height:150px; display:flex; flex-direction:column; overflow:hidden; }
-#v-dashboard .chart-card .chart-wrap { flex:1; min-height:0; position:relative; }
+#v-dashboard .chart-card { flex:0 0 auto; display:flex; flex-direction:column; overflow:hidden; }
+#v-dashboard .chart-card .chart-wrap { height:340px; min-height:340px; position:relative; }
+#v-dashboard #cumul-card .chart-wrap { height:300px; min-height:300px; }
 #v-dashboard #main-chart, #v-dashboard #cumul-chart { position:absolute; left:0; top:0; }
+/* KPI et tuiles de statistiques plus généreux */
+#v-dashboard .vm-kpi-grid > div { padding-top:20px; padding-bottom:20px; }
+@media (max-width:900px){
+  #v-dashboard .content { padding:14px 16px 26px; gap:14px; }
+  #v-dashboard .chart-card .chart-wrap, #v-dashboard #cumul-card .chart-wrap { height:250px; min-height:250px; }
+}
 
 /* ─── GLOBAL TOP BAR (style OF) ─── */
 #global-topbar { flex-shrink:0; height:52px; display:flex; align-items:center; justify-content:flex-end; padding:0 4px; gap:6px; background:transparent; }

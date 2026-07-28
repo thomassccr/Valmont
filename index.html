@@ -209,7 +209,8 @@ body.theme-light [style*="background:#1b1d20"] { border:1px solid rgba(0,0,0,0.1
 /* Menus déroulants (le JS réécrit l'attribut style → on cible par id/classe) */
 body.theme-light #vm-filters-dropdown, body.theme-light #cumul-acc-dropdown,
 body.theme-light #grw-acc-dropdown, body.theme-light #grw-mode-dropdown,
-body.theme-light #vm-filters-btn, body.theme-light #drp-dropdown, body.theme-light #drp-btn {
+body.theme-light #vm-filters-btn, body.theme-light #drp-dropdown, body.theme-light #drp-btn,
+body.theme-light #inflow-et-dropdown, body.theme-light #inflow-et-btn {
   background:#ffffff !important; border-color:rgba(0,0,0,0.14) !important; color:#16181d !important;
   box-shadow:0 16px 48px rgba(15,20,30,.18) !important;
 }
@@ -261,6 +262,19 @@ body.theme-light .grw-ms-target { color:#16181d; }
 body.theme-light .grw-ms-track { background:rgba(0,0,0,0.09); }
 body.theme-light .grw-ms-status.locked { background:rgba(0,0,0,0.06); color:#6b7078; }
 body.theme-light .grw-ms-pct, body.theme-light .grw-ms-more { color:#6b7078; }
+body.theme-light #inflow-et-dropdown *, body.theme-light #inflow-et-dropdown .inflow-et-opt { color:#23262b !important; }
+body.theme-light #inflow-et-dropdown [style*="color:#555"], body.theme-light #inflow-et-dropdown [style*="letter-spacing"] { color:#6b7078 !important; }
+/* Session Review / chat */
+body.theme-light .msg-text.fc, body.theme-light .msg:not(.msg-user) .msg-text.fc { color:#23262b; }
+body.theme-light .md-p, body.theme-light .md-li, body.theme-light .md-li-text { color:#23262b; }
+body.theme-light .md-h1 { color:#16181d; }
+body.theme-light .msg-text.fu { color:#1a4f8f; background:rgba(61,142,240,.09); border-color:rgba(61,142,240,.22); }
+body.theme-light .inp-card { background:#ffffff; border:1px solid rgba(0,0,0,0.14); box-shadow:0 2px 12px rgba(15,20,30,.07); }
+body.theme-light .inp-card textarea { color:#16181d; }
+body.theme-light .inp-card textarea::placeholder { color:#8b9099; }
+body.theme-light .inp-plus-btn { background:rgba(0,0,0,0.06); color:#5c6069; }
+body.theme-light .inp-plus-btn:hover { background:rgba(0,0,0,0.12); }
+body.theme-light .send-btn { background:#16181d; color:#ffffff; }
 /* Page d'accueil */
 body.theme-light .home-logo { color:#16181d; }
 body.theme-light #v-home { background:#f7f8fa; }

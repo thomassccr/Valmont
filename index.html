@@ -1426,38 +1426,49 @@ body .main { margin-top:0 !important; height:100vh !important; }
 .rm-metric:last-child { padding-right:2px; }
 .rm-metric-val { font-family:'DM Sans',sans-serif;font-size:20px;font-weight:600;color:#e8e4de;line-height:1;font-variant-numeric:tabular-nums; }
 .rm-metric-lbl { font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:#726e67;margin-top:10px; }
-.rm-track { position:relative; }
-.rm-node { position:relative;display:flex;gap:22px;padding-bottom:12px; }
-.rm-node:last-child { padding-bottom:0; }
-.rm-node-rail { position:relative;flex-shrink:0;width:14px;display:flex;flex-direction:column;align-items:center;padding-top:23px; }
-.rm-node-dot { width:13px;height:13px;border-radius:50%;flex-shrink:0;z-index:2;border:2px solid #2c2d33;background:#141419;box-sizing:border-box;transition:all .2s; }
-.rm-node-line { flex:1;width:2px;background:rgba(255,255,255,0.06);margin-top:5px; }
-.rm-node:last-child .rm-node-line { display:none; }
-.rm-node.is-done .rm-node-dot { background:#3ecf5e;border-color:#3ecf5e; }
-.rm-node.is-done .rm-node-line { background:rgba(62,207,94,0.22); }
-.rm-node.is-now .rm-node-dot { background:#3d8ef0;border-color:rgba(61,142,240,0.4);box-shadow:0 0 0 4px rgba(61,142,240,0.15); }
-.rm-card { flex:1;background:#131318;border:1px solid rgba(255,255,255,0.07);border-radius:13px;padding:16px 20px;transition:border-color .18s,background .18s; }
-.rm-node.is-now .rm-card { background:linear-gradient(180deg,#161a22 0%,#121319 100%);border-color:rgba(61,142,240,0.26); }
-.rm-node.is-locked .rm-card { opacity:.66; }
-.rm-card-head { display:flex;align-items:flex-start;justify-content:space-between;gap:14px; }
-.rm-card-tier { font-family:'DM Sans',sans-serif;font-size:23px;font-weight:700;color:#eae6e0;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-0.015em; }
-.rm-card-tier .u { font-size:12.5px;color:#726e67;font-weight:500;letter-spacing:0; }
-.rm-card-year { font-family:'DM Mono',monospace;font-size:10.5px;color:#6c685f;margin-top:8px;font-variant-numeric:tabular-nums; }
-.rm-tag { display:inline-flex;align-items:center;gap:7px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;padding-top:3px; }
-.rm-tag .rm-tag-dot { width:6px;height:6px;border-radius:50%;flex-shrink:0; }
+/* Timeline centrale à paliers alternés gauche/droite */
+.rm-timeline { position:relative; padding:6px 0; }
+.rm-timeline::before { content:''; position:absolute; left:50%; top:10px; bottom:10px; width:2px; margin-left:-1px; background:linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%); border-radius:2px; }
+.rm-row { position:relative; display:flex; margin-bottom:20px; }
+.rm-row:last-child { margin-bottom:0; }
+.rm-row.right { justify-content:flex-end; }
+.rm-row.left { justify-content:flex-start; }
+.rm-item { position:relative; width:calc(50% - 46px); }
+.rm-row.right .rm-item::before, .rm-row.left .rm-item::before { content:''; position:absolute; top:27px; width:34px; height:2px; background:rgba(255,255,255,0.10); }
+.rm-row.right .rm-item::before { left:-40px; }
+.rm-row.left  .rm-item::before { right:-40px; }
+.rm-dot { position:absolute; left:50%; top:27px; width:15px; height:15px; border-radius:50%; transform:translate(-50%,-50%); border:2px solid #2f3037; background:#131318; z-index:3; box-sizing:border-box; transition:all .2s; }
+.rm-row.is-done .rm-dot { background:#3ecf5e; border-color:#3ecf5e; }
+.rm-row.is-now  .rm-dot { background:#3d8ef0; border-color:rgba(61,142,240,0.45); box-shadow:0 0 0 5px rgba(61,142,240,0.16); }
+.rm-row.is-done .rm-item::before { background:rgba(62,207,94,0.35); }
+.rm-row.is-now  .rm-item::before { background:rgba(61,142,240,0.4); }
+.rm-card { position:relative; background:#131318; border:1px solid rgba(255,255,255,0.07); border-radius:13px; padding:15px 18px; transition:border-color .18s, background .18s, transform .18s; }
+.rm-card:hover { transform:translateY(-1px); border-color:rgba(255,255,255,0.14); }
+.rm-row.is-now .rm-card { background:linear-gradient(180deg,#161a22 0%,#121319 100%); border-color:rgba(61,142,240,0.26); }
+.rm-row.is-locked .rm-card { opacity:.62; }
+.rm-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+.rm-card-tier { font-family:'DM Sans',sans-serif; font-size:22px; font-weight:700; color:#eae6e0; line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-0.015em; }
+.rm-card-tier .u { font-size:12px; color:#726e67; font-weight:500; letter-spacing:0; }
+.rm-card-year { font-family:'DM Mono',monospace; font-size:10px; color:#6c685f; margin-top:7px; font-variant-numeric:tabular-nums; }
+.rm-tag { display:inline-flex; align-items:center; gap:7px; font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; white-space:nowrap; padding-top:3px; }
+.rm-tag .rm-tag-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
 .rm-tag.done { color:#5fe08f; } .rm-tag.done .rm-tag-dot { background:#3ecf5e; }
-.rm-tag.now { color:#7fb4f5; } .rm-tag.now .rm-tag-dot { background:#3d8ef0;box-shadow:0 0 0 3px rgba(61,142,240,0.2); }
+.rm-tag.now { color:#7fb4f5; } .rm-tag.now .rm-tag-dot { background:#3d8ef0; box-shadow:0 0 0 3px rgba(61,142,240,0.2); }
 .rm-tag.locked { color:#6c685f; } .rm-tag.locked .rm-tag-dot { background:#3a3b40; }
-.rm-card-body { display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-top:18px;flex-wrap:wrap; }
-.rm-need { display:flex;flex-direction:column;gap:6px; }
-.rm-need-lbl { font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:#726e67; }
-.rm-need-val { font-family:'DM Sans',sans-serif;font-size:18px;font-weight:600;color:#e2ded8;font-variant-numeric:tabular-nums; }
-.rm-need-sub { font-family:'DM Sans',sans-serif;font-size:12px;color:#827e77; }
-.rm-progress { flex:1;min-width:190px;max-width:340px; }
-.rm-progress-top { display:flex;align-items:baseline;justify-content:space-between;gap:12px;font-family:'DM Mono',monospace;font-size:10.5px;color:#827e77;margin-bottom:8px;font-variant-numeric:tabular-nums; }
-.rm-progress-top b { color:#c8c4be;font-weight:600; }
-.rm-bar { height:4px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden; }
-.rm-bar-fill { height:100%;border-radius:3px;transition:width .7s cubic-bezier(.3,.85,.35,1); }
+.rm-req { font-family:'DM Sans',sans-serif; font-size:13px; color:#9a9691; margin:15px 0 13px; }
+.rm-req b { color:#e6e2dc; font-weight:600; font-size:15px; font-variant-numeric:tabular-nums; }
+.rm-req .sep { color:#4d4a45; margin:0 5px; }
+.rm-progress-top { display:flex; align-items:baseline; justify-content:space-between; gap:12px; font-family:'DM Mono',monospace; font-size:10px; color:#827e77; margin-bottom:7px; font-variant-numeric:tabular-nums; }
+.rm-progress-top b { color:#c8c4be; font-weight:600; }
+.rm-bar { height:4px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; }
+.rm-bar-fill { height:100%; border-radius:3px; transition:width .7s cubic-bezier(.3,.85,.35,1); }
+@media (max-width:920px){
+  .rm-timeline::before { left:16px; }
+  .rm-row.right, .rm-row.left { justify-content:flex-start; }
+  .rm-item { width:calc(100% - 42px); margin-left:40px; }
+  .rm-row.right .rm-item::before, .rm-row.left .rm-item::before { left:-40px; right:auto; }
+  .rm-dot { left:16px; }
+}
 
 /* HOME */
 #v-home { align-items:center; justify-content:center; background:var(--bg); }
@@ -7796,13 +7807,14 @@ function renderRoadmap(){
   var firstUnreached = -1, reachedCount = 0;
   for (var k=0;k<RM_INCOME_TARGETS.length;k++){ var nk=rmCapitalFor(RM_INCOME_TARGETS[k]); if(d.capital>=nk && nk>0){ reachedCount++; } else if(firstUnreached===-1){ firstUnreached=k; } }
   var cnt=document.getElementById('rm-count'); if(cnt) cnt.textContent = reachedCount+' / '+RM_INCOME_TARGETS.length+' paliers atteints';
-  var html = '<div class="rm-track">';
+  var html = '<div class="rm-timeline">';
   RM_INCOME_TARGETS.forEach(function(g, i){
     var need = rmCapitalFor(g);
     var pct = need>0 ? Math.min(100, d.capital/need*100) : 0;
     var reached = d.capital >= need && need>0;
     var isNow = i === firstUnreached;
-    var cls = reached ? 'is-done' : (isNow ? 'is-now' : 'is-locked');
+    var state = reached ? 'is-done' : (isNow ? 'is-now' : 'is-locked');
+    var side = (i % 2 === 0) ? 'right' : 'left';
     var tag = reached ? '<span class="rm-tag done"><span class="rm-tag-dot"></span>Atteint</span>'
             : (isNow ? '<span class="rm-tag now"><span class="rm-tag-dot"></span>Palier actuel</span>'
             : '<span class="rm-tag locked"><span class="rm-tag-dot"></span>Verrouillé</span>');
@@ -7813,16 +7825,17 @@ function renderRoadmap(){
       ? '<span>Capital couvert</span><span><b>'+rmFmtK(d.capital)+'</b></span>'
       : '<span><b>'+Math.round(pct)+' %</b> · reste '+rmFmtK(gap)+'</span><span>'+rmFmtK(d.capital)+' / '+rmFmtK(need)+'</span>';
     html +=
-      '<div class="rm-node '+cls+'">'+
-        '<div class="rm-node-rail"><div class="rm-node-dot"></div><div class="rm-node-line"></div></div>'+
-        '<div class="rm-card">'+
-          '<div class="rm-card-head">'+
-            '<div><div class="rm-card-tier">'+rmFmt(g)+'<span class="u"> / mois</span></div><div class="rm-card-year">'+rmFmtK(g*12)+' sur l’année</div></div>'+
-            tag+
-          '</div>'+
-          '<div class="rm-card-body">'+
-            '<div class="rm-need"><div class="rm-need-lbl">Capital requis</div><div class="rm-need-val">'+rmFmtK(need)+'</div><div class="rm-need-sub">≈ '+nAcc+' compte'+(nAcc>1?'s':'')+' de '+rmFmtK(unit)+'</div></div>'+
-            '<div class="rm-progress"><div class="rm-progress-top">'+progTop+'</div><div class="rm-bar"><div class="rm-bar-fill" style="width:'+pct.toFixed(1)+'%;background:'+fill+';"></div></div></div>'+
+      '<div class="rm-row '+side+' '+state+'">'+
+        '<div class="rm-dot"></div>'+
+        '<div class="rm-item">'+
+          '<div class="rm-card">'+
+            '<div class="rm-card-head">'+
+              '<div><div class="rm-card-tier">'+rmFmt(g)+'<span class="u"> / mois</span></div><div class="rm-card-year">'+rmFmtK(g*12)+' sur l’année</div></div>'+
+              tag+
+            '</div>'+
+            '<div class="rm-req"><b>'+rmFmtK(need)+'</b> de capital<span class="sep">·</span>≈ '+nAcc+' compte'+(nAcc>1?'s':'')+' de '+rmFmtK(unit)+'</div>'+
+            '<div class="rm-progress-top">'+progTop+'</div>'+
+            '<div class="rm-bar"><div class="rm-bar-fill" style="width:'+pct.toFixed(1)+'%;background:'+fill+';"></div></div>'+
           '</div>'+
         '</div>'+
       '</div>';

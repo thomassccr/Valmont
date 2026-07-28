@@ -1404,6 +1404,51 @@ body .main { margin-top:0 !important; height:100vh !important; }
 .grw-acc-chip.off { opacity:0.5; }
 @keyframes viewIn { from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);} }
 
+/* ─── ROADMAP ─── */
+.rm-hero { display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap;padding:2px 2px 24px;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:22px; }
+.rm-hero-main { display:flex;flex-direction:column;gap:6px; }
+.rm-hero-lbl { font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#726e67; }
+.rm-hero-val { font-family:'DM Sans',sans-serif;font-size:34px;font-weight:600;color:#e8e4de;line-height:1;font-variant-numeric:tabular-nums; }
+.rm-hero-val .u { font-size:15px;color:#726e67;font-weight:500;margin-left:3px; }
+.rm-hero-sub { font-family:'DM Sans',sans-serif;font-size:12.5px;color:#726e67; }
+.rm-hero-metrics { display:flex;gap:0; }
+.rm-metric { padding:2px 22px;border-left:1px solid rgba(255,255,255,0.08); }
+.rm-metric:first-child { padding-left:0;border-left:none; }
+.rm-metric-val { font-family:'DM Sans',sans-serif;font-size:20px;font-weight:600;color:#e8e4de;line-height:1;font-variant-numeric:tabular-nums; }
+.rm-metric-lbl { font-family:'DM Sans',sans-serif;font-size:11.5px;color:#726e67;margin-top:8px; }
+.rm-settings { display:flex;gap:34px;flex-wrap:wrap;background:#131316;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px 20px; }
+.rm-set-block { display:flex;flex-direction:column;gap:9px; }
+.rm-set-lbl { font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#726e67; }
+.rm-chips { display:flex;gap:7px; }
+.rm-chip { padding:6px 15px;background:#18181c;border:1px solid rgba(255,255,255,0.1);border-radius:9px;color:#9a9691;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;font-variant-numeric:tabular-nums; }
+.rm-chip:hover { border-color:rgba(255,255,255,0.24);color:#c8c4be; }
+.rm-chip.on { background:rgba(61,142,240,0.13);border-color:rgba(61,142,240,0.5);color:#9fc6f8; }
+.rm-track { position:relative;display:flex;flex-direction:column;gap:0; }
+.rm-node { position:relative;display:flex;gap:20px;padding-bottom:18px; }
+.rm-node:last-child { padding-bottom:0; }
+.rm-node-rail { position:relative;flex-shrink:0;width:40px;display:flex;flex-direction:column;align-items:center; }
+.rm-node-dot { width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;flex-shrink:0;z-index:2;border:1px solid rgba(255,255,255,0.1);background:#17171b;color:#8c8880; }
+.rm-node-line { flex:1;width:2px;background:rgba(255,255,255,0.08);margin:2px 0; }
+.rm-node:last-child .rm-node-line { display:none; }
+.rm-card { flex:1;background:#141418;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:16px 18px;transition:border-color .15s,transform .15s; }
+.rm-card:hover { border-color:rgba(255,255,255,0.15);transform:translateX(2px); }
+.rm-card-top { display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px; }
+.rm-card-title { font-family:'DM Sans',sans-serif;font-size:18px;font-weight:600;color:#e8e4de;font-variant-numeric:tabular-nums; }
+.rm-card-title .u { font-size:13px;color:#726e67;font-weight:500; }
+.rm-badge { font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;padding:3px 11px;border-radius:20px;white-space:nowrap; }
+.rm-badge.done { background:rgba(74,222,128,0.13);color:#5fe08f; }
+.rm-badge.now { background:rgba(61,142,240,0.14);color:#7fb4f5; }
+.rm-badge.next { background:rgba(255,255,255,0.06);color:#8c8880; }
+.rm-card-need { font-family:'DM Sans',sans-serif;font-size:13px;color:#9a9691;margin-bottom:12px; }
+.rm-card-need b { color:#e8e4de;font-weight:600;font-variant-numeric:tabular-nums; }
+.rm-bar { height:7px;background:rgba(255,255,255,0.06);border-radius:5px;overflow:hidden;margin-bottom:9px; }
+.rm-bar-fill { height:100%;border-radius:5px;transition:width .6s cubic-bezier(.3,.8,.4,1); }
+.rm-card-foot { display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:'DM Sans',sans-serif;font-size:12px;color:#726e67;flex-wrap:wrap; }
+.rm-card-foot b { color:#c8c4be;font-weight:600; }
+.rm-node.is-done .rm-node-dot { background:rgba(74,222,128,0.14);border-color:rgba(74,222,128,0.4);color:#5fe08f; }
+.rm-node.is-now .rm-node-dot { background:rgba(61,142,240,0.16);border-color:rgba(61,142,240,0.55);color:#9fc6f8;box-shadow:0 0 0 4px rgba(61,142,240,0.08); }
+.rm-node.is-now .rm-card { border-color:rgba(61,142,240,0.3); }
+
 /* HOME */
 #v-home { align-items:center; justify-content:center; background:var(--bg); }
 #v-home::after { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 70% 60% at 50% 40%, rgba(61,142,240,0.06) 0%, transparent 70%); pointer-events:none; z-index:0; }
@@ -4407,6 +4452,7 @@ tbody tr:last-child td { border-bottom: none; }
         </button>
         <div class="sb-sub">
           <button class="nav-btn sub" id="nb-growth" onclick="showV('growth'); if(typeof renderGrowth==='function') renderGrowth();"><span>Progression</span></button>
+          <button class="nav-btn sub" id="nb-roadmap" onclick="showV('roadmap'); if(typeof renderRoadmap==='function') renderRoadmap();"><span>Roadmap</span></button>
         </div>
       </div>
 
@@ -5938,6 +5984,52 @@ tbody tr:last-child td { border-bottom: none; }
         <div id="grw-milestones" style="display:flex;flex-direction:column;gap:10px;"></div>
       </div>
     </div><!-- /v-growth -->
+
+    <div id="v-roadmap" class="view" style="background:#0d0d10;">
+      <!-- Header -->
+      <div style="flex-shrink:0;padding:24px 28px 18px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#c8c4be" stroke-width="1.8" style="width:20px;height:20px;"><path d="M9 20l-5.5 2 1-6L1 11l6-1 2-6 2 6 6 1-3.5 5 1 6z"/></svg>
+            <span style="font-size:18px;font-weight:600;color:#e0ddd8;font-family:'DM Sans',sans-serif;">Roadmap</span>
+          </div>
+          <p style="font-size:13px;color:#666;font-family:'DM Sans',sans-serif;">Ta feuille de route de scaling — combien de capital <b style="color:#7fb4f5;font-weight:600;">funded</b> pour atteindre chaque palier de revenu mensuel.</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;">
+          <div style="position:relative;" id="rm-acc-wrap">
+            <button onclick="rmToggleAccDropdown(event)" style="display:flex;align-items:center;gap:6px;padding:6px 14px;background:#18181c;border:1px solid rgba(255,255,255,0.11);border-radius:8px;color:#c8c4be;font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.22)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.11)'">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px;color:#888;"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="8"/><rect x="12" y="6" width="3" height="12"/><rect x="17" y="13" width="3" height="5"/></svg>
+              <span id="rm-acc-label">Comptes de départ</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;color:#666;"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div id="rm-acc-dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:#18181c;border:1px solid rgba(255,255,255,0.12);border-radius:10px;box-shadow:0 16px 48px rgba(0,0,0,.85);z-index:2000;overflow:hidden;min-width:230px;max-width:300px;">
+              <div style="padding:8px 14px 6px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#666;">Comptes avec lesquels tu démarres</div>
+              <div id="rm-acc-list" style="padding:2px 0 6px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zone scrollable -->
+      <div style="flex:1;overflow-y:auto;padding:22px 28px 40px;">
+        <div id="rm-hero" class="rm-hero"></div>
+
+        <!-- Réglages -->
+        <div class="rm-settings">
+          <div class="rm-set-block">
+            <div class="rm-set-lbl">Rendement mensuel visé</div>
+            <div class="rm-chips" id="rm-return-chips"></div>
+          </div>
+          <div class="rm-set-block">
+            <div class="rm-set-lbl">Part que tu gardes <span style="color:#555;">(après split prop firm)</span></div>
+            <div class="rm-chips" id="rm-split-chips"></div>
+          </div>
+        </div>
+
+        <div class="emp-sec-title" style="margin-top:26px;">Ta feuille de route</div>
+        <div id="rm-roadmap"></div>
+      </div>
+    </div><!-- /v-roadmap -->
 
   </div>
 </div>
@@ -7592,6 +7684,103 @@ function grwData(){
   const nextTarget = GRW_MONTH_TARGETS.find(function(m){ return m>best; }) || null;
   return { start:start, total:total, current:current, growthPct: start? total/start*100 : 0, series:series, monthlyDeltas:monthlyDeltas, best:best, pace:pace, streak:streak, payoutTotal:payoutTotal, curMonthPayout:curMonthPayout, curMonthGross:curMonthGross, nextTarget:nextTarget, funded:funded, accounts:accounts, realAccounts:realAccounts, net:NET };
 }
+
+// ─── ROADMAP — scaling vers un revenu mensuel (paliers 10k → 250k / mois) ───
+const RM_INCOME_TARGETS = [10000, 25000, 50000, 100000, 250000];
+const RM_RETURN_OPTS = [5, 8, 12];
+const RM_SPLIT_OPTS = [80, 90, 100];
+try { window.rmReturn = parseFloat(localStorage.getItem('vm_rm_return')); if(!(window.rmReturn>0)) window.rmReturn = 8; } catch(e){ window.rmReturn = 8; }
+try { window.rmSplit = parseFloat(localStorage.getItem('vm_rm_split')); if(!(window.rmSplit>0)) window.rmSplit = 80; } catch(e){ window.rmSplit = 80; }
+try { window.rmExcluded = JSON.parse(localStorage.getItem('vm_rm_excluded')||'[]'); if(!Array.isArray(window.rmExcluded)) window.rmExcluded=[]; } catch(e){ window.rmExcluded=[]; }
+
+function rmFmt(v){ v=Math.round(v); return '$'+v.toLocaleString('fr-FR'); }
+function rmFmtK(v){ var a=Math.abs(v); if(a>=1000000) return '$'+(v/1000000).toFixed(v%1000000===0?0:1).replace('.',',')+'M'; if(a>=1000) return '$'+Math.round(v/1000)+'k'; return '$'+Math.round(v); }
+function rmAccActive(id){ return window.rmExcluded.indexOf(String(id))===-1; }
+function rmToggleAccount(id){ id=String(id); var i=window.rmExcluded.indexOf(id); if(i===-1) window.rmExcluded.push(id); else window.rmExcluded.splice(i,1); try{ localStorage.setItem('vm_rm_excluded', JSON.stringify(window.rmExcluded)); }catch(e){} renderRoadmap(); }
+function rmToggleAccDropdown(e){ if(e) e.stopPropagation(); var d=document.getElementById('rm-acc-dropdown'); if(d) d.style.display=(d.style.display==='none'||!d.style.display)?'block':'none'; }
+document.addEventListener('mousedown', function(e){ var w=document.getElementById('rm-acc-wrap'); if(w && !w.contains(e.target)){ var d=document.getElementById('rm-acc-dropdown'); if(d) d.style.display='none'; } });
+function rmSetReturn(v){ window.rmReturn=v; try{ localStorage.setItem('vm_rm_return', String(v)); }catch(e){} renderRoadmap(); }
+function rmSetSplit(v){ window.rmSplit=v; try{ localStorage.setItem('vm_rm_split', String(v)); }catch(e){} renderRoadmap(); }
+function rmCapitalFor(income){ var r=(window.rmReturn/100)*(window.rmSplit/100); return r>0 ? income/r : 0; }
+
+function rmData(){
+  var accts=[], capital=0, byMonth={};
+  try {
+    if (typeof window.getDashAccounts==='function' && typeof window.loadTradesForAccount==='function') {
+      (window.getDashAccounts()||[]).forEach(function(a){
+        if (!grwIsReal(a)) return;
+        var sz = grwSize(a), active = rmAccActive(a.id);
+        accts.push({ id:a.id, name:a.name, size:sz, active:active });
+        if (!active) return;
+        capital += sz;
+        (window.loadTradesForAccount(a.id)||[]).forEach(function(t){ var m=grwMonthKey(t.date||t.closeTime||''); var p=parseFloat(t.pnl||0)||0; if(m) byMonth[m]=(byMonth[m]||0)+p; });
+      });
+    }
+  } catch(e){}
+  var split = window.rmSplit/100;
+  var bestGross=0; Object.keys(byMonth).forEach(function(m){ if(byMonth[m]>bestGross) bestGross=byMonth[m]; });
+  return { accts:accts, capital:capital, bestNet: bestGross>0?bestGross*split:0, projected: capital*(window.rmReturn/100)*split };
+}
+
+function renderRoadmap(){
+  var d = rmData();
+  // comptes de départ
+  var list = document.getElementById('rm-acc-list');
+  if (list) {
+    list.innerHTML = d.accts.length
+      ? d.accts.map(function(a){ return '<button onclick="rmToggleAccount(\''+a.id+'\')" class="inflow-et-opt"><span class="inflow-et-check" style="opacity:'+(a.active?1:0)+'">✓</span>'+grwEsc(a.name)+' · '+rmFmtK(a.size)+'</button>'; }).join('')
+      : '<div style="padding:8px 14px 10px;font-family:\'DM Sans\',sans-serif;font-size:12px;color:#666;">Aucun compte funded / live.</div>';
+  }
+  var lbl = document.getElementById('rm-acc-label');
+  if (lbl) { var on=d.accts.filter(function(a){return a.active;}).length, tot=d.accts.length; lbl.textContent = (tot && on===tot)?'Tous les comptes':(on+'/'+tot+' compte'+(on>1?'s':'')); }
+  // chips
+  var rc=document.getElementById('rm-return-chips');
+  if (rc) rc.innerHTML = RM_RETURN_OPTS.map(function(v){ return '<button class="rm-chip'+(window.rmReturn===v?' on':'')+'" onclick="rmSetReturn('+v+')">'+v+'%</button>'; }).join('');
+  var sc=document.getElementById('rm-split-chips');
+  if (sc) sc.innerHTML = RM_SPLIT_OPTS.map(function(v){ return '<button class="rm-chip'+(window.rmSplit===v?' on':'')+'" onclick="rmSetSplit('+v+')">'+v+'%</button>'; }).join('');
+  // hero
+  var hero=document.getElementById('rm-hero');
+  if (hero) hero.innerHTML =
+    '<div class="rm-hero-main">'+
+      '<div class="rm-hero-lbl">Revenu mensuel projeté</div>'+
+      '<div class="rm-hero-val">'+rmFmt(d.projected)+'<span class="u">/mois</span></div>'+
+      '<div class="rm-hero-sub">'+rmFmtK(d.capital)+' de capital · '+window.rmReturn+'%/mois · tu gardes '+window.rmSplit+'%</div>'+
+    '</div>'+
+    '<div class="rm-hero-metrics">'+
+      '<div class="rm-metric"><div class="rm-metric-val">'+rmFmtK(d.capital)+'</div><div class="rm-metric-lbl">Capital financé</div></div>'+
+      '<div class="rm-metric"><div class="rm-metric-val">'+(d.bestNet>0?rmFmt(d.bestNet):'—')+'</div><div class="rm-metric-lbl">Meilleur mois net</div></div>'+
+    '</div>';
+  // roadmap
+  var wrap=document.getElementById('rm-roadmap'); if(!wrap) return;
+  var firstUnreached = -1;
+  for (var k=0;k<RM_INCOME_TARGETS.length;k++){ if(d.capital < rmCapitalFor(RM_INCOME_TARGETS[k])){ firstUnreached=k; break; } }
+  var html = '<div class="rm-track">';
+  RM_INCOME_TARGETS.forEach(function(g, i){
+    var need = rmCapitalFor(g);
+    var pct = need>0 ? Math.min(100, d.capital/need*100) : 0;
+    var reached = d.capital >= need && need>0;
+    var isNow = i === firstUnreached;
+    var cls = reached ? 'is-done' : (isNow ? 'is-now' : '');
+    var badge = reached ? '<span class="rm-badge done">Atteint</span>' : (isNow ? '<span class="rm-badge now">En cours</span>' : '<span class="rm-badge next">À venir</span>');
+    var fill = reached ? 'linear-gradient(90deg,#3ecf5e,#5fe08f)' : (isNow ? 'linear-gradient(90deg,#3d8ef0,#6ba9f5)' : 'rgba(255,255,255,0.18)');
+    var gap = Math.max(0, need - d.capital);
+    var foot = reached ? '<span>Palier débloqué 🎉</span>' : '<span>Il te manque <b>'+rmFmtK(gap)+'</b> de capital financé</span>';
+    html +=
+      '<div class="rm-node '+cls+'">'+
+        '<div class="rm-node-rail"><div class="rm-node-dot">'+(reached?'✓':(i+1))+'</div><div class="rm-node-line"></div></div>'+
+        '<div class="rm-card">'+
+          '<div class="rm-card-top"><div class="rm-card-title">'+rmFmt(g)+'<span class="u"> /mois</span></div>'+badge+'</div>'+
+          '<div class="rm-card-need">Capital financé nécessaire : <b>'+rmFmtK(need)+'</b> <span style="color:#555;">(à '+window.rmReturn+'%/mois, part gardée '+window.rmSplit+'%)</span></div>'+
+          '<div class="rm-bar"><div class="rm-bar-fill" style="width:'+pct.toFixed(1)+'%;background:'+fill+';"></div></div>'+
+          '<div class="rm-card-foot">'+foot+'<span><b>'+Math.round(pct)+'%</b> du capital</span></div>'+
+        '</div>'+
+      '</div>';
+  });
+  html += '</div>';
+  wrap.innerHTML = html;
+}
+window.renderRoadmap = renderRoadmap;
+
 function renderGrowth(){
   const g = grwData();
   const gnet = !!window.grwNet;

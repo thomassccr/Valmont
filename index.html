@@ -1665,6 +1665,68 @@ body .main { margin-top:0 !important; height:100vh !important; }
 .grw-acc-chip.off { opacity:0.5; }
 @keyframes viewIn { from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);} }
 
+/* ─── PARRAINAGE : accroche centrée ─── */
+.rf-hero { display:flex; flex-direction:column; align-items:center; text-align:center; padding:38px 20px 60px; }
+.rf-hero-title { font-family:'DM Sans',sans-serif; font-size:46px; font-weight:800; letter-spacing:-.025em; color:#6f7178; line-height:1.05; }
+.rf-hero-sub { font-family:'DM Sans',sans-serif; font-size:19px; color:#8b8e95; margin-top:10px; }
+.rf-badge {
+  position:relative; margin:34px 0 42px; width:250px; padding:26px 22px;
+  background:linear-gradient(160deg,#4a7dfc,#3d6ef0); border-radius:22px;
+  box-shadow:0 0 60px rgba(61,110,240,.45), 0 18px 50px rgba(0,0,0,.5);
+  display:flex; flex-direction:column; align-items:center; gap:14px;
+}
+.rf-badge-top { font-family:'DM Sans',sans-serif; font-size:17px; font-weight:700; color:#fff; }
+.rf-badge-main { display:flex; align-items:baseline; gap:7px; color:#fff; }
+.rf-badge-main .s { font-family:'DM Sans',sans-serif; font-size:17px; font-weight:600; }
+.rf-badge-main .n { font-family:'DM Sans',sans-serif; font-size:60px; font-weight:800; line-height:1; letter-spacing:-.03em; }
+.rf-badge-main .u { font-family:'DM Sans',sans-serif; font-size:20px; font-weight:700; }
+.rf-badge-bot { font-family:'DM Sans',sans-serif; font-size:12.5px; color:rgba(255,255,255,.86); line-height:1.4; }
+.rf-cta {
+  padding:15px 38px; background:#3d8ef0; border:none; border-radius:10px; color:#fff;
+  font-family:'DM Sans',sans-serif; font-size:17px; font-weight:600; cursor:pointer;
+  transition:background .15s, transform .15s;
+}
+.rf-cta:hover { background:#2f7ae0; transform:translateY(-1px); }
+.rf-back { background:none; border:none; color:#7c7f86; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; padding:0 0 14px; }
+.rf-back:hover { color:#c8c4be; }
+body.theme-light .rf-hero-title { color:#8b9099; }
+body.theme-light .rf-hero-sub { color:#6b7078; }
+
+/* ─── PARRAINAGE ─── */
+.rf-card { background:#141418; border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:20px 22px; margin-bottom:22px; }
+.rf-lbl { font-family:'DM Mono',monospace; font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:#726e67; margin-bottom:12px; }
+.rf-link-row { display:flex; gap:10px; align-items:stretch; flex-wrap:wrap; }
+.rf-link { flex:1; min-width:240px; background:#0f0f13; border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px 14px; color:#e8e4de; font-family:'DM Mono',monospace; font-size:12.5px; outline:none; }
+.rf-copy { padding:12px 22px; background:#3d8ef0; border:none; border-radius:10px; color:#fff; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:background .15s; white-space:nowrap; }
+.rf-copy:hover { background:#2f7ae0; }
+.rf-copy.done { background:#3ecf5e; }
+.rf-share { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:14px; }
+.rf-share-lbl { font-family:'DM Sans',sans-serif; font-size:12.5px; color:#726e67; margin-right:2px; }
+.rf-share-btn { padding:7px 14px; background:#1a1a1f; border:1px solid rgba(255,255,255,0.11); border-radius:20px; color:#c8c4be; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; transition:all .15s; }
+.rf-share-btn:hover { border-color:rgba(255,255,255,0.26); color:#fff; }
+.rf-stats { display:flex; gap:0; background:#141418; border:1px solid rgba(255,255,255,0.08); border-radius:16px; overflow:hidden; }
+.rf-stat { flex:1; padding:18px 22px; border-left:1px solid rgba(255,255,255,0.07); }
+.rf-stat:first-child { border-left:none; }
+.rf-stat-val { font-family:'DM Sans',sans-serif; font-size:26px; font-weight:700; color:#f2f0ec; line-height:1; font-variant-numeric:tabular-nums; }
+.rf-stat-lbl { font-family:'DM Sans',sans-serif; font-size:12px; color:#7c7f86; margin-top:8px; }
+.rf-tier { display:flex; align-items:center; gap:16px; background:#141418; border:1px solid rgba(255,255,255,0.07); border-radius:13px; padding:14px 18px; margin-bottom:10px; }
+.rf-tier.done { border-color:rgba(62,207,94,0.3); background:linear-gradient(100deg,rgba(62,207,94,0.06),transparent); }
+.rf-tier-n { width:38px; height:38px; border-radius:11px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:#1c1c21; color:#8c8880; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700; }
+.rf-tier.done .rf-tier-n { background:rgba(62,207,94,0.16); color:#5fe08f; }
+.rf-tier-txt { flex:1; }
+.rf-tier-title { font-family:'DM Sans',sans-serif; font-size:14.5px; font-weight:600; color:#e8e4de; }
+.rf-tier-sub { font-family:'DM Sans',sans-serif; font-size:12.5px; color:#7c7f86; margin-top:3px; }
+.rf-tier-state { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:#6c685f; white-space:nowrap; }
+.rf-tier.done .rf-tier-state { color:#5fe08f; }
+.rf-empty { background:#141418; border:1px dashed rgba(255,255,255,0.12); border-radius:13px; padding:26px; text-align:center; font-family:'DM Sans',sans-serif; font-size:13px; color:#7c7f86; }
+.rf-note { display:flex; gap:11px; align-items:flex-start; background:rgba(61,142,240,0.07); border:1px solid rgba(61,142,240,0.2); border-radius:12px; padding:13px 16px; margin-top:14px; font-family:'DM Sans',sans-serif; font-size:12.5px; line-height:1.55; color:#9aa4b4; }
+.rf-note b { color:#cfd8e6; font-weight:600; }
+body.theme-light .rf-card, body.theme-light .rf-stats, body.theme-light .rf-tier, body.theme-light .rf-empty { background:#ffffff; border-color:rgba(0,0,0,0.10); }
+body.theme-light .rf-link { background:#f4f5f7; border-color:rgba(0,0,0,0.12); color:#16181d; }
+body.theme-light .rf-share-btn { background:#f4f5f7; border-color:rgba(0,0,0,0.12); color:#3c4048; }
+body.theme-light .rf-stat-val, body.theme-light .rf-tier-title { color:#16181d; }
+body.theme-light .rf-tier-n { background:#eef0f3; color:#5c6069; }
+
 /* ─── ROADMAP ─── */
 .rm-hdr-btn { display:flex;align-items:center;gap:6px;padding:6px 14px;background:#18181c;border:1px solid rgba(255,255,255,0.11);border-radius:8px;color:#c8c4be;font-family:'DM Sans',sans-serif;font-size:12.5px;cursor:pointer;transition:border-color .15s;white-space:nowrap; }
 .rm-hdr-btn:hover { border-color:rgba(255,255,255,0.22); }
@@ -4887,7 +4949,7 @@ tbody tr:last-child td { border-bottom: none; }
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;color:#555;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       </div>
       <!-- Referrals -->
-      <div class="tb-item tb-btn">
+      <div class="tb-item tb-btn" onclick="showV('referrals'); if(typeof renderReferrals==='function') renderReferrals();">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         <span>Referrals</span>
       </div>
@@ -6365,6 +6427,63 @@ tbody tr:last-child td { border-bottom: none; }
         <div id="rm-roadmap"></div>
       </div>
     </div><!-- /v-roadmap -->
+
+    <div id="v-referrals" class="view" style="background:#0d0d10;">
+      <div style="flex-shrink:0;padding:24px 28px 18px;border-bottom:1px solid rgba(255,255,255,0.07);">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#c8c4be" stroke-width="1.8" style="width:20px;height:20px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span style="font-size:18px;font-weight:600;color:#e0ddd8;font-family:'DM Sans',sans-serif;">Parrainage</span>
+        </div>
+        <p style="font-size:13px;color:#666;font-family:'DM Sans',sans-serif;">Invite d'autres traders sur Valmont et débloque des mois offerts.</p>
+      </div>
+
+      <div style="flex:1;overflow-y:auto;padding:22px 28px 40px;">
+        <!-- Accroche centrée (masquée dès qu'on ouvre le programme) -->
+        <div id="rf-hero" class="rf-hero">
+          <div class="rf-hero-title">Deviens partenaire Valmont</div>
+          <div class="rf-hero-sub">Sois récompensé pour inviter ton réseau</div>
+          <div class="rf-badge">
+            <div class="rf-badge-top">Invite un trader</div>
+            <div class="rf-badge-main"><span class="s">gagne</span><span class="n">1</span><span class="u">mois</span></div>
+            <div class="rf-badge-bot">de Pro offert, dès sa première inscription</div>
+          </div>
+          <button class="rf-cta" onclick="rfOpenProgram()">Commencer à gagner</button>
+        </div>
+
+        <!-- Programme (révélé au clic) -->
+        <div id="rf-program" style="display:none;">
+        <button class="rf-back" onclick="rfBackToHero()">← Retour</button>
+        <!-- Lien de parrainage -->
+        <div class="rf-card">
+          <div class="rf-lbl">Ton lien de parrainage</div>
+          <div class="rf-link-row">
+            <input id="rf-link" class="rf-link" type="text" readonly value="">
+            <button class="rf-copy" id="rf-copy-btn" onclick="rfCopyLink()">Copier</button>
+          </div>
+          <div class="rf-share">
+            <span class="rf-share-lbl">Partager :</span>
+            <button class="rf-share-btn" onclick="rfShare('discord')">Discord</button>
+            <button class="rf-share-btn" onclick="rfShare('x')">X</button>
+            <button class="rf-share-btn" onclick="rfShare('whatsapp')">WhatsApp</button>
+            <button class="rf-share-btn" onclick="rfShare('mail')">E-mail</button>
+          </div>
+        </div>
+
+        <!-- Chiffres -->
+        <div class="rf-stats">
+          <div class="rf-stat"><div class="rf-stat-val" id="rf-count">0</div><div class="rf-stat-lbl">Filleuls inscrits</div></div>
+          <div class="rf-stat"><div class="rf-stat-val" id="rf-paid">0</div><div class="rf-stat-lbl">Passés en payant</div></div>
+          <div class="rf-stat"><div class="rf-stat-val" id="rf-earned">0</div><div class="rf-stat-lbl">Mois offerts gagnés</div></div>
+        </div>
+
+        <div class="emp-sec-title" style="margin-top:26px;">Tes récompenses</div>
+        <div id="rf-tiers"></div>
+
+        <div class="emp-sec-title" style="margin-top:26px;">Tes filleuls</div>
+        <div id="rf-list"></div>
+        </div><!-- /rf-program -->
+      </div>
+    </div><!-- /v-referrals -->
 
   </div>
 </div>
@@ -8072,6 +8191,126 @@ function grwData(){
   const nextTarget = GRW_MONTH_TARGETS.find(function(m){ return m>best; }) || null;
   return { start:start, total:total, current:current, growthPct: start? total/start*100 : 0, series:series, monthlyDeltas:monthlyDeltas, best:best, pace:pace, streak:streak, payoutTotal:payoutTotal, curMonthPayout:curMonthPayout, curMonthGross:curMonthGross, nextTarget:nextTarget, funded:funded, accounts:accounts, realAccounts:realAccounts, net:NET };
 }
+
+// ─── PARRAINAGE ───────────────────────────────────────────
+// Le lien et le partage sont pleinement fonctionnels. Le décompte des filleuls
+// nécessite une table côté serveur (voir rfBackendReady) : tant qu'elle n'existe
+// pas, on affiche l'état réel (zéro) plutôt que des chiffres inventés.
+const RF_TIERS = [
+  { n:1,  reward:'1 mois de Pro offert' },
+  { n:3,  reward:'3 mois de Pro offerts' },
+  { n:10, reward:'1 an de Pro offert' },
+  { n:25, reward:'Elite à vie' },
+];
+const RF_BASE_URL = 'https://valmontfx.vercel.app/';
+
+function rfCode(){
+  // Code stable dérivé de l'identifiant du compte (sinon code local persistant)
+  var id = '';
+  try { id = localStorage.getItem('vm_current_user_id') || ''; } catch(e){}
+  if (id) return id.replace(/[^a-zA-Z0-9]/g,'').slice(0,10).toLowerCase();
+  var c = '';
+  try { c = localStorage.getItem('vm_ref_code') || ''; } catch(e){}
+  if (!c) { c = Math.random().toString(36).slice(2,10); try{ localStorage.setItem('vm_ref_code', c); }catch(e){} }
+  return c;
+}
+function rfLink(){ return RF_BASE_URL + '?ref=' + rfCode(); }
+// Filleuls réellement connus (alimentés par le serveur quand il sera branché)
+function rfReferrals(){
+  try { var r = JSON.parse(localStorage.getItem('vm_ref_list')||'[]'); return Array.isArray(r)?r:[]; }
+  catch(e){ return []; }
+}
+function rfBackendReady(){ return rfReferrals().length > 0; }
+
+function rfCopyLink(){
+  var inp = document.getElementById('rf-link');
+  var btn = document.getElementById('rf-copy-btn');
+  if (!inp) return;
+  var done = function(){
+    if (btn) { btn.textContent = 'Copié !'; btn.classList.add('done'); setTimeout(function(){ btn.textContent='Copier'; btn.classList.remove('done'); }, 1800); }
+    try { if (typeof showToast==='function') showToast('Lien copié', 'success', '✓', 2000); } catch(e){}
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(inp.value).then(done).catch(function(){ inp.select(); document.execCommand('copy'); done(); });
+  } else { inp.select(); document.execCommand('copy'); done(); }
+}
+function rfShare(where){
+  var url = rfLink();
+  var txt = 'Je track mes trades avec Valmont — journal de trading pour comptes financés. Essaye :';
+  var u = encodeURIComponent(url), t = encodeURIComponent(txt);
+  var links = {
+    x: 'https://twitter.com/intent/tweet?text='+t+'&url='+u,
+    whatsapp: 'https://wa.me/?text='+encodeURIComponent(txt+' '+url),
+    mail: 'mailto:?subject='+encodeURIComponent('Valmont — journal de trading')+'&body='+encodeURIComponent(txt+'\n\n'+url)
+  };
+  if (where === 'discord') { rfCopyLink(); try{ if(typeof showToast==='function') showToast('Lien copié — colle-le sur Discord', 'info', '✦', 2600); }catch(e){} return; }
+  try { window.open(links[where], '_blank', 'noopener'); } catch(e){}
+}
+
+// Bascule accroche ↔ programme
+function rfOpenProgram(){
+  var h=document.getElementById('rf-hero'), p=document.getElementById('rf-program');
+  if(h) h.style.display='none';
+  if(p) p.style.display='block';
+  renderReferrals();
+}
+function rfBackToHero(){
+  var h=document.getElementById('rf-hero'), p=document.getElementById('rf-program');
+  if(p) p.style.display='none';
+  if(h) h.style.display='flex';
+}
+window.rfOpenProgram = rfOpenProgram; window.rfBackToHero = rfBackToHero;
+
+function renderReferrals(){
+  var link = document.getElementById('rf-link');
+  if (link) link.value = rfLink();
+
+  var list = rfReferrals();
+  var paid = list.filter(function(r){ return r && r.paid; }).length;
+  var earned = RF_TIERS.filter(function(t){ return list.length >= t.n; }).length;
+  var set = function(id, v){ var e=document.getElementById(id); if(e) e.textContent = v; };
+  set('rf-count', list.length); set('rf-paid', paid); set('rf-earned', earned);
+
+  var tiers = document.getElementById('rf-tiers');
+  if (tiers) {
+    tiers.innerHTML = RF_TIERS.map(function(t){
+      var done = list.length >= t.n;
+      var left = Math.max(0, t.n - list.length);
+      return '<div class="rf-tier'+(done?' done':'')+'">'+
+        '<div class="rf-tier-n">'+(done?'✓':t.n)+'</div>'+
+        '<div class="rf-tier-txt">'+
+          '<div class="rf-tier-title">'+t.reward+'</div>'+
+          '<div class="rf-tier-sub">'+t.n+' filleul'+(t.n>1?'s':'')+' inscrit'+(t.n>1?'s':'')+'</div>'+
+        '</div>'+
+        '<div class="rf-tier-state">'+(done ? 'Débloqué' : 'Encore '+left)+'</div>'+
+      '</div>';
+    }).join('');
+  }
+
+  var wrap = document.getElementById('rf-list');
+  if (wrap) {
+    if (!list.length) {
+      wrap.innerHTML = '<div class="rf-empty">Aucun filleul pour le moment — partage ton lien pour commencer.</div>' +
+        (rfBackendReady() ? '' :
+        '<div class="rf-note"><span>ℹ️</span><span>Le <b>comptage automatique des filleuls</b> n\'est pas encore actif : il demande une table dédiée côté serveur. Ton lien et le partage fonctionnent dès maintenant, et les inscriptions seront rattachées une fois le suivi branché.</span></div>');
+    } else {
+      wrap.innerHTML = list.map(function(r){
+        return '<div class="rf-tier"><div class="rf-tier-n">'+String(r.name||'?').charAt(0).toUpperCase()+'</div>'+
+          '<div class="rf-tier-txt"><div class="rf-tier-title">'+grwEsc(r.name||'Trader')+'</div>'+
+          '<div class="rf-tier-sub">'+grwEsc(r.date||'')+'</div></div>'+
+          '<div class="rf-tier-state">'+(r.paid?'Abonné':'Inscrit')+'</div></div>';
+      }).join('');
+    }
+  }
+}
+window.renderReferrals = renderReferrals;
+// Mémorise le code de parrainage présent dans l'URL (?ref=…) pour l'attribuer à l'inscription
+(function rfCaptureRef(){
+  try {
+    var m = String(location.search||'').match(/[?&]ref=([a-zA-Z0-9]+)/);
+    if (m && m[1] && !localStorage.getItem('vm_ref_by')) localStorage.setItem('vm_ref_by', m[1]);
+  } catch(e){}
+})();
 
 // ─── ROADMAP — scaling vers un revenu mensuel (paliers 10k → 250k / mois) ───
 const RM_INCOME_TARGETS = [10000, 25000, 50000, 100000, 250000];

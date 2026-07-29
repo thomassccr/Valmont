@@ -11622,6 +11622,15 @@ function drawChart(bars) {
     }
   });
 
+  // Repère vertical au survol (pointillés, sous les données)
+  if (hoveredIdx >= 0 && hoveredIdx < n) {
+    const hx = Math.round(fxC(hoveredIdx)) + 0.5;
+    ctx.save();
+    ctx.strokeStyle = vmInk(0.28); ctx.lineWidth = 1; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(hx, padT); ctx.lineTo(hx, padT + chartH); ctx.stroke();
+    ctx.restore();
+  }
+
   if (chartType === 'bar') {
     // ── BAR MODE (barres bleues pleines, coins arrondis, façon Infloww) ──
     const r = Math.min(3.5, barW / 2);
@@ -11629,7 +11638,10 @@ function drawChart(bars) {
       const v = b.pnl || 0;
       const x = fxB(i);
       if (v === 0 && !b.hasData) return;
-      ctx.fillStyle = v >= 0 ? '#4287f5' : '#e5484d';
+      // Barre survolée : teinte plus claire pour la faire ressortir
+      ctx.fillStyle = (i === hoveredIdx)
+        ? (v >= 0 ? '#6ba3f8' : '#f06d71')
+        : (v >= 0 ? '#4287f5' : '#e5484d');
       // Hauteur pleine puis mise à l'échelle par la progression d'animation (part de 0)
       const p = _barAnimP < 0 ? 0 : (_barAnimP > 1 ? 1 : _barAnimP);
       const fullH = Math.max(2, Math.abs(fy(v) - y0));
@@ -11696,7 +11708,7 @@ function drawChart(bars) {
       // Data points
       linePoints.forEach((p, i) => {
         if (!bars[i].hasData && (bars[i].pnl||0) === 0) return;
-        const isHovered = false;
+        const isHovered = (i === hoveredIdx);
         ctx.beginPath();
         ctx.arc(p.x, p.y, isHovered ? 5 : 3, 0, Math.PI * 2);
         ctx.fillStyle = isHovered
@@ -11730,7 +11742,7 @@ function onChartMove(e) {
 
   if (idx !== hoveredIdx) {
     hoveredIdx = idx;
-    drawChart();
+    if (chartParams && chartParams.bars) drawChart(chartParams.bars);
     chartCanvas.style.cursor = 'default';
   }
 
@@ -12767,7 +12779,14 @@ function ensureChartInit() {
   chartCanvas.style.height = H + 'px';
   chartCtx.scale(dpr, dpr);
   if (!chartInited) {
-    // hover + click désactivés (lecture seule)
+    // Survol : point mis en avant, repère vertical et infobulle (clic toujours désactivé)
+    chartCanvas.addEventListener('mousemove', onChartMove);
+    chartCanvas.addEventListener('mouseleave', function(){
+      hoveredIdx = -1;
+      if (chartParams && chartParams.bars) drawChart(chartParams.bars);
+      var tt = document.getElementById('chart-tooltip');
+      if (tt) tt.style.display = 'none';
+    });
     chartInited = true;
   }
 }

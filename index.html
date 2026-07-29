@@ -1665,6 +1665,33 @@ body .main { margin-top:0 !important; height:100vh !important; }
 .grw-acc-chip.off { opacity:0.5; }
 @keyframes viewIn { from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);} }
 
+/* ─── PARRAINAGE : accroche centrée ─── */
+.rf-hero { display:flex; flex-direction:column; align-items:center; text-align:center; padding:38px 20px 60px; }
+.rf-hero-title { font-family:'DM Sans',sans-serif; font-size:46px; font-weight:800; letter-spacing:-.025em; color:#6f7178; line-height:1.05; }
+.rf-hero-sub { font-family:'DM Sans',sans-serif; font-size:19px; color:#8b8e95; margin-top:10px; }
+.rf-badge {
+  position:relative; margin:34px 0 42px; width:250px; padding:26px 22px;
+  background:linear-gradient(160deg,#4a7dfc,#3d6ef0); border-radius:22px;
+  box-shadow:0 0 60px rgba(61,110,240,.45), 0 18px 50px rgba(0,0,0,.5);
+  display:flex; flex-direction:column; align-items:center; gap:14px;
+}
+.rf-badge-top { font-family:'DM Sans',sans-serif; font-size:17px; font-weight:700; color:#fff; }
+.rf-badge-main { display:flex; align-items:baseline; gap:7px; color:#fff; }
+.rf-badge-main .s { font-family:'DM Sans',sans-serif; font-size:17px; font-weight:600; }
+.rf-badge-main .n { font-family:'DM Sans',sans-serif; font-size:60px; font-weight:800; line-height:1; letter-spacing:-.03em; }
+.rf-badge-main .u { font-family:'DM Sans',sans-serif; font-size:20px; font-weight:700; }
+.rf-badge-bot { font-family:'DM Sans',sans-serif; font-size:12.5px; color:rgba(255,255,255,.86); line-height:1.4; }
+.rf-cta {
+  padding:15px 38px; background:#3d8ef0; border:none; border-radius:10px; color:#fff;
+  font-family:'DM Sans',sans-serif; font-size:17px; font-weight:600; cursor:pointer;
+  transition:background .15s, transform .15s;
+}
+.rf-cta:hover { background:#2f7ae0; transform:translateY(-1px); }
+.rf-back { background:none; border:none; color:#7c7f86; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; padding:0 0 14px; }
+.rf-back:hover { color:#c8c4be; }
+body.theme-light .rf-hero-title { color:#8b9099; }
+body.theme-light .rf-hero-sub { color:#6b7078; }
+
 /* ─── PARRAINAGE ─── */
 .rf-card { background:#141418; border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:20px 22px; margin-bottom:22px; }
 .rf-lbl { font-family:'DM Mono',monospace; font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:#726e67; margin-bottom:12px; }
@@ -6411,6 +6438,21 @@ tbody tr:last-child td { border-bottom: none; }
       </div>
 
       <div style="flex:1;overflow-y:auto;padding:22px 28px 40px;">
+        <!-- Accroche centrée (masquée dès qu'on ouvre le programme) -->
+        <div id="rf-hero" class="rf-hero">
+          <div class="rf-hero-title">Deviens partenaire Valmont</div>
+          <div class="rf-hero-sub">Sois récompensé pour inviter ton réseau</div>
+          <div class="rf-badge">
+            <div class="rf-badge-top">Invite un trader</div>
+            <div class="rf-badge-main"><span class="s">gagne</span><span class="n">1</span><span class="u">mois</span></div>
+            <div class="rf-badge-bot">de Pro offert, dès sa première inscription</div>
+          </div>
+          <button class="rf-cta" onclick="rfOpenProgram()">Commencer à gagner</button>
+        </div>
+
+        <!-- Programme (révélé au clic) -->
+        <div id="rf-program" style="display:none;">
+        <button class="rf-back" onclick="rfBackToHero()">← Retour</button>
         <!-- Lien de parrainage -->
         <div class="rf-card">
           <div class="rf-lbl">Ton lien de parrainage</div>
@@ -6439,6 +6481,7 @@ tbody tr:last-child td { border-bottom: none; }
 
         <div class="emp-sec-title" style="margin-top:26px;">Tes filleuls</div>
         <div id="rf-list"></div>
+        </div><!-- /rf-program -->
       </div>
     </div><!-- /v-referrals -->
 
@@ -8203,6 +8246,20 @@ function rfShare(where){
   if (where === 'discord') { rfCopyLink(); try{ if(typeof showToast==='function') showToast('Lien copié — colle-le sur Discord', 'info', '✦', 2600); }catch(e){} return; }
   try { window.open(links[where], '_blank', 'noopener'); } catch(e){}
 }
+
+// Bascule accroche ↔ programme
+function rfOpenProgram(){
+  var h=document.getElementById('rf-hero'), p=document.getElementById('rf-program');
+  if(h) h.style.display='none';
+  if(p) p.style.display='block';
+  renderReferrals();
+}
+function rfBackToHero(){
+  var h=document.getElementById('rf-hero'), p=document.getElementById('rf-program');
+  if(p) p.style.display='none';
+  if(h) h.style.display='flex';
+}
+window.rfOpenProgram = rfOpenProgram; window.rfBackToHero = rfBackToHero;
 
 function renderReferrals(){
   var link = document.getElementById('rf-link');

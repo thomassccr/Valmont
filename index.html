@@ -730,13 +730,13 @@ body::after { content:''; position:fixed; inset:0; background-image:url("data:im
 #plan-banner .pb-close:hover { color:rgba(255,255,255,0.7); }
 
 /* Masque de démarrage (reconnexion auto) : logo qui pulse sur fond noir */
+/* Reconnexion automatique : simple voile opaque, sans logo ni animation —
+   il masque le flash de l'écran de login puis disparaît aussitôt. */
 #boot-mask {
   position:fixed; inset:0; z-index:1500; background:#050505;
   display:flex; align-items:center; justify-content:center;
-  opacity:1; transition:opacity .45s ease;
 }
-#boot-mask svg { animation:bmPulse 1.6s ease-in-out infinite; }
-@keyframes bmPulse { 0%,100% { opacity:.9; transform:scale(1); } 50% { opacity:.45; transform:scale(.94); } }
+#boot-mask svg { display:none; }
 #boot-mask.bm-out { opacity:0; pointer-events:none; }
 
 /* LOGIN */
@@ -10451,7 +10451,6 @@ function saveProfile() {
 
     const mask = document.createElement('div');
     mask.id = 'boot-mask';
-    mask.innerHTML = '<svg viewBox="0 0 1024 1024" style="width:60px;height:60px;color:#fff;"><use href="#vlm-mark" xlink:href="#vlm-mark"/></svg>';
     document.body.appendChild(mask);
 
     const t0 = Date.now();
@@ -10459,8 +10458,8 @@ function saveProfile() {
       const logged = (typeof currentUser !== 'undefined' && currentUser);
       const timedOut = Date.now() - t0 > 6000; // au-delà : on révèle le login
       if (logged || timedOut) {
-        mask.classList.add('bm-out');
-        setTimeout(() => { if (mask.parentNode) mask.parentNode.removeChild(mask); }, 500);
+        // Retrait immédiat : on arrive directement sur l'app, sans transition
+        if (mask.parentNode) mask.parentNode.removeChild(mask);
       } else {
         setTimeout(poll, 150);
       }

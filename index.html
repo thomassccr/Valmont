@@ -198,10 +198,34 @@ body.theme-light .tb-icon-btn { background:#eef1f6; border-color:rgba(0,0,0,0.12
 body.theme-light .nav-btn { color:#4a4f57; }
 body.theme-light .nav-btn:hover { background:rgba(0,0,0,0.05); color:#111; }
 body.theme-light .nav-btn.active { background:rgba(61,142,240,0.12); color:#1f6fd0; }
+/* ─── DASHBOARD : bloc KPI en carte arrondie (façon Infloww) ───
+   La page est plus sombre que la carte, ce qui la fait ressortir. */
+#v-dashboard { background:#0f1012; }
+#v-dashboard .content { background:transparent; }
+.vm-kpi-head {
+  display:flex; align-items:center; gap:10px;
+  padding:16px 24px 14px; border-bottom:1px solid rgba(255,255,255,0.055);
+  background:#17181a;
+}
+.vm-kpi-head .t { font-family:'DM Sans',sans-serif; font-size:16.5px; font-weight:600; color:#f2f0ec; letter-spacing:-.01em; }
+.vm-kpi-head .sub { font-family:'DM Sans',sans-serif; font-size:12.5px; color:#7c7f86; }
+.vm-kpi-card { border-radius:16px; overflow:hidden; box-shadow:0 2px 14px rgba(0,0,0,.35); }
+/* Valeurs et icônes plus généreuses, comme la référence */
+#sum-wins, #sum-losses, #sum-winrate, #sum-days, #inflow-dd, #inflow-pf { font-size:30px !important; }
+#total-val { font-size:40px !important; }
+.vm-kpi-grid [style*="width:38px;height:38px"] { width:44px !important; height:44px !important; }
+.vm-kpi-grid [style*="width:38px;height:38px"] svg { width:19px !important; height:19px !important; }
+/* Icône repoussée sur le bord droit de la cellule (la 1re cellule est en colonne : on l'exclut) */
+.vm-kpi-grid > div:not(:first-child) { justify-content:space-between !important; }
 /* Traits de délimitation du dashboard (les cellules sont séparées par le fond de la grille) */
 .vm-kpi-grid { background:rgba(255,255,255,0.055); }
 body.theme-light .vm-kpi-grid { background:rgba(0,0,0,0.11) !important; }
 body.theme-light .vm-kpi-grid > div { background:#ffffff !important; }
+body.theme-light #v-dashboard { background:#eef0f3; }
+body.theme-light .vm-kpi-head { background:#ffffff; border-bottom-color:rgba(0,0,0,0.09); }
+body.theme-light .vm-kpi-head .t { color:#16181d; }
+body.theme-light .vm-kpi-head .sub { color:#6b7078; }
+body.theme-light .vm-kpi-card { box-shadow:0 2px 14px rgba(15,20,30,.07); }
 /* Séparations entre les blocs du dashboard */
 body.theme-light #v-dashboard .chart-card { border:1px solid rgba(0,0,0,0.10); border-radius:12px; margin-top:10px; }
 body.theme-light #v-dashboard .content > div[style*="margin:4px 0 0"] { border-top:1px solid rgba(0,0,0,0.10); padding-top:14px; margin-top:12px !important; }
@@ -4898,7 +4922,7 @@ tbody tr:last-child td { border-bottom: none; }
 
       <!-- INFLOW EARNINGS OVERVIEW BAR -->
       <!-- Outer wrapper: black background + subtle dot grid like the screenshot -->
-      <div style="flex-shrink:0;background:#17181a;padding:12px 24px 0;">
+      <div style="flex-shrink:0;background:transparent;padding:12px 24px 0;">
 
         <!-- Header row: title left, controls right -->
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -5083,7 +5107,12 @@ tbody tr:last-child td { border-bottom: none; }
           </div>
         </div>
 
-        <!-- Cards grid: à plat, hairlines fins, sans encadré (façon Infloww) -->
+        <!-- Bloc KPI : carte arrondie avec titre, hairlines fins entre les cellules (façon Infloww) -->
+        <div class="vm-kpi-card">
+        <div class="vm-kpi-head">
+          <span class="t">Vue d'ensemble des gains</span>
+          <span class="sub" id="vm-kpi-head-period">—</span>
+        </div>
         <div class="vm-kpi-grid" style="display:grid;grid-template-columns:240px 1fr 1fr 1fr;gap:1px;background:rgba(255,255,255,0.055);">
 
           <!-- LEFT col spans 2 rows: avatar + total -->
@@ -5162,6 +5191,7 @@ tbody tr:last-child td { border-bottom: none; }
           </div>
 
         </div>
+        </div><!-- /vm-kpi-card -->
         <!-- bottom padding so grid shows below last row -->
         <div style="height:8px;"></div>
       </div>
@@ -11903,6 +11933,8 @@ function render() {
   const { start, end, label } = getPeriodRange(currentView, currentOffset);
   const periodLabelEl = document.getElementById('period-label');
   if (periodLabelEl) periodLabelEl.textContent = label;
+  const kpiHeadPeriod = document.getElementById('vm-kpi-head-period');
+  if (kpiHeadPeriod) kpiHeadPeriod.textContent = label;
 
 
   const allDashboardTrades = getEffectiveDashboardTrades();

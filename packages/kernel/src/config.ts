@@ -3,6 +3,15 @@ import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 /**
+ * Fournisseurs de modèle disponibles.
+ *
+ * `anthropic` — Claude : la meilleure qualité de raisonnement et de français.
+ * `groq`      — modèles ouverts servis très vite et pour presque rien.
+ * `mock`      — sans réseau, pour les tests et le mode dégradé.
+ */
+export type LLMProviderName = 'anthropic' | 'groq' | 'mock';
+
+/**
  * Configuration résolue une seule fois au démarrage. Aucun module ne lit
  * `process.env` directement : ils reçoivent leur configuration. Cela rend
  * le système testable et permettra plus tard une configuration par interface.
@@ -16,8 +25,16 @@ export interface ValmontConfig {
     documents: string;
   };
   llm: {
-    provider: 'anthropic' | 'mock';
+    /** Fournisseur de la voix — celui que l'utilisateur entend. */
+    provider: LLMProviderName;
+    /**
+     * Fournisseur des tâches de fond (extraction, résumé, reformulation).
+     * Permet de mettre un modèle rapide et bon marché sur le volume tout en
+     * gardant un modèle de pointe sur la conversation.
+     */
+    fastProvider: LLMProviderName;
     apiKey?: string;
+    groqApiKey?: string;
     model: string;
     fastModel: string;
   };
@@ -92,6 +109,8 @@ export function loadConfig(overrides: Partial<ValmontConfig> = {}): ValmontConfi
         : 'local';
   const embeddingModel = env('VALMONT_EMBEDDING_MODEL') ?? defaultEmbeddingModel;
 
+  const llmProvider = (env('VALMONT_LLM_PROVIDER') ?? 'anthropic') as LLMProviderName;
+
   const config: ValmontConfig = {
     home,
     paths: {
@@ -101,10 +120,16 @@ export function loadConfig(overrides: Partial<ValmontConfig> = {}): ValmontConfi
       documents: join(home, 'documents'),
     },
     llm: {
-      provider: (env('VALMONT_LLM_PROVIDER') ?? 'anthropic') as 'anthropic' | 'mock',
+      provider: llmProvider,
+      // Par défaut les tâches de fond tournent chez le même fournisseur que
+      // la voix. Le découpage n'a d'intérêt que s'il est demandé.
+      fastProvider: (env('VALMONT_FAST_PROVIDER') ?? llmProvider) as LLMProviderName,
       apiKey: env('ANTHROPIC_API_KEY'),
-      model: env('VALMONT_LLM_MODEL') ?? 'claude-opus-5',
-      fastModel: env('VALMONT_LLM_FAST_MODEL') ?? 'claude-sonnet-5',
+      groqApiKey: env('GROQ_API_KEY'),
+      model: env('VALMONT_LLM_MODEL') ?? defaultModelFor(llmProvider),
+      fastModel:
+        env('VALMONT_LLM_FAST_MODEL') ??
+        defaultFastModelFor((env('VALMONT_FAST_PROVIDER') ?? llmProvider) as LLMProviderName),
     },
     embedding: {
       provider: embeddingProvider,
@@ -139,4 +164,28 @@ export function loadConfig(overrides: Partial<ValmontConfig> = {}): ValmontConfi
   }
 
   return config;
+}
+
+/** Modèle de conversation par défaut, selon le fournisseur. */
+function defaultModelFor(provider: LLMProviderName): string {
+  switch (provider) {
+    case 'groq':
+      return 'llama-3.3-70b-versatile';
+    case 'mock':
+      return 'mock';
+    default:
+      return 'claude-opus-5';
+  }
+}
+
+/** Modèle des tâches de fond, selon le fournisseur qui les exécute. */
+function defaultFastModelFor(provider: LLMProviderName): string {
+  switch (provider) {
+    case 'groq':
+      return 'llama-3.1-8b-instant';
+    case 'mock':
+      return 'mock';
+    default:
+      return 'claude-sonnet-5';
+  }
 }

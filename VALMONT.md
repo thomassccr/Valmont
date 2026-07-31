@@ -66,6 +66,45 @@ echo "NEXT_PUBLIC_VALMONT_TOKEN=$(cat ~/.valmont/token)" >> apps/ui/.env.local
 Valmont démarre quand même, en mode dégradé, et le dit. Rien ne bloque le
 lancement — c'est délibéré.
 
+### Choisir son modèle
+
+Deux fournisseurs sont branchés, et ils ne servent pas à la même chose.
+
+| | Claude (`anthropic`) | Groq (`groq`) |
+| --- | --- | --- |
+| Qualité de raisonnement et de français | la meilleure | correcte |
+| Vitesse | normale | ~10× plus rapide |
+| Coût | à l'usage | palier gratuit large |
+| Embeddings | non | non |
+
+**Le réglage recommandé : Claude pour la voix, Groq pour le fond.** Valmont fait
+deux choses très différentes — parler (quelques dizaines d'appels par jour, où
+la nuance décide de tout) et structurer (des centaines d'appels invisibles :
+extraction, résumés, reformulations). Mettre les deux sur le même modèle est un
+gâchis dans un sens ou une perte de qualité dans l'autre.
+
+```bash
+VALMONT_LLM_PROVIDER=anthropic     # la voix
+ANTHROPIC_API_KEY=sk-ant-...
+VALMONT_FAST_PROVIDER=groq         # les tâches de fond
+GROQ_API_KEY=gsk_...
+```
+
+**Tout sur Groq**, si tu veux d'abord essayer sans payer :
+
+```bash
+VALMONT_LLM_PROVIDER=groq
+GROQ_API_KEY=gsk_...
+```
+
+La clé se crée en trente secondes sur [console.groq.com](https://console.groq.com)
+→ *API Keys*. Les identifiants de modèle ne sont pas figés dans le code : si tu
+veux en changer, mets `VALMONT_LLM_MODEL` avec un identifiant pris dans
+[la liste de Groq](https://console.groq.com/docs/models).
+
+⚠️ Groq ne fournit **pas** d'embeddings. La mémoire vectorielle reste sur
+Ollama, OpenAI ou le repli local — voir la section suivante.
+
 ### Recherche sémantique
 
 Par défaut, les embeddings utilisent un repli local sans réseau : ça marche,
@@ -105,6 +144,7 @@ apps/
 ```bash
 pnpm typecheck                  # tout le monorepo
 pnpm --filter @valmont/memory smoke   # exerce le moteur de mémoire de bout en bout
+pnpm --filter @valmont/llm test       # vérifie la traduction vers l'API Groq
 pnpm build                      # déclarations des paquets
 ```
 

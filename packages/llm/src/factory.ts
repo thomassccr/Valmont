@@ -1,6 +1,8 @@
-import type { ValmontConfig } from '@valmont/kernel';
+import type { LLMProviderName, ValmontConfig } from '@valmont/kernel';
 import { AnthropicProvider } from './anthropic.js';
+import { GroqProvider } from './groq.js';
 import { MockProvider } from './mock.js';
+import { RoutedProvider } from './routed.js';
 import { LocalEmbeddingProvider } from './embeddings/local.js';
 import { OllamaEmbeddingProvider } from './embeddings/ollama.js';
 import { OpenAIEmbeddingProvider } from './embeddings/openai.js';
@@ -14,15 +16,51 @@ import type { EmbeddingProvider, LLMProvider } from './types.js';
  * lancement. Une IA personnelle qui refuse d'ouvrir parce qu'un service tiers
  * est indisponible n'est pas une présence, c'est un client d'API.
  */
-export function createLLMProvider(config: ValmontConfig): LLMProvider {
-  if (config.llm.provider === 'mock' || !config.llm.apiKey) {
-    return new MockProvider();
+function buildProvider(
+  name: LLMProviderName,
+  config: ValmontConfig,
+  models: { model: string; fastModel: string },
+): LLMProvider {
+  switch (name) {
+    case 'anthropic':
+      // Sans clé, on ne renvoie pas un client cassé qui échouera au premier
+      // appel : on renvoie le fournisseur factice, qui dit explicitement ce
+      // qui manque.
+      return config.llm.apiKey
+        ? new AnthropicProvider({
+            apiKey: config.llm.apiKey,
+            model: models.model,
+            fastModel: models.fastModel,
+          })
+        : new MockProvider();
+
+    case 'groq':
+      return config.llm.groqApiKey
+        ? new GroqProvider({
+            apiKey: config.llm.groqApiKey,
+            model: models.model,
+            fastModel: models.fastModel,
+          })
+        : new MockProvider();
+
+    default:
+      return new MockProvider();
   }
-  return new AnthropicProvider({
-    apiKey: config.llm.apiKey,
-    model: config.llm.model,
-    fastModel: config.llm.fastModel,
+}
+
+export function createLLMProvider(config: ValmontConfig): LLMProvider {
+  const { provider, fastProvider, model, fastModel } = config.llm;
+
+  const voice = buildProvider(provider, config, { model, fastModel });
+
+  // Un seul fournisseur pour tout : cas courant, rien à router.
+  if (fastProvider === provider) return voice;
+
+  const background = buildProvider(fastProvider, config, {
+    model: fastModel,
+    fastModel,
   });
+  return new RoutedProvider(voice, background);
 }
 
 export function createEmbeddingProvider(config: ValmontConfig): EmbeddingProvider {

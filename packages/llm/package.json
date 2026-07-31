@@ -10,7 +10,8 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "tsc --emitDeclarationOnly --outDir dist"
+    "build": "tsc --emitDeclarationOnly --outDir dist",
+    "test": "tsx test/groq.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.68.0",

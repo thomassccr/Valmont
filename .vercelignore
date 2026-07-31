@@ -1,0 +1,23 @@
+# Ce projet Vercel (racine du dépôt) sert l'application de trading statique :
+# index.html, ses icônes, son manifeste, et le site vitrine sous `site/`.
+#
+# Le monorepo de l'IA personnelle vit dans le même dépôt mais n'a rien à faire
+# dans ce déploiement — il n'est ni construit ni servi ici. L'exclure évite
+# que Vercel prenne la racine pour un projet Node à construire, et évite de
+# publier des sources qui n'ont pas à l'être.
+#
+# ⚠️ Ne jamais exclure `site/` : index.html y redirige les navigateurs.
+
+packages/
+apps/
+
+package.json
+pnpm-lock.yaml
+pnpm-workspace.yaml
+tsconfig.base.json
+.env.example
+
+ARCHITECTURE.md
+VALMONT.md
+
+node_modules/

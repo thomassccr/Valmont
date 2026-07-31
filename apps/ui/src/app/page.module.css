@@ -1,0 +1,409 @@
+.shell {
+  position: relative;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* Le noyau occupe tout l'écran, en fond. L'interface flotte au-dessus, sans
+   jamais l'encadrer : c'est lui l'objet principal, pas un widget. */
+.core {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 26px 34px;
+  pointer-events: none;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.wordmark {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.status {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  transition: color 0.6s var(--ease);
+}
+
+.statusActive {
+  color: var(--gold);
+}
+
+.meta {
+  display: flex;
+  gap: 22px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+  text-align: right;
+}
+
+/* ── Conversation ─────────────────────────────────────────────────────── */
+
+.stream {
+  position: absolute;
+  left: 50%;
+  bottom: 132px;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: min(680px, calc(100vw - 64px));
+  max-height: 46vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 0 4px;
+  /* Fondu en haut : les tours anciens s'effacent au lieu d'être coupés net. */
+  mask-image: linear-gradient(to bottom, transparent, black 12%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 12%);
+}
+
+.turn {
+  animation: rise 0.55s var(--ease) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.user {
+  align-self: flex-end;
+  max-width: 76%;
+  padding: 11px 17px;
+  border-radius: 15px 15px 4px 15px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: 14.5px;
+  backdrop-filter: blur(14px);
+}
+
+.valmont {
+  align-self: flex-start;
+  max-width: 88%;
+  font-size: 16px;
+  line-height: 1.62;
+  color: var(--text);
+  /* Pas de bulle : la parole de Valmont émane du noyau, elle n'est pas
+     contenue dans un objet. */
+  text-shadow: 0 0 34px rgba(255, 192, 97, 0.14);
+  white-space: pre-wrap;
+}
+
+/* Une initiative se distingue visuellement : ce n'est pas une réponse, c'est
+   Valmont qui prend la parole. */
+.spontaneous {
+  position: relative;
+  padding-left: 18px;
+  border-left: 1px solid rgba(255, 192, 97, 0.32);
+}
+
+.spontaneousActions {
+  display: flex;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.ghost {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  transition: color 0.3s var(--ease);
+}
+
+.ghost:hover {
+  color: var(--gold);
+}
+
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 3px;
+  background: var(--gold);
+  vertical-align: text-bottom;
+  animation: blink 1.05s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  to {
+    opacity: 0;
+  }
+}
+
+.tool {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.toolDot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--amber);
+  animation: throb 1.3s ease-in-out infinite;
+}
+
+@keyframes throb {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.75);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+}
+
+/* ── Saisie ───────────────────────────────────────────────────────────── */
+
+.composer {
+  position: absolute;
+  left: 50%;
+  bottom: 42px;
+  transform: translateX(-50%);
+  z-index: 4;
+  width: min(680px, calc(100vw - 64px));
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 15px 13px 21px;
+  border-radius: 18px;
+  background: rgba(13, 13, 16, 0.7);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(28px) saturate(1.2);
+  transition:
+    border-color 0.5s var(--ease),
+    box-shadow 0.5s var(--ease);
+}
+
+.composerActive {
+  border-color: rgba(255, 192, 97, 0.26);
+  box-shadow: 0 0 44px rgba(242, 118, 27, 0.1);
+}
+
+.input {
+  flex: 1;
+  font-size: 15px;
+  color: var(--text);
+  min-height: 22px;
+  max-height: 120px;
+}
+
+.input::placeholder {
+  color: var(--text-faint);
+}
+
+.mic {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  color: var(--text-dim);
+  transition: all 0.4s var(--ease);
+  flex-shrink: 0;
+}
+
+.mic:hover {
+  border-color: rgba(255, 192, 97, 0.4);
+  color: var(--gold);
+}
+
+.micOn {
+  border-color: var(--amber);
+  color: var(--gold);
+  background: rgba(242, 118, 27, 0.1);
+}
+
+/* Onde qui s'échappe du micro pendant l'écoute — signal permanent que le
+   mode mains libres est actif. */
+.micOn::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  border: 1px solid var(--amber);
+  animation: emit 1.9s var(--ease) infinite;
+}
+
+@keyframes emit {
+  from {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1.85);
+    opacity: 0;
+  }
+}
+
+.interim {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 21px;
+  font-size: 13px;
+  color: var(--text-faint);
+  font-style: italic;
+  pointer-events: none;
+}
+
+/* ── Panneau latéral ──────────────────────────────────────────────────── */
+
+.panelToggle {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  z-index: 5;
+  writing-mode: vertical-rl;
+  padding: 22px 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  transition: color 0.4s var(--ease);
+}
+
+.panelToggle:hover {
+  color: var(--gold);
+}
+
+.panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 6;
+  width: min(410px, 100vw);
+  padding: 34px 30px;
+  overflow-y: auto;
+  background: rgba(8, 8, 10, 0.9);
+  border-left: 1px solid var(--line);
+  backdrop-filter: blur(34px);
+}
+
+.panelTitle {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 20px;
+}
+
+.section {
+  margin-bottom: 34px;
+}
+
+.metric {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.metricName {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.metricValue {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text);
+}
+
+.up {
+  color: var(--gold);
+}
+.down {
+  color: var(--cold);
+}
+
+.themeRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 0;
+}
+
+.themeBar {
+  flex: 1;
+  height: 1px;
+  background: var(--line-strong);
+  position: relative;
+  overflow: hidden;
+}
+
+.themeFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, var(--ember), var(--gold));
+}
+
+.themeLabel {
+  font-size: 12.5px;
+  color: var(--text-dim);
+  min-width: 130px;
+}
+
+.insight {
+  padding: 13px 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--line);
+}
+
+.empty {
+  font-size: 13px;
+  color: var(--text-faint);
+  font-style: italic;
+}

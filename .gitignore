@@ -1,1 +1,21 @@
 node_modules/
+
+# Build
+dist/
+.next/
+*.tsbuildinfo
+
+# Environnement — ne jamais committer de clés
+.env
+.env.local
+.env.*.local
+
+# Données locales de Valmont (mémoire, journaux, sauvegardes)
+.valmont/
+*.db
+*.db-wal
+*.db-shm
+
+# Système
+.DS_Store
+Thumbs.db

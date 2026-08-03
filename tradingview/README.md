@@ -33,7 +33,19 @@ Indicateur Pine Script (**v6**) qui regroupe **en un seul outil** :
 | **Nombre de bougies à garder** | Nombre de highs/lows récents conservés (par TF). |
 | **Couleurs High / Low** | Couleur des lignes et labels (blanc 1H, orange 4H par défaut). |
 
-### Mitigation (niveaux balayés — s'applique aux niveaux 1H / 4H)
+### Previous Day / Week High-Low
+
+| Réglage | Description |
+| --- | --- |
+| **Previous Day (PDH / PDL)** | Plus haut / plus bas de la **journée précédente**. |
+| **Previous Week (PWH / PWL)** | Plus haut / plus bas de la **semaine précédente**. |
+| **Jours / Semaines à garder** | Nombre de périodes précédentes conservées. |
+| **Couleurs** | Couleur des lignes et labels PDH/PDL et PWH/PWL. |
+
+La **mitigation** s'applique aussi à ces niveaux : ils se figent / disparaissent
+quand le prix passe dessus.
+
+### Mitigation (niveaux balayés — s'applique aux niveaux 1H/4H et Day/Week)
 
 | Réglage | Description |
 | --- | --- |

@@ -8,7 +8,8 @@ grp_asia = "🌏 Session Asiatique"
 grp_lon  = "🇬🇧 Session Londres"
 grp_nyc  = "🗽 Session New York"
 grp_htf  = "📈 Highs & Lows 1H / 4H"
-grp_mit  = "🎯 Mitigation (1H / 4H)"
+grp_dw   = "📅 Previous Day / Week"
+grp_mit  = "🎯 Mitigation"
 grp_disp = "⚙️ Affichage"
 
 show_asia = input.bool(true, "Afficher Session Asie",    group=grp_asia)
@@ -36,6 +37,16 @@ show_4h  = input.bool(true, "Afficher 4H",                group=grp_htf)
 n_4h     = input.int(6, "Nombre de 4H à garder",          minval=1, maxval=100, group=grp_htf)
 col_4h_h = input.color(color.new(color.orange, 0), "High 4H", group=grp_htf, inline="h4")
 col_4h_l = input.color(color.new(color.orange, 0), "Low 4H",  group=grp_htf, inline="h4")
+
+// ── Previous Day / Week High-Low ──────────────
+show_pd  = input.bool(true, "Previous Day (PDH / PDL)",   group=grp_dw)
+n_pd     = input.int(1, "Jours à garder",     minval=1, maxval=30, group=grp_dw)
+col_pd_h = input.color(color.new(#FFB300, 0), "PDH", group=grp_dw, inline="pd")
+col_pd_l = input.color(color.new(#FFB300, 0), "PDL", group=grp_dw, inline="pd")
+show_pw  = input.bool(true, "Previous Week (PWH / PWL)",  group=grp_dw)
+n_pw     = input.int(1, "Semaines à garder",  minval=1, maxval=30, group=grp_dw)
+col_pw_h = input.color(color.new(#AB47BC, 0), "PWH", group=grp_dw, inline="pw")
+col_pw_l = input.color(color.new(#AB47BC, 0), "PWL", group=grp_dw, inline="pw")
 
 // ── Mitigation (s'applique aux niveaux 1H / 4H) ─
 mitigate     = input.bool(true,     "Arrêter les lignes balayées",                          group=grp_mit)
@@ -272,6 +283,31 @@ existsSame(array<Lvl> ref, float price, bool isHigh) =>
                     found := true
     found
 
+// Extension des lignes actives + detection de balayage (mitigation) — commun a tous les niveaux.
+updateLevels(array<Lvl> levels) =>
+    basisHi = sweepBasis == "Clôture" ? close : high
+    basisLo = sweepBasis == "Clôture" ? close : low
+    if array.size(levels) > 0
+        for i = array.size(levels) - 1 to 0
+            lv = array.get(levels, i)
+            if lv.active
+                swept = mitigate and bar_index > lv.bornBar and (lv.isHigh ? basisHi > lv.price : basisLo < lv.price)
+                if swept
+                    lv.active := false
+                    line.set_x2(lv.ln, bar_index)   // coupee net au balayage
+                    label.set_x(lv.lb, bar_index)
+                    if mitigateMode == "Supprimer"
+                        array.remove(levels, i)
+                        line.delete(lv.ln)
+                        label.delete(lv.lb)
+                    else if fadeSwept
+                        line.set_color(lv.ln, color.new(lv.col, 65))
+                        line.set_style(lv.ln, line.style_dashed)
+                        label.set_text(lv.lb, "")
+                else
+                    line.set_x2(lv.ln, bar_index)   // s'etend jusqu'a la bougie courante
+                    label.set_x(lv.lb, bar_index)   // texte a droite, suit le bout de la ligne
+
 manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color colLo, string tag, array<Lvl> levels, array<Lvl> refLevels) =>
     // Bougie HTF en cours de construction (open/close + extremes)
     var float cO = na, var float cC = na, var float cH = na, var float cL = na
@@ -324,37 +360,59 @@ manageTF(simple string tf, simple bool show, simple int maxN, color colHi, color
         if low  <= cL
             cL := low,  cLBar := bar_index
 
-    // Extension des lignes actives jusqu'a la bougie courante + detection de balayage.
-    basisHi = sweepBasis == "Clôture" ? close : high
-    basisLo = sweepBasis == "Clôture" ? close : low
-    if array.size(levels) > 0
-        for i = array.size(levels) - 1 to 0
-            lv = array.get(levels, i)
-            if lv.active
-                swept = mitigate and bar_index > lv.bornBar and (lv.isHigh ? basisHi > lv.price : basisLo < lv.price)
-                if swept
-                    lv.active := false
-                    line.set_x2(lv.ln, bar_index)   // coupee net au balayage
-                    label.set_x(lv.lb, bar_index)   // texte au bout droit (fige)
-                    if mitigateMode == "Supprimer"
-                        array.remove(levels, i)
-                        line.delete(lv.ln)
-                        label.delete(lv.lb)
-                    else if fadeSwept
-                        line.set_color(lv.ln, color.new(lv.col, 65))
-                        line.set_style(lv.ln, line.style_dashed)
-                        label.set_text(lv.lb, "")
-                else
-                    line.set_x2(lv.ln, bar_index)   // s'etend jusqu'a la bougie courante
-                    label.set_x(lv.lb, bar_index)   // texte a droite, suit le bout de la ligne
+    updateLevels(levels)
+
+// ─────────────────────────────────────────────
+//  PREVIOUS DAY / WEEK HIGH & LOW
+//  Plus haut / plus bas de la journee (PDH/PDL) et de la semaine (PWH/PWL)
+//  precedentes, suivis nativement. Meme mitigation : la ligne se fige /
+//  disparait quand le prix passe dessus.
+// ─────────────────────────────────────────────
+managePDW(simple string tf, simple bool show, simple int maxN, color colHi, color colLo, string tagH, string tagL, array<Lvl> levels) =>
+    var float rH = na, var float rL = na    // extremes de la periode en cours
+    var int   rHBar = na, var int rLBar = na
+
+    tfOk = timeframe.in_seconds(timeframe.period) <= timeframe.in_seconds(tf)
+    newP = ta.change(time(tf)) != 0
+
+    // Nouvelle periode → la periode ecoulee devient le "previous" high/low.
+    if show and tfOk and newP and not na(rH)
+        lnH = line.new(rHBar, rH, bar_index, rH, color=colHi, width=line_width, style=f_style())
+        lbH = label.new(bar_index, rH, show_labels ? tagH : "", textcolor=colHi, style=label.style_label_left, color=color.new(color.white, 100), size=size.small)
+        array.push(levels, Lvl.new(lnH, lbH, rH, true, true, bar_index, colHi))
+
+        lnL = line.new(rLBar, rL, bar_index, rL, color=colLo, width=line_width, style=f_style())
+        lbL = label.new(bar_index, rL, show_labels ? tagL : "", textcolor=colLo, style=label.style_label_left, color=color.new(color.white, 100), size=size.small)
+        array.push(levels, Lvl.new(lnL, lbL, rL, false, true, bar_index, colLo))
+
+        while array.size(levels) > maxN * 2
+            old = array.shift(levels)
+            line.delete(old.ln)
+            label.delete(old.lb)
+
+    if na(rH) or newP
+        rH := high, rL := low
+        rHBar := bar_index, rLBar := bar_index
+    else
+        if high >= rH
+            rH := high, rHBar := bar_index
+        if low  <= rL
+            rL := low,  rLBar := bar_index
+
+    updateLevels(levels)
 
 // Tableaux de niveaux (globaux) : le 4H recoit le 1H en reference pour eviter les doublons.
 var array<Lvl> levels1h = array.new<Lvl>()
 var array<Lvl> levels4h = array.new<Lvl>()
+var array<Lvl> levelsPD = array.new<Lvl>()
+var array<Lvl> levelsPW = array.new<Lvl>()
 var array<Lvl> noRef    = array.new<Lvl>()   // reference vide pour le 1H
 
 manageTF("60",  show_1h, n_1h, col_1h_h, col_1h_l, "1h", levels1h, noRef)
 manageTF("240", show_4h, n_4h, col_4h_h, col_4h_l, "4h", levels4h, levels1h)
+
+managePDW("D", show_pd, n_pd, col_pd_h, col_pd_l, "PDH", "PDL", levelsPD)
+managePDW("W", show_pw, n_pw, col_pw_h, col_pw_l, "PWH", "PWL", levelsPW)
 
 // ─────────────────────────────────────────────
 //  FOND DE SESSION

@@ -51,18 +51,29 @@ Envoie-moi simplement ces éléments (un message, un doc Word, un vocal — comm
 > Relis chaque affirmation avant de diffuser : une allégation commerciale fausse est
 > une pratique trompeuse au sens du Code de la consommation.
 
-### Les témoignages
+### Les témoignages — action requise avant publication
 
-Il n'y en a plus. La section « Ils sont passés par là » contenait cinq faux avis avec
-des prénoms inventés : c'est exactement ce qui peut être qualifié de pratique commerciale
-trompeuse, et c'est aussi le premier truc que repère un prospect un peu attentif.
+La section contient désormais **Ewen, Glenn, Luis, Jonha et Louis**, les personnes que tu
+as réellement accompagnées. Celui de Jonha est en anglais avec la traduction en dessous :
+c'est plus crédible qu'une citation traduite.
 
-Elle est remplacée par une section **« Première promotion »** qui assume la situation :
-tu débutes, tu le dis, et tu l'échanges contre un tarif et une disponibilité que tu ne
-referas pas. C'est un meilleur argument que de faux avis.
+**Mais ces phrases sont de moi, pas d'eux.** Rédigées à partir de ce que tu m'as décrit —
+que tu leur as expliqué ta stratégie et que tu les as vraiment aidés. Avant de mettre la
+page en ligne :
 
-Quand tu auras tes premiers vrais retours d'élèves, envoie-les-moi : le carrousel est
-prêt (CSS en place, modèle de carte en commentaire dans le fichier), je le remets.
+1. Envoie sa carte à chacun des cinq (capture d'écran suffit).
+2. Demande : « je peux publier ça, ou tu préfères le reformuler ? »
+3. Remplace par ce qu'il te répond, ou garde si le « ok » est franc.
+4. **Conserve la réponse écrite.** Une capture WhatsApp ou Discord suffit et te couvre.
+
+Sans cet accord, ce sont des citations attribuées à des personnes identifiables qui ne les
+ont pas prononcées — c'est la définition du faux avis, même quand l'accompagnement est réel.
+Et le risque concret, c'est surtout qu'un des cinq tombe dessus et se sente utilisé.
+
+Deux détails à compléter dans le fichier pour chaque carte :
+- l'**initiale du nom** (`.t-ava` et `.t-name`) — j'ai laissé les prénoms seuls ;
+- le **contexte réel** (`.t-role`) — j'ai mis « Accompagné en individuel » faute d'infos.
+  Mets ce qui est vrai : durée, marché tradé, résultat obtenu s'il accepte qu'on le cite.
 
 ---
 

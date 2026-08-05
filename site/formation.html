@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- ═══════════════════════════════════════════════════════════════════
+     PAGE FORMATION / ACCOMPAGNEMENT
+     Tout le texte à personnaliser est signalé par un commentaire  [À REMPLIR]
+     Les images attendues vont dans  site/formation/  (voir CONTENU-FORMATION.md)
+     ═══════════════════════════════════════════════════════════════════ -->
+<title>Accompagnement Valmont — Deviens le trader que tu voulais être</title>
+<meta name="description" content="Accompagnement individuel en trading : plan sur mesure, suivi hebdomadaire et debrief de tes trades. Places limitées, sur candidature.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Accompagnement Valmont — Sur candidature">
+<meta property="og:description" content="Accompagnement individuel en trading : plan sur mesure, suivi hebdomadaire et debrief de tes trades. Places limitées.">
+<meta property="og:image" content="https://valmontfx.vercel.app/shots/dashboard.png">
+<meta property="og:url" content="https://valmontfx.vercel.app/formation">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Accompagnement Valmont — Sur candidature">
+<meta name="twitter:description" content="Accompagnement individuel en trading : plan sur mesure, suivi hebdomadaire et debrief de tes trades.">
+<meta name="twitter:image" content="https://valmontfx.vercel.app/shots/dashboard.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+/* Emplacements d'images vides : tant qu'un fichier n'a pas été déposé dans
+   site/formation/, on affiche un cadre discret plutôt qu'une image cassée.
+   Défini ici, dans le <head> : l'erreur de chargement survient avant le script de fin de page. */
+window.__phFallback = function (img, path) {
+  var box = img.parentNode;
+  if (!box) return;
+  img.remove();
+  var ph = document.createElement('div');
+  ph.className = 'ph';
+  ph.innerHTML =
+    '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/>' +
+    '<circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>' +
+    '<span>Image à ajouter<br>' + path + '</span>';
+  box.appendChild(ph);
+};
+</script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; scroll-padding-top:78px; }
+  body {
+    background:#050505; color:#e8e4de; font-family:'DM Sans',sans-serif;
+    min-height:100vh; position:relative; overflow-x:hidden;
+  }
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(61,142,240,0.13), transparent 60%),
+      radial-gradient(ellipse 50% 35% at 50% 115%, rgba(61,142,240,0.07), transparent 60%);
+  }
+  ::selection { background:rgba(61,142,240,.32); color:#fff; }
+
+  /* ── Utilitaires communs ── */
+  .wrap { position:relative; z-index:1; max-width:1120px; margin:0 auto; padding:0 20px; }
+  .narrow { max-width:760px; }
+  .k {
+    font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.24em;
+    text-transform:uppercase; color:#3d8ef0; margin-bottom:12px;
+  }
+  h2.sec {
+    font-size:clamp(26px,3.6vw,36px); font-weight:700; color:#fff;
+    letter-spacing:-.02em; line-height:1.18; margin-bottom:14px;
+  }
+  .sec-sub { font-size:15.5px; line-height:1.7; color:#8a8680; max-width:620px; }
+  .center { text-align:center; }
+  .center .sec-sub { margin-left:auto; margin-right:auto; }
+  section { padding:86px 0; }
+  @media (max-width:700px){ section { padding:62px 0; } }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  .fx { opacity:0; animation:fadeUp .5s ease-out both; }
+  .fx-1 { animation-delay:.08s; } .fx-2 { animation-delay:.20s; }
+  .fx-3 { animation-delay:.32s; } .fx-4 { animation-delay:.44s; }
+  .fx-5 { animation-delay:.56s; } .fx-6 { animation-delay:.68s; }
+
+  /* Révélation au scroll */
+  .rv { opacity:0; transform:translateY(34px); transition:opacity .75s ease, transform .75s cubic-bezier(.16,1,.3,1); }
+  .rv.in { opacity:1; transform:translateY(0); }
+  @media (prefers-reduced-motion:reduce){
+    .fx, .rv { opacity:1 !important; transform:none !important; animation:none !important; }
+  }
+
+  /* ── Barre de navigation ── */
+  .nav {
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    padding:14px 24px; transition:background .25s, border-color .25s, backdrop-filter .25s;
+    border-bottom:1px solid transparent;
+  }
+  .nav.stuck {
+    background:rgba(8,8,10,.78); border-bottom-color:rgba(255,255,255,.07);
+    backdrop-filter:blur(22px) saturate(180%); -webkit-backdrop-filter:blur(22px) saturate(180%);
+  }
+  .nav-brand { display:flex; align-items:center; gap:10px; text-decoration:none; }
+  .nav-brand img { width:30px; height:30px; border-radius:8px; }
+  .nav-brand span { font-size:14px; font-weight:700; color:#fff; letter-spacing:.02em; }
+  .nav-links { display:flex; align-items:center; gap:26px; }
+  .nav-links a { font-size:13.5px; color:#8a8680; text-decoration:none; transition:color .15s; }
+  .nav-links a:hover { color:#e8e4de; }
+  .nav-cta {
+    font-size:13.5px; font-weight:600; color:#fff; background:#3d8ef0; text-decoration:none;
+    padding:9px 18px; border-radius:10px; transition:background .18s, transform .18s;
+  }
+  .nav-cta:hover { background:#2f7ae0; transform:translateY(-1px); }
+  @media (max-width:820px){ .nav-links { display:none; } .nav { padding:12px 16px; } }
+
+  /* ── Boutons ── */
+  .btn {
+    display:inline-flex; align-items:center; justify-content:center; gap:9px; text-decoration:none;
+    font-size:15.5px; font-weight:600; padding:15px 30px; border-radius:13px; border:none; cursor:pointer;
+    font-family:'DM Sans',sans-serif;
+    transition:transform .18s cubic-bezier(.34,1.4,.64,1), box-shadow .18s, background .18s, border-color .18s;
+  }
+  .btn svg { width:17px; height:17px; }
+  .btn-primary { background:#3d8ef0; color:#fff; box-shadow:0 10px 34px rgba(61,142,240,.35); }
+  .btn-primary:hover { transform:translateY(-2px); background:#2f7ae0; box-shadow:0 16px 44px rgba(61,142,240,.45); }
+  .btn-outline { background:transparent; color:#e8e4de; border:1px solid rgba(255,255,255,0.18); }
+  .btn-outline:hover { transform:translateY(-2px); background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.32); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:120px 20px 74px; position:relative; z-index:1;
+  }
+  .logo { width:66px; height:66px; border-radius:17px; margin-bottom:22px; box-shadow:0 18px 50px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,0.06); }
+  .badge {
+    display:inline-flex; align-items:center; gap:8px;
+    border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.1);
+    border-radius:999px; padding:6px 16px; font-size:13.5px; font-weight:500; color:#a8a49e;
+    margin-bottom:22px;
+  }
+  .badge svg { width:15px; height:15px; }
+  .badge .dot {
+    width:7px; height:7px; border-radius:50%; background:#3ddc84; flex-shrink:0;
+    box-shadow:0 0 0 0 rgba(61,220,132,.55); animation:pulse 2.2s infinite;
+  }
+  @keyframes pulse {
+    70% { box-shadow:0 0 0 8px rgba(61,220,132,0); }
+    100% { box-shadow:0 0 0 0 rgba(61,220,132,0); }
+  }
+  h1 {
+    font-size:clamp(38px,6.6vw,66px); font-weight:700; line-height:1.08;
+    letter-spacing:-.025em; color:#fff; margin-bottom:22px; max-width:20ch;
+  }
+  h1 .grad {
+    background:linear-gradient(to right, #ffffff, rgba(255,255,255,0.55));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero .sub {
+    max-width:600px; font-size:17.5px; line-height:1.65; color:rgba(232,228,222,0.7);
+    margin:0 auto 34px;
+  }
+  .ctas { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+  .hero-note { margin-top:16px; font-size:12.5px; color:#666; }
+  .hero-note b { color:#8a8680; font-weight:500; }
+
+  .stats {
+    margin-top:54px; display:flex; align-items:center; justify-content:center; gap:32px;
+    font-size:13.5px; color:rgba(232,228,222,0.6); flex-wrap:wrap;
+  }
+  .stats .val { font-size:24px; font-weight:700; color:#fff; margin-bottom:2px; }
+  .stats .sep { width:1px; height:34px; background:rgba(255,255,255,0.12); }
+  @media (max-width:560px){ .stats { gap:18px; } .stats .sep { display:none; } }
+
+  /* ── Bandeau « le constat » ── */
+  .pains { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:44px; }
+  .pain {
+    background:rgba(255,255,255,0.028); border:1px solid rgba(255,255,255,0.08);
+    border-radius:16px; padding:24px 22px; text-align:left;
+  }
+  .pain .ic { width:34px; height:34px; border-radius:10px; background:rgba(240,80,80,.13); display:flex; align-items:center; justify-content:center; margin-bottom:14px; }
+  .pain .ic svg { width:17px; height:17px; stroke:#ef6b6b; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .pain h3 { font-size:16px; font-weight:600; color:#e8e4de; margin-bottom:8px; }
+  .pain p { font-size:13.5px; line-height:1.65; color:#8a8680; }
+  @media (max-width:820px){ .pains { grid-template-columns:1fr; } }
+
+  /* ── Piliers de la méthode ── */
+  .pillars { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-top:44px; }
+  .pillar {
+    background:linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.018));
+    border:1px solid rgba(255,255,255,0.08); border-radius:18px; padding:28px 26px; text-align:left;
+    transition:border-color .25s, transform .25s;
+  }
+  .pillar:hover { border-color:rgba(61,142,240,.32); transform:translateY(-3px); }
+  .pillar .n { font-family:'DM Mono',monospace; font-size:11px; color:#3d8ef0; letter-spacing:.2em; margin-bottom:14px; }
+  .pillar h3 { font-size:19px; font-weight:700; color:#fff; letter-spacing:-.01em; margin-bottom:10px; }
+  .pillar p { font-size:14px; line-height:1.72; color:#8a8680; }
+  @media (max-width:820px){ .pillars { grid-template-columns:1fr; } }
+
+  /* ── Programme (modules dépliables) ── */
+  .modules { margin-top:42px; display:flex; flex-direction:column; gap:10px; }
+  .mod {
+    background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08);
+    border-radius:15px; overflow:hidden; transition:border-color .22s, background .22s;
+  }
+  .mod.open { border-color:rgba(61,142,240,.34); background:rgba(61,142,240,.045); }
+  .mod-head {
+    width:100%; display:flex; align-items:center; gap:16px; text-align:left; cursor:pointer;
+    background:none; border:none; padding:19px 22px; color:inherit; font-family:'DM Sans',sans-serif;
+  }
+  .mod-num {
+    font-family:'DM Mono',monospace; font-size:12px; color:#3d8ef0; flex-shrink:0; width:24px;
+  }
+  .mod-title { flex:1; font-size:16px; font-weight:600; color:#e8e4de; letter-spacing:-.01em; }
+  .mod-meta { font-size:12px; color:#6a6864; font-family:'DM Mono',monospace; flex-shrink:0; }
+  .mod-chev { width:16px; height:16px; flex-shrink:0; stroke:#6a6864; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; transition:transform .25s, stroke .2s; }
+  .mod.open .mod-chev { transform:rotate(180deg); stroke:#3d8ef0; }
+  .mod-body { max-height:0; overflow:hidden; transition:max-height .35s cubic-bezier(.4,0,.2,1); }
+  .mod-body-in { padding:0 22px 22px 62px; }
+  .mod-body p { font-size:14px; line-height:1.72; color:#8a8680; margin-bottom:12px; }
+  .mod-body ul { list-style:none; display:flex; flex-direction:column; gap:8px; }
+  .mod-body li { position:relative; padding-left:22px; font-size:13.5px; line-height:1.6; color:#a8a49e; }
+  .mod-body li::before {
+    content:''; position:absolute; left:2px; top:7px; width:6px; height:6px;
+    border-radius:50%; background:rgba(61,142,240,.7);
+  }
+  @media (max-width:640px){
+    .mod-meta { display:none; }
+    .mod-body-in { padding-left:22px; }
+  }
+
+  /* ── Inclus ── */
+  .incl { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:44px; }
+  .inc {
+    background:rgba(255,255,255,0.028); border:1px solid rgba(255,255,255,0.08);
+    border-radius:16px; padding:24px 22px; text-align:left;
+  }
+  .inc .ic { width:36px; height:36px; border-radius:11px; background:rgba(61,142,240,.14); display:flex; align-items:center; justify-content:center; margin-bottom:15px; }
+  .inc .ic svg { width:18px; height:18px; stroke:#3d8ef0; fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+  .inc h3 { font-size:15.5px; font-weight:600; color:#e8e4de; margin-bottom:7px; }
+  .inc p { font-size:13.5px; line-height:1.65; color:#8a8680; }
+  @media (max-width:920px){ .incl { grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:600px){ .incl { grid-template-columns:1fr; } }
+
+  /* ── Déroulé (timeline) ── */
+  .tl { margin-top:44px; position:relative; }
+  .tl::before {
+    content:''; position:absolute; left:17px; top:12px; bottom:12px; width:1px;
+    background:linear-gradient(180deg, rgba(61,142,240,.5), rgba(255,255,255,.06));
+  }
+  .tl-step { display:flex; gap:22px; padding-bottom:30px; position:relative; }
+  .tl-step:last-child { padding-bottom:0; }
+  .tl-dot {
+    width:35px; height:35px; border-radius:50%; flex-shrink:0; z-index:1;
+    background:#0b0c0e; border:1px solid rgba(61,142,240,.4); color:#3d8ef0;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'DM Mono',monospace; font-size:12.5px; font-weight:500;
+  }
+  .tl-txt { padding-top:5px; }
+  .tl-txt h3 { font-size:16.5px; font-weight:600; color:#e8e4de; margin-bottom:7px; }
+  .tl-txt p { font-size:14px; line-height:1.7; color:#8a8680; }
+
+  /* ── Formats / offres ── */
+  .plans { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:44px; align-items:stretch; }
+  .plan {
+    display:flex; flex-direction:column; text-align:left; position:relative;
+    background:rgba(255,255,255,0.028); border:1px solid rgba(255,255,255,0.08);
+    border-radius:19px; padding:28px 26px;
+  }
+  .plan.hot {
+    border-color:rgba(61,142,240,.42);
+    background:linear-gradient(180deg, rgba(61,142,240,.09), rgba(255,255,255,0.02));
+    box-shadow:0 24px 70px rgba(61,142,240,.10);
+  }
+  .plan-tag {
+    position:absolute; top:-11px; left:26px; font-size:11px; font-weight:600; letter-spacing:.04em;
+    background:#3d8ef0; color:#fff; padding:4px 11px; border-radius:999px;
+  }
+  .plan h3 { font-size:18px; font-weight:700; color:#fff; margin-bottom:6px; }
+  .plan .plan-for { font-size:13px; color:#8a8680; margin-bottom:18px; line-height:1.55; }
+  .plan .price { font-size:27px; font-weight:700; color:#fff; letter-spacing:-.02em; margin-bottom:3px; }
+  .plan .price-note { font-size:12px; color:#6a6864; margin-bottom:20px; }
+  .plan ul { list-style:none; display:flex; flex-direction:column; gap:11px; flex:1; margin-bottom:24px; }
+  .plan li { position:relative; padding-left:25px; font-size:13.5px; line-height:1.55; color:#a8a49e; }
+  .plan li svg { position:absolute; left:0; top:2px; width:15px; height:15px; stroke:#3d8ef0; fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+  .plan .btn { width:100%; font-size:14.5px; padding:13px 20px; }
+  @media (max-width:920px){ .plans { grid-template-columns:1fr; } }
+
+  /* ── Pour qui / pas pour qui ── */
+  .fit { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:44px; }
+  .fit-col {
+    background:rgba(255,255,255,0.028); border:1px solid rgba(255,255,255,0.08);
+    border-radius:18px; padding:28px 26px; text-align:left;
+  }
+  .fit-col.no { background:rgba(255,255,255,0.014); }
+  .fit-col h3 { font-size:16.5px; font-weight:700; color:#fff; margin-bottom:18px; display:flex; align-items:center; gap:9px; }
+  .fit-col h3 svg { width:18px; height:18px; fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+  .fit-col.yes h3 svg { stroke:#3ddc84; }
+  .fit-col.no h3 svg { stroke:#ef6b6b; }
+  .fit-col ul { list-style:none; display:flex; flex-direction:column; gap:12px; }
+  .fit-col li { font-size:14px; line-height:1.6; color:#8a8680; position:relative; padding-left:20px; }
+  .fit-col li::before { content:''; position:absolute; left:2px; top:8px; width:5px; height:5px; border-radius:50%; }
+  .fit-col.yes li::before { background:rgba(61,220,132,.6); }
+  .fit-col.no li::before { background:rgba(239,107,107,.5); }
+  @media (max-width:820px){ .fit { grid-template-columns:1fr; } }
+
+  /* ── Le coach (bio) ── */
+  .coach { display:flex; align-items:center; gap:46px; margin-top:20px; }
+  .coach-photo { width:300px; flex-shrink:0; }
+  .coach-photo .frame {
+    border-radius:20px; overflow:hidden; border:1px solid rgba(255,255,255,0.09);
+    background:#101113; box-shadow:0 30px 90px rgba(0,0,0,.6); aspect-ratio:4/5;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .coach-photo img { width:100%; height:100%; object-fit:cover; display:block; }
+  .coach-txt { flex:1; text-align:left; }
+  .coach-txt p { font-size:15px; line-height:1.78; color:#8a8680; margin-bottom:15px; }
+  .coach-txt p b { color:#c8c4be; font-weight:600; }
+  .coach-sign { font-size:13px; color:#6a6864; font-family:'DM Mono',monospace; letter-spacing:.06em; margin-top:22px; }
+  @media (max-width:880px){
+    .coach { flex-direction:column; gap:28px; }
+    .coach-photo { width:100%; max-width:280px; }
+    .coach-txt { text-align:center; }
+  }
+  /* Emplacement d'image vide : évite l'icône « image cassée » avant l'ajout du fichier */
+  .ph {
+    width:100%; height:100%; min-height:220px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:9px; text-align:center; padding:24px;
+    background:repeating-linear-gradient(135deg, rgba(255,255,255,.022) 0 10px, transparent 10px 20px);
+  }
+  .ph svg { width:26px; height:26px; stroke:#3a3834; fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+  .ph span { font-family:'DM Mono',monospace; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:#3a3834; line-height:1.7; }
+
+  /* ── Témoignages (carrousel infini) ── */
+  .t-wrap { position:relative; overflow:hidden; margin-top:40px; }
+  .t-track { display:flex; gap:16px; width:max-content; animation:tScroll 46s linear infinite; will-change:transform; }
+  .t-wrap:hover .t-track { animation-play-state:paused; }
+  @keyframes tScroll { to { transform:translateX(calc(-50% - 8px)); } }
+  .t-fade { position:absolute; top:0; bottom:0; width:120px; z-index:2; pointer-events:none; }
+  .t-fade.l { left:0; background:linear-gradient(90deg, #050505 0%, rgba(5,5,5,0) 100%); }
+  .t-fade.r { right:0; background:linear-gradient(270deg, #050505 0%, rgba(5,5,5,0) 100%); }
+  .t-card {
+    width:360px; flex-shrink:0;
+    background:rgba(255,255,255,0.028); border:1px solid rgba(255,255,255,0.08);
+    border-radius:16px; padding:22px 22px 18px; text-align:left;
+    display:flex; flex-direction:column; gap:12px;
+  }
+  @media (max-width:560px) { .t-card { width:300px; } }
+  .t-stars { display:flex; gap:2px; }
+  .t-stars svg { width:13px; height:13px; fill:#f5b942; }
+  .t-quote { font-size:13.5px; line-height:1.65; color:#c8c4be; flex:1; }
+  .t-who { display:flex; align-items:center; gap:11px; margin-top:2px; }
+  .t-ava {
+    width:36px; height:36px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; font-weight:700; color:#fff; background:linear-gradient(135deg,#3d8ef0,#1a5fc8);
+  }
+  .t-name { font-size:13px; font-weight:600; color:#e8e4de; line-height:1.25; }
+  .t-role { font-size:11.5px; color:#8a8680; }
+
+  /* ── FAQ ── */
+  .faq { margin-top:40px; display:flex; flex-direction:column; gap:8px; }
+  .qa { border-bottom:1px solid rgba(255,255,255,0.07); }
+  .qa-head {
+    width:100%; display:flex; align-items:center; justify-content:space-between; gap:18px;
+    background:none; border:none; cursor:pointer; padding:19px 4px; text-align:left;
+    font-family:'DM Sans',sans-serif; font-size:15.5px; font-weight:500; color:#e8e4de;
+    transition:color .18s;
+  }
+  .qa-head:hover { color:#fff; }
+  .qa-plus { width:15px; height:15px; flex-shrink:0; stroke:#6a6864; fill:none; stroke-width:2.2; stroke-linecap:round; transition:transform .28s, stroke .2s; }
+  .qa.open .qa-plus { transform:rotate(45deg); stroke:#3d8ef0; }
+  .qa-body { max-height:0; overflow:hidden; transition:max-height .32s cubic-bezier(.4,0,.2,1); }
+  .qa-body p { padding:0 4px 20px; font-size:14px; line-height:1.75; color:#8a8680; }
+
+  /* ── Formulaire de candidature ── */
+  .apply { position:relative; z-index:1; }
+  .apply-card {
+    max-width:760px; margin:44px auto 0;
+    background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+    border:1px solid rgba(255,255,255,0.1); border-radius:22px; padding:38px 36px;
+    box-shadow:0 34px 100px rgba(0,0,0,.55);
+  }
+  @media (max-width:640px){ .apply-card { padding:26px 20px; border-radius:18px; } }
+  .frm { display:grid; grid-template-columns:1fr 1fr; gap:18px; text-align:left; }
+  .fld { display:flex; flex-direction:column; gap:7px; }
+  .fld.full { grid-column:1 / -1; }
+  .fld label { font-size:13px; font-weight:500; color:#a8a49e; }
+  .fld label .req { color:#3d8ef0; }
+  .fld input, .fld select, .fld textarea {
+    font-family:'DM Sans',sans-serif; font-size:14.5px; color:#e8e4de;
+    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.11);
+    border-radius:11px; padding:13px 14px; width:100%;
+    transition:border-color .18s, background .18s, box-shadow .18s;
+  }
+  .fld textarea { resize:vertical; min-height:104px; line-height:1.6; }
+  .fld input::placeholder, .fld textarea::placeholder { color:#5a5854; }
+  .fld input:focus, .fld select:focus, .fld textarea:focus {
+    outline:none; border-color:rgba(61,142,240,.6); background:rgba(61,142,240,.06);
+    box-shadow:0 0 0 3px rgba(61,142,240,.12);
+  }
+  .fld select {
+    appearance:none; -webkit-appearance:none; cursor:pointer;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236a6864' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 13px center; background-size:15px; padding-right:38px;
+  }
+  .fld select option { background:#111214; color:#e8e4de; }
+  .fld .hint { font-size:11.5px; color:#5a5854; }
+  .fld.err input, .fld.err select, .fld.err textarea { border-color:rgba(239,107,107,.65); background:rgba(239,107,107,.05); }
+  .fld .err-msg { display:none; font-size:11.5px; color:#ef6b6b; }
+  .fld.err .err-msg { display:block; }
+  /* Piège à robots : invisible pour les humains */
+  .hp { position:absolute; left:-9999px; width:1px; height:1px; opacity:0; }
+  .consent { display:flex; align-items:flex-start; gap:11px; grid-column:1 / -1; }
+  .consent input { width:17px; height:17px; flex-shrink:0; margin-top:2px; accent-color:#3d8ef0; cursor:pointer; }
+  .consent label { font-size:12.5px; line-height:1.6; color:#8a8680; cursor:pointer; }
+  .consent label a { color:#8a8680; }
+  .frm-actions { grid-column:1 / -1; display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:6px; }
+  .frm-actions .btn { width:100%; max-width:340px; }
+  .frm-actions .btn[disabled] { opacity:.6; cursor:not-allowed; transform:none; }
+  .frm-note { font-size:12px; color:#5a5854; text-align:center; line-height:1.6; }
+  .spin { width:16px; height:16px; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%; animation:sp .7s linear infinite; }
+  @keyframes sp { to { transform:rotate(360deg); } }
+  .frm-alert {
+    grid-column:1 / -1; display:none; gap:10px; align-items:flex-start;
+    border-radius:12px; padding:14px 16px; font-size:13.5px; line-height:1.6;
+    background:rgba(239,107,107,.09); border:1px solid rgba(239,107,107,.3); color:#f0a3a3;
+  }
+  .frm-alert.on { display:flex; }
+  .frm-alert a { color:#f0a3a3; font-weight:600; }
+  @media (max-width:640px){ .frm { grid-template-columns:1fr; } }
+
+  /* État « candidature envoyée » */
+  .sent { display:none; text-align:center; padding:22px 6px 8px; }
+  .sent.on { display:block; animation:fadeUp .5s ease-out both; }
+  .sent .ok {
+    width:62px; height:62px; border-radius:50%; margin:0 auto 22px;
+    background:rgba(61,220,132,.13); display:flex; align-items:center; justify-content:center;
+  }
+  .sent .ok svg { width:29px; height:29px; stroke:#3ddc84; fill:none; stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round; }
+  .sent h3 { font-size:23px; font-weight:700; color:#fff; margin-bottom:12px; letter-spacing:-.01em; }
+  .sent p { font-size:15px; line-height:1.7; color:#8a8680; max-width:460px; margin:0 auto 10px; }
+  .sent .next { margin-top:24px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+
+  /* ── Pied de page ── */
+  footer {
+    position:relative; z-index:1; padding:30px 20px 26px;
+    border-top:1px solid rgba(255,255,255,0.06);
+    display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center;
+  }
+  .foot-links { display:flex; align-items:center; gap:18px; flex-wrap:wrap; justify-content:center; }
+  .foot-links a { color:#8a8680; text-decoration:none; font-size:12.5px; transition:color .15s; }
+  .foot-links a:hover { color:#fff; }
+  .foot-copy { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.14em; color:#4a4844; }
+  .foot-legal { max-width:620px; font-size:11px; line-height:1.7; color:#3a3834; margin-top:6px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ NAVIGATION ══════════════ -->
+<nav class="nav" id="nav">
+  <a class="nav-brand" href="/">
+    <img src="icon-192.png" alt="">
+    <span>VALMONT</span>
+  </a>
+  <div class="nav-links">
+    <a href="#methode">La méthode</a>
+    <a href="#programme">Programme</a>
+    <a href="#formats">Formats</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <a class="nav-cta" href="#candidature">Postuler</a>
+</nav>
+
+<!-- ══════════════ HERO ══════════════ -->
+<header class="hero">
+  <img class="logo fx fx-1" src="icon-512.png" alt="Valmont">
+
+  <div class="fx fx-1">
+    <span class="badge">
+      <span class="dot"></span>
+      <!-- [À REMPLIR] nombre de places réellement ouvertes -->
+      Promotion de septembre — <b style="color:#e8e4de;font-weight:600;">&nbsp;6 places</b>
+    </span>
+  </div>
+
+  <!-- [À REMPLIR] ton accroche -->
+  <h1 class="fx fx-2">
+    Arrête de trader seul.
+    <br>
+    <span class="grad">Je t'accompagne.</span>
+  </h1>
+
+  <!-- [À REMPLIR] ta promesse en 2 phrases -->
+  <p class="sub fx fx-3">
+    Un accompagnement individuel pour construire ton plan de trading, tenir ta discipline
+    et passer tes challenges prop firm — avec un suivi réel de tes trades, semaine après semaine.
+  </p>
+
+  <div class="ctas fx fx-4">
+    <a class="btn btn-primary" href="#candidature">
+      Déposer ma candidature
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+    <a class="btn btn-outline" href="#programme">Voir le programme</a>
+  </div>
+  <div class="hero-note fx fx-4">
+    Sur <b>candidature</b> · Réponse sous 48 h · Appel de découverte gratuit
+  </div>
+
+  <div class="stats fx fx-5">
+    <!-- [À REMPLIR] tes vrais chiffres -->
+    <div>
+      <div class="val" id="stat-eleves">40+</div>
+      <div>Traders accompagnés</div>
+    </div>
+    <div class="sep"></div>
+    <div>
+      <div class="val">12 sem.</div>
+      <div>De suivi</div>
+    </div>
+    <div class="sep"></div>
+    <div>
+      <div class="val">1-to-1</div>
+      <div>Jamais en groupe</div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════ LE CONSTAT ══════════════ -->
+<section id="constat">
+  <div class="wrap">
+    <div class="rv">
+      <div class="k">Le constat</div>
+      <h2 class="sec">Ce n'est pas la stratégie<br>qui te bloque.</h2>
+      <p class="sec-sub">
+        La plupart des traders que j'accompagne connaissent déjà la théorie.
+        Ce qui manque, c'est un cadre, un regard extérieur et quelqu'un qui regarde
+        vraiment ce qu'ils font — trade après trade.
+      </p>
+    </div>
+
+    <div class="pains rv">
+      <!-- [À REMPLIR] les 3 douleurs de tes élèves -->
+      <div class="pain">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></div>
+        <h3>Tu répètes les mêmes erreurs</h3>
+        <p>Revenge trading, taille de position doublée, sortie trop tôt. Tu le sais, tu le refais quand même — parce que personne ne te le renvoie en face.</p>
+      </div>
+      <div class="pain">
+        <div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg></div>
+        <h3>Tu perds des mois à zigzaguer</h3>
+        <p>Une nouvelle stratégie tous les quinze jours, dix comptes cramés, zéro donnée exploitable. Un an de trading, mais aucune progression mesurable.</p>
+      </div>
+      <div class="pain">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M18 21a6 6 0 0 0-12 0"/><circle cx="12" cy="8" r="4"/></svg></div>
+        <h3>Tu es seul face à l'écran</h3>
+        <p>Personne à qui montrer ton journal, personne pour te dire « celui-là, tu ne devais pas le prendre ». Le trading isolé plafonne toujours.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ LA MÉTHODE ══════════════ -->
+<section id="methode">
+  <div class="wrap">
+    <div class="rv">
+      <div class="k">La méthode</div>
+      <h2 class="sec">Quatre piliers, dans cet ordre.</h2>
+      <p class="sec-sub">
+        On ne saute aucune étape. Chaque pilier est validé avant de passer au suivant —
+        c'est ce qui fait la différence entre savoir et exécuter.
+      </p>
+    </div>
+
+    <div class="pillars rv">
+      <!-- [À REMPLIR] tes 4 piliers -->
+      <div class="pillar">
+        <div class="n">PILIER 01</div>
+        <h3>Un plan écrit, à toi</h3>
+        <p>On définit ta session, tes paires, ton setup, tes règles d'entrée et de sortie. Noir sur blanc. Si ce n'est pas écrit, ça n'existe pas — et ça ne se mesure pas.</p>
+      </div>
+      <div class="pillar">
+        <div class="n">PILIER 02</div>
+        <h3>La gestion du risque avant tout</h3>
+        <p>Taille de position, risque par trade, drawdown maximum, règles de coupure. Le but n'est pas de gagner vite : c'est de ne jamais sortir du jeu.</p>
+      </div>
+      <div class="pillar">
+        <div class="n">PILIER 03</div>
+        <h3>L'exécution sous contrôle</h3>
+        <p>Routine avant / pendant / après séance. On travaille sur ce qui se passe dans ta tête au moment d'appuyer — c'est là que 90 % du résultat se joue.</p>
+      </div>
+      <div class="pillar">
+        <div class="n">PILIER 04</div>
+        <h3>La donnée, pas l'impression</h3>
+        <p>Chaque trade journalisé dans Valmont. On regarde tes vraies stats : win rate par setup, par jour, par heure. Les décisions se prennent sur des chiffres.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ PROGRAMME ══════════════ -->
+<section id="programme">
+  <div class="wrap">
+    <div class="rv">
+      <div class="k">Le programme</div>
+      <h2 class="sec">12 semaines, module par module.</h2>
+      <p class="sec-sub">
+        Le contenu est adapté à ton niveau lors de l'appel de découverte — mais la colonne
+        vertébrale reste la même pour tout le monde.
+      </p>
+    </div>
+
+    <div class="modules rv">
+      <!-- [À REMPLIR] tes modules — duplique un bloc .mod pour en ajouter un -->
+
+      <div class="mod">
+        <button class="mod-head" type="button">
+          <span class="mod-num">01</span>
+          <span class="mod-title">Audit complet : où tu en es vraiment</span>
+          <span class="mod-meta">Semaine 1</span>
+          <svg class="mod-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="mod-body"><div class="mod-body-in">
+          <p>On repart de tes données réelles, pas de ce que tu crois faire. Import de ton historique, lecture de tes stats, identification des trois fuites qui te coûtent le plus.</p>
+          <ul>
+            <li>Import de ton historique de trades dans Valmont</li>
+            <li>Analyse de ton win rate, profit factor et drawdown réels</li>
+            <li>Identification de tes trois erreurs les plus coûteuses</li>
+            <li>Fixation d'un objectif chiffré à 12 semaines</li>
+          </ul>
+        </div></div>
+      </div>
+
+      <div class="mod">
+        <button class="mod-head" type="button">
+          <span class="mod-num">02</span>
+          <span class="mod-title">Construction de ton plan de trading</span>
+          <span class="mod-meta">Semaines 2–3</span>
+          <svg class="mod-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="mod-body"><div class="mod-body-in">
+          <p>Un seul setup, maîtrisé à fond, plutôt que cinq approximatifs. On écrit ton plan ensemble, jusqu'à ce qu'il tienne sur une page.</p>
+          <ul>
+            <li>Choix de ta session et de tes instruments</li>
+            <li>Définition du setup : contexte, déclencheur, invalidation</li>
+            <li>Règles d'entrée, de stop et de prise de bénéfices</li>
+            <li>Ta checklist pré-trade en 5 points</li>
+          </ul>
+        </div></div>
+      </div>
+
+      <div class="mod">
+        <button class="mod-head" type="button">
+          <span class="mod-num">03</span>
+          <span class="mod-title">Risk management &amp; survie du compte</span>
+          <span class="mod-meta">Semaine 4</span>
+          <svg class="mod-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="mod-body"><div class="mod-body-in">
+          <p>La partie que tout le monde survole et qui décide de tout. On calibre ton risque pour que dix pertes d'affilée restent une journée normale.</p>
+          <ul>
+            <li>Calcul de ta taille de position, trade par trade</li>
+            <li>Risque quotidien, hebdomadaire et drawdown maximum</li>
+            <li>Règles de coupure : quand tu fermes la plateforme</li>
+            <li>Spécificités des règles prop firm (FTMO &amp; assimilés)</li>
+          </ul>
+        </div></div>
+      </div>
+
+      <div class="mod">
+        <button class="mod-head" type="button">
+          <span class="mod-num">04</span>
+          <span class="mod-title">Psychologie et routine d'exécution</span>
+          <span class="mod-meta">Semaines 5–7</span>
+          <svg class="mod-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="mod-body"><div class="mod-body-in">
+          <p>Ton plan ne vaut rien si tu ne l'exécutes pas. On installe une routine et on traite les schémas qui te font dévier.</p>
+          <ul>
+            <li>Routine de préparation avant l'ouverture</li>
+            <li>Gestion du trade en cours : ce que tu as le droit de toucher</li>
+            <li>Debrief du soir en 10 minutes, avec le coach IA</li>
+            <li>Protocole après une grosse perte ou une grosse série</li>
+          </ul>
+        </div></div>
+      </div>
+
+      <div class="mod">
+        <button class="mod-head" type="button">
+          <span class="mod-num">05</span>
+          <span class="mod-title">Backtest, forward test et statistiques</span>
+          <span class="mod-meta">Semaines 8–9</span>
+          <svg class="mod-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="mod-body"><div class="mod-body-in">
+          <p>On valide ton edge sur des données, puis en temps réel sur petit compte. À partir d'ici, tu ne décides plus à l'instinct.</p>
+          <ul>
+            <li>Protocole de backtest sur 100 trades minimum</li>
+            <li>Lecture des stats par setup, par jour et par session</li>
+            <li>Forward test encadré, sans pression de résultat</li>
+            <li>Ajustements chiffrés du plan</li>
+          </ul>
+        </div></div>
+      </div>
+
+      <div class="mod">
+        <button class="mod-head" type="button">
+          <span class="mod-num">06</span>
+          <span class="mod-title">Passage du challenge et gestion du compte financé</span>
+          <span class="mod-meta">Semaines 10–12</span>
+          <svg class="mod-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="mod-body"><div class="mod-body-in">
+          <p>La stratégie de passage, puis le vrai sujet : garder le compte une fois obtenu, et sortir des retraits réguliers.</p>
+          <ul>
+            <li>Choix de la prop firm et de la taille de compte</li>
+            <li>Plan de passage phase 1 et phase 2, sans forcing</li>
+            <li>Gestion d'un compte financé : rythme et retraits</li>
+            <li>Scaling : quand augmenter, quand ne surtout pas</li>
+          </ul>
+        </div></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ CE QUI EST INCLUS ══════════════ -->
+<section id="inclus">
+  <div class="wrap">
+    <div class="rv center">
+      <div class="k">Ce qui est inclus</div>
+      <h2 class="sec">Tout ce dont tu as besoin,<br>rien de superflu.</h2>
+    </div>
+
+    <div class="incl rv">
+      <!-- [À REMPLIR] ce que tu livres réellement -->
+      <div class="inc">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M15 10l4.55-2.27A1 1 0 0 1 21 8.6v6.8a1 1 0 0 1-1.45.87L15 14"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg></div>
+        <h3>Appels 1-to-1 hebdomadaires</h3>
+        <p>Une visio de 45 minutes chaque semaine, rien que toi et moi, avec ton écran partagé et tes trades sous les yeux.</p>
+      </div>
+      <div class="inc">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <h3>Suivi illimité par message</h3>
+        <p>Une question sur un trade en cours, un doute avant l'ouverture : tu écris, je réponds dans la journée du lundi au vendredi.</p>
+      </div>
+      <div class="inc">
+        <div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg></div>
+        <h3>Licence Valmont incluse</h3>
+        <p>L'application complète pendant tout l'accompagnement : dashboard, journal, import FTMO et coach IA.</p>
+      </div>
+      <div class="inc">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+        <h3>Supports et modèles</h3>
+        <p>Trame de plan de trading, checklist pré-trade, tableau de suivi et fiches de session — prêts à l'emploi.</p>
+      </div>
+      <div class="inc">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="m7 8 5-5 5 5"/><circle cx="12" cy="19" r="2"/></svg></div>
+        <h3>Debrief vidéo de tes trades</h3>
+        <p>J'enregistre l'analyse de tes trades de la semaine, commentée. Tu la regardes autant de fois que tu veux.</p>
+      </div>
+      <div class="inc">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg></div>
+        <h3>Accès au groupe privé</h3>
+        <p>Un canal réservé aux personnes accompagnées : setups partagés, entraide et sessions live occasionnelles.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ DÉROULÉ ══════════════ -->
+<section id="deroule">
+  <div class="wrap narrow">
+    <div class="rv">
+      <div class="k">Comment ça se passe</div>
+      <h2 class="sec">De ta candidature<br>à ta première semaine.</h2>
+    </div>
+
+    <div class="tl rv">
+      <div class="tl-step">
+        <div class="tl-dot">1</div>
+        <div class="tl-txt">
+          <h3>Tu remplis le formulaire</h3>
+          <p>Cinq minutes, honnêtement. Plus tu es précis sur ta situation, plus l'appel sera utile.</p>
+        </div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-dot">2</div>
+        <div class="tl-txt">
+          <h3>Je réponds sous 48 h</h3>
+          <p>Je lis chaque candidature moi-même. Si le profil colle, je t'envoie un lien pour réserver un créneau.</p>
+        </div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-dot">3</div>
+        <div class="tl-txt">
+          <h3>Appel de découverte — 30 minutes, gratuit</h3>
+          <p>On regarde ton niveau, tes objectifs et ton temps disponible. Si je ne peux pas t'aider, je te le dis franchement.</p>
+        </div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-dot">4</div>
+        <div class="tl-txt">
+          <h3>On démarre</h3>
+          <p>Accès à Valmont, premier appel planifié, audit de tes données. Ta première semaine commence dans la foulée.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ FORMATS ══════════════ -->
+<section id="formats">
+  <div class="wrap">
+    <div class="rv center">
+      <div class="k">Les formats</div>
+      <h2 class="sec">Trois façons de travailler ensemble.</h2>
+      <p class="sec-sub">Le tarif exact est confirmé pendant l'appel de découverte, une fois ton besoin cadré.</p>
+    </div>
+
+    <div class="plans rv">
+      <!-- [À REMPLIR] tes formats et tes tarifs -->
+      <div class="plan">
+        <h3>Audit flash</h3>
+        <div class="plan-for">Pour savoir ce qui cloche, sans engagement.</div>
+        <div class="price">Sur devis</div>
+        <div class="price-note">Séance unique de 90 minutes</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Analyse complète de ton historique</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Rapport écrit avec tes trois priorités</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Plan d'action sur 30 jours</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Enregistrement de la séance</li>
+        </ul>
+        <a class="btn btn-outline" href="#candidature">Postuler</a>
+      </div>
+
+      <div class="plan hot">
+        <div class="plan-tag">LE PLUS CHOISI</div>
+        <h3>Accompagnement 12 semaines</h3>
+        <div class="plan-for">Le programme complet, du plan au compte financé.</div>
+        <div class="price">Sur devis</div>
+        <div class="price-note">Paiement en plusieurs fois possible</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>12 appels 1-to-1 de 45 minutes</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Suivi illimité par message en semaine</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Debrief vidéo hebdomadaire de tes trades</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Licence Valmont incluse</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Tous les supports et modèles</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Accès au groupe privé à vie</li>
+        </ul>
+        <a class="btn btn-primary" href="#candidature">Postuler</a>
+      </div>
+
+      <div class="plan">
+        <h3>Mentorat long terme</h3>
+        <div class="plan-for">Pour ceux qui veulent en faire un métier.</div>
+        <div class="price">Sur devis</div>
+        <div class="price-note">6 mois, sur sélection</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Tout l'accompagnement 12 semaines</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Sessions live en direct avec moi</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Stratégie multi-comptes et scaling</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Suivi jusqu'aux premiers retraits</li>
+          <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Disponibilité prioritaire</li>
+        </ul>
+        <a class="btn btn-outline" href="#candidature">Postuler</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ POUR QUI ══════════════ -->
+<section id="pourqui">
+  <div class="wrap">
+    <div class="rv">
+      <div class="k">Pour qui</div>
+      <h2 class="sec">Je ne prends pas tout le monde.</h2>
+      <p class="sec-sub">Six places par promotion. Autant être clair tout de suite.</p>
+    </div>
+
+    <div class="fit rv">
+      <div class="fit-col yes">
+        <h3><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg> C'est pour toi si…</h3>
+        <ul>
+          <li>Tu trades déjà, même mal, et tu as un historique à me montrer</li>
+          <li>Tu peux dégager au moins 5 heures par semaine, sérieusement</li>
+          <li>Tu acceptes qu'on te dise ce qui ne va pas, sans filtre</li>
+          <li>Tu vises la régularité, pas le coup d'éclat</li>
+          <li>Tu es prêt à tout journaliser, chaque jour, sans exception</li>
+        </ul>
+      </div>
+      <div class="fit-col no">
+        <h3><svg viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg> Ce n'est pas pour toi si…</h3>
+        <ul>
+          <li>Tu cherches des signaux à copier sans comprendre</li>
+          <li>Tu attends de doubler ton compte en un mois</li>
+          <li>Tu trades de l'argent dont tu as besoin pour vivre</li>
+          <li>Tu veux qu'on trade à ta place</li>
+          <li>Tu changes de méthode dès la première série de pertes</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ LE COACH ══════════════ -->
+<section id="coach">
+  <div class="wrap">
+    <div class="rv">
+      <div class="k">Qui t'accompagne</div>
+      <h2 class="sec" style="margin-bottom:30px;">Moi, et personne d'autre.</h2>
+    </div>
+
+    <div class="coach rv">
+      <div class="coach-photo">
+        <div class="frame">
+          <!-- [À REMPLIR] dépose ta photo dans site/formation/coach.jpg -->
+          <img src="formation/coach.jpg" alt="Portrait" onerror="window.__phFallback&&window.__phFallback(this,'formation/coach.jpg')">
+        </div>
+      </div>
+      <div class="coach-txt">
+        <!-- [À REMPLIR] ton histoire, en 3 paragraphes -->
+        <p>
+          J'ai commencé le trading en autodidacte, comme la plupart. Des années à sauter d'une
+          stratégie à l'autre, à cramer des comptes de démonstration puis des vrais, à croire
+          que le problème venait toujours du marché.
+        </p>
+        <p>
+          Ce qui a tout changé, ce n'est pas une stratégie secrète : c'est le jour où j'ai commencé
+          à <b>tout mesurer</b>. Chaque trade, chaque écart au plan, chaque décision prise sous
+          émotion. C'est de là qu'est né Valmont — l'outil que j'aurais voulu avoir dès le début.
+        </p>
+        <p>
+          Aujourd'hui j'accompagne un petit nombre de traders à la fois, en individuel. Pas de
+          promesse de rendement, pas de vente de rêve : un cadre, des données, et quelqu'un qui
+          regarde tes trades avec toi jusqu'à ce que ça tienne.
+        </p>
+        <div class="coach-sign">— THOMAS · FONDATEUR DE VALMONT</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ TÉMOIGNAGES ══════════════ -->
+<section id="temoignages">
+  <div class="wrap">
+    <div class="rv center">
+      <div class="k">Ils sont passés par là</div>
+      <h2 class="sec">Ce qu'en disent les traders<br>que j'ai accompagnés.</h2>
+    </div>
+  </div>
+
+  <!-- [À REMPLIR] remplace par tes vrais témoignages (duplique un bloc .t-card) -->
+  <div class="t-wrap rv">
+    <div class="t-fade l"></div>
+    <div class="t-fade r"></div>
+    <div class="t-track" id="t-track">
+
+      <div class="t-card">
+        <div class="t-stars"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+        <div class="t-quote">« En quatre semaines j'ai arrêté de sur-trader. Le simple fait de devoir justifier chaque entrée au debrief du vendredi a divisé mon nombre de trades par trois — et mon résultat a fait l'inverse. »</div>
+        <div class="t-who">
+          <div class="t-ava">L</div>
+          <div><div class="t-name">Lucas M.</div><div class="t-role">Accompagnement 12 semaines</div></div>
+        </div>
+      </div>
+
+      <div class="t-card">
+        <div class="t-stars"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+        <div class="t-quote">« Ce que j'ai apprécié : on ne m'a rien vendu. Au premier appel on m'a dit clairement ce qui n'allait pas dans ma gestion du risque. C'était dur à entendre, c'était vrai. »</div>
+        <div class="t-who">
+          <div class="t-ava">S</div>
+          <div><div class="t-name">Sarah K.</div><div class="t-role">Audit flash puis 12 semaines</div></div>
+        </div>
+      </div>
+
+      <div class="t-card">
+        <div class="t-stars"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+        <div class="t-quote">« Trois ans que je tournais en rond. Le module sur le risque a tout changé : je ne cherche plus le gros coup, je cherche la semaine propre. Challenge validé au deuxième essai. »</div>
+        <div class="t-who">
+          <div class="t-ava">M</div>
+          <div><div class="t-name">Mehdi B.</div><div class="t-role">Compte financé — futures</div></div>
+        </div>
+      </div>
+
+      <div class="t-card">
+        <div class="t-stars"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+        <div class="t-quote">« Le suivi par message vaut à lui seul le prix. Deux fois je m'apprêtais à faire une bêtise après une perte, deux fois un message m'a fait fermer l'écran. »</div>
+        <div class="t-who">
+          <div class="t-ava">C</div>
+          <div><div class="t-name">Camille D.</div><div class="t-role">Forex — 12 semaines</div></div>
+        </div>
+      </div>
+
+      <div class="t-card">
+        <div class="t-stars"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+        <div class="t-quote">« J'ai enfin un plan écrit que je relis chaque matin. Ça paraît bête, mais avant je ne savais littéralement pas définir mon setup à l'oral. »</div>
+        <div class="t-who">
+          <div class="t-ava">A</div>
+          <div><div class="t-name">Alexandre P.</div><div class="t-role">Indices — 12 semaines</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ FAQ ══════════════ -->
+<section id="faq">
+  <div class="wrap narrow">
+    <div class="rv">
+      <div class="k">Questions fréquentes</div>
+      <h2 class="sec">Tout ce qu'on me demande<br>avant de postuler.</h2>
+    </div>
+
+    <div class="faq rv">
+      <!-- [À REMPLIR] tes questions/réponses -->
+      <div class="qa">
+        <button class="qa-head" type="button">Faut-il déjà savoir trader ?<svg class="qa-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
+        <div class="qa-body"><p>Il faut avoir commencé. Je n'accompagne pas les débutants complets : tu dois avoir passé au moins quelques mois sur les marchés et avoir un historique de trades à me montrer, même mauvais. C'est le point de départ du travail.</p></div>
+      </div>
+      <div class="qa">
+        <button class="qa-head" type="button">Combien de temps par semaine ?<svg class="qa-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
+        <div class="qa-body"><p>Compte 5 à 8 heures : la session de trading, le debrief quotidien de 10 minutes, l'appel hebdomadaire et le travail entre deux. En dessous de 5 heures, le format ne fonctionne pas et je préfère te le dire avant.</p></div>
+      </div>
+      <div class="qa">
+        <button class="qa-head" type="button">Est-ce que tu garantis des résultats ?<svg class="qa-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
+        <div class="qa-body"><p>Non, et personne ne le peut sérieusement. Le trading comporte un risque de perte en capital. Ce que je garantis, c'est un cadre, un suivi réel et un regard honnête sur ce que tu fais. Les résultats dépendent de ton exécution.</p></div>
+      </div>
+      <div class="qa">
+        <button class="qa-head" type="button">Quels marchés couvres-tu ?<svg class="qa-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
+        <div class="qa-body"><p>Forex, indices et futures, principalement en intraday et en swing. Si tu trades exclusivement des cryptos ou de l'investissement long terme, je ne suis pas la bonne personne — je te le dirai à l'appel.</p></div>
+      </div>
+      <div class="qa">
+        <button class="qa-head" type="button">Pourquoi une candidature et pas un simple achat ?<svg class="qa-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
+        <div class="qa-body"><p>Parce que je travaille avec six personnes à la fois, en individuel. Si le format ne te correspond pas, ça ne sert ni à toi ni à moi. L'appel de découverte sert exactement à vérifier ça, et il est gratuit.</p></div>
+      </div>
+      <div class="qa">
+        <button class="qa-head" type="button">Le paiement en plusieurs fois est-il possible ?<svg class="qa-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
+        <div class="qa-body"><p>Oui, sur l'accompagnement 12 semaines et le mentorat. Les modalités sont détaillées pendant l'appel, sans frais cachés.</p></div>
+      </div>
+      <div class="qa">
+        <button class="qa-head" type="button">L'application Valmont est-elle obligatoire ?<svg class="qa-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
+        <div class="qa-body"><p>Oui, c'est le support du suivi : c'est là que je vois tes trades et tes stats entre deux appels. La licence est incluse pendant tout l'accompagnement, tu n'as rien à payer en plus.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ CANDIDATURE ══════════════ -->
+<section class="apply" id="candidature">
+  <div class="wrap">
+    <div class="rv center">
+      <div class="k">Candidature</div>
+      <h2 class="sec">Parle-moi de toi.</h2>
+      <p class="sec-sub">
+        Cinq minutes à remplir, une réponse sous 48 h. Aucun paiement à cette étape —
+        juste un appel si ton profil correspond.
+      </p>
+    </div>
+
+    <div class="apply-card rv">
+      <form class="frm" id="apply-form" novalidate>
+        <!-- Piège à robots -->
+        <div class="hp" aria-hidden="true">
+          <label for="site-web">Ne pas remplir</label>
+          <input type="text" id="site-web" name="site-web" tabindex="-1" autocomplete="off">
+        </div>
+
+        <div class="fld">
+          <label for="f-prenom">Prénom <span class="req">*</span></label>
+          <input type="text" id="f-prenom" name="prenom" autocomplete="given-name" placeholder="Thomas" required>
+          <span class="err-msg">Indique ton prénom.</span>
+        </div>
+
+        <div class="fld">
+          <label for="f-nom">Nom</label>
+          <input type="text" id="f-nom" name="nom" autocomplete="family-name" placeholder="Dupont">
+        </div>
+
+        <div class="fld">
+          <label for="f-email">Email <span class="req">*</span></label>
+          <input type="email" id="f-email" name="email" autocomplete="email" placeholder="toi@exemple.com" required>
+          <span class="err-msg">Cet email n'a pas l'air valide.</span>
+        </div>
+
+        <div class="fld">
+          <label for="f-tel">Téléphone / WhatsApp</label>
+          <input type="tel" id="f-tel" name="telephone" autocomplete="tel" placeholder="+33 6 12 34 56 78">
+        </div>
+
+        <div class="fld full">
+          <label for="f-reseau">Instagram, Discord ou Telegram</label>
+          <input type="text" id="f-reseau" name="reseau" placeholder="@ton_pseudo">
+          <span class="hint">Facultatif — mais ça accélère la prise de contact.</span>
+        </div>
+
+        <div class="fld">
+          <label for="f-exp">Depuis combien de temps tu trades ? <span class="req">*</span></label>
+          <select id="f-exp" name="experience" required>
+            <option value="">Choisis…</option>
+            <option>Je n'ai pas encore commencé</option>
+            <option>Moins de 6 mois</option>
+            <option>6 mois à 1 an</option>
+            <option>1 à 3 ans</option>
+            <option>Plus de 3 ans</option>
+          </select>
+          <span class="err-msg">Sélectionne une réponse.</span>
+        </div>
+
+        <div class="fld">
+          <label for="f-marches">Ce que tu trades <span class="req">*</span></label>
+          <select id="f-marches" name="marches" required>
+            <option value="">Choisis…</option>
+            <option>Forex</option>
+            <option>Indices</option>
+            <option>Futures</option>
+            <option>Actions</option>
+            <option>Crypto</option>
+            <option>Un peu de tout</option>
+          </select>
+          <span class="err-msg">Sélectionne une réponse.</span>
+        </div>
+
+        <div class="fld">
+          <label for="f-capital">Ta situation de compte <span class="req">*</span></label>
+          <select id="f-capital" name="capital" required>
+            <option value="">Choisis…</option>
+            <option>Compte démo uniquement</option>
+            <option>Compte perso — moins de 1 000 €</option>
+            <option>Compte perso — 1 000 à 10 000 €</option>
+            <option>Compte perso — plus de 10 000 €</option>
+            <option>Challenge prop firm en cours</option>
+            <option>Compte prop firm financé</option>
+          </select>
+          <span class="err-msg">Sélectionne une réponse.</span>
+        </div>
+
+        <div class="fld">
+          <label for="f-dispo">Temps disponible par semaine <span class="req">*</span></label>
+          <select id="f-dispo" name="disponibilite" required>
+            <option value="">Choisis…</option>
+            <option>Moins de 5 h</option>
+            <option>5 à 10 h</option>
+            <option>10 à 20 h</option>
+            <option>Plus de 20 h</option>
+          </select>
+          <span class="err-msg">Sélectionne une réponse.</span>
+        </div>
+
+        <div class="fld full">
+          <label for="f-objectif">Ton objectif sur les 6 prochains mois <span class="req">*</span></label>
+          <textarea id="f-objectif" name="objectif" placeholder="Ex. : valider un challenge FTMO 50k et sortir un premier retrait sans cramer le compte." required></textarea>
+          <span class="err-msg">Décris ton objectif en quelques mots.</span>
+        </div>
+
+        <div class="fld full">
+          <label for="f-blocage">Aujourd'hui, qu'est-ce qui te bloque le plus ? <span class="req">*</span></label>
+          <textarea id="f-blocage" name="blocage" placeholder="Sois honnête : discipline, gestion du risque, manque de méthode, gestion des émotions…" required></textarea>
+          <span class="err-msg">Dis-m'en un peu plus.</span>
+        </div>
+
+        <div class="fld">
+          <label for="f-format">Le format qui t'intéresse</label>
+          <select id="f-format" name="format">
+            <option value="">Je ne sais pas encore</option>
+            <option>Audit flash</option>
+            <option>Accompagnement 12 semaines</option>
+            <option>Mentorat long terme</option>
+          </select>
+        </div>
+
+        <div class="fld">
+          <label for="f-source">Comment tu m'as connu ?</label>
+          <select id="f-source" name="source">
+            <option value="">Choisis…</option>
+            <option>Instagram</option>
+            <option>TikTok</option>
+            <option>YouTube</option>
+            <option>Discord / Telegram</option>
+            <option>L'application Valmont</option>
+            <option>Bouche à oreille</option>
+            <option>Autre</option>
+          </select>
+        </div>
+
+        <div class="consent">
+          <input type="checkbox" id="f-consent" name="consent" required>
+          <label for="f-consent">
+            J'accepte que mes réponses soient utilisées pour étudier ma candidature et me recontacter.
+            J'ai compris que le trading comporte un risque de perte en capital et qu'aucun résultat n'est garanti.
+            (<a href="confidentialite.html">politique de confidentialité</a>)
+          </label>
+        </div>
+
+        <div class="frm-alert" id="frm-alert">
+          <span id="frm-alert-txt"></span>
+        </div>
+
+        <div class="frm-actions">
+          <button class="btn btn-primary" type="submit" id="frm-submit">
+            <span id="frm-submit-label">Envoyer ma candidature</span>
+            <svg id="frm-submit-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+          <div class="frm-note">Aucun paiement à cette étape · Réponse sous 48 h · Tes réponses restent confidentielles</div>
+        </div>
+      </form>
+
+      <!-- Écran de confirmation -->
+      <div class="sent" id="apply-sent">
+        <div class="ok"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+        <h3>Candidature bien reçue.</h3>
+        <p>Je lis chaque candidature moi-même. Si ton profil correspond, tu reçois un email sous 48 heures avec un lien pour réserver ton appel de découverte.</p>
+        <p style="font-size:13.5px;color:#6a6864;">Pense à vérifier tes spams — c'est là que finissent la moitié de mes réponses.</p>
+        <div class="next">
+          <a class="btn btn-outline" href="/">Découvrir l'app Valmont</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ PIED DE PAGE ══════════════ -->
+<footer>
+  <div class="foot-links">
+    <a href="/">L'application</a>
+    <a href="#programme">Programme</a>
+    <a href="#candidature">Postuler</a>
+    <a href="conditions.html">Conditions d'utilisation</a>
+    <a href="confidentialite.html">Politique de confidentialité</a>
+  </div>
+  <div class="foot-copy">© 2026 VALMONT — TOUS DROITS RÉSERVÉS</div>
+  <p class="foot-legal">
+    Le trading comporte un risque de perte en capital pouvant aller jusqu'à la totalité des sommes investies.
+    Les performances passées ne préjugent pas des performances futures. Cet accompagnement est une prestation
+    pédagogique et ne constitue ni un conseil en investissement, ni une gestion de portefeuille, ni une
+    recommandation personnalisée d'achat ou de vente.
+  </p>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   RÉCEPTION DES CANDIDATURES
+   Les candidatures sont enregistrées dans la table `formation_candidatures`
+   de ton projet Supabase (le même que l'app). Exécute une fois le fichier
+   supabase-formation-schema.sql dans le SQL Editor de Supabase.
+
+   EMAIL_CONTACT sert de solution de secours : si Supabase est injoignable,
+   le visiteur se voit proposer d'envoyer sa candidature par email.
+   ═══════════════════════════════════════════════════════════════ */
+var CONFIG = {
+  SUPABASE_URL:  'https://hlczyaluhqrbrybaofjd.supabase.co',
+  SUPABASE_KEY:  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhsY3p5YWx1aHFyYnJ5YmFvZmpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NjM2MzIsImV4cCI6MjA5OTMzOTYzMn0.LAq3IgCOCJFsMQXxxHp8tmXa_amFMzZvgcSXAhz9-bY',
+  TABLE:         'formation_candidatures',
+  EMAIL_CONTACT: 'contact@valmontfx.com'   /* [À REMPLIR] ton adresse email */
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+
+  /* ── Barre de navigation : fond au défilement ── */
+  var nav = document.getElementById('nav');
+  function onScroll() { nav.classList.toggle('stuck', window.scrollY > 24); }
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  /* ── Révélation au défilement ── */
+  var rvs = document.querySelectorAll('.rv');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    rvs.forEach(function (el) { io.observe(el); });
+  } else {
+    rvs.forEach(function (el) { el.classList.add('in'); });
+  }
+
+  /* ── Carrousel de témoignages : duplication pour une boucle sans couture ── */
+  var track = document.getElementById('t-track');
+  if (track) {
+    var clone = track.cloneNode(true);
+    clone.querySelectorAll('.t-card').forEach(function (c) { c.setAttribute('aria-hidden', 'true'); });
+    while (clone.firstChild) track.appendChild(clone.firstChild);
+  }
+
+  /* ── Modules dépliables ── */
+  document.querySelectorAll('.mod').forEach(function (mod) {
+    var head = mod.querySelector('.mod-head');
+    var body = mod.querySelector('.mod-body');
+    head.setAttribute('aria-expanded', 'false');
+    head.addEventListener('click', function () {
+      var open = mod.classList.toggle('open');
+      head.setAttribute('aria-expanded', open ? 'true' : 'false');
+      body.style.maxHeight = open ? body.scrollHeight + 'px' : '';
+    });
+  });
+
+  /* ── FAQ ── */
+  document.querySelectorAll('.qa').forEach(function (qa) {
+    var head = qa.querySelector('.qa-head');
+    var body = qa.querySelector('.qa-body');
+    head.setAttribute('aria-expanded', 'false');
+    head.addEventListener('click', function () {
+      var open = qa.classList.toggle('open');
+      head.setAttribute('aria-expanded', open ? 'true' : 'false');
+      body.style.maxHeight = open ? body.scrollHeight + 'px' : '';
+    });
+  });
+
+  /* Les blocs ouverts se réajustent si la fenêtre change de taille */
+  window.addEventListener('resize', function () {
+    document.querySelectorAll('.mod.open .mod-body, .qa.open .qa-body').forEach(function (b) {
+      b.style.maxHeight = b.scrollHeight + 'px';
+    });
+  });
+
+  /* ── Compteur du hero ── */
+  var eleves = document.getElementById('stat-eleves');
+  if (eleves) {
+    var target = parseInt(eleves.textContent, 10) || 0;
+    var t0 = performance.now(), DUR = 1200;
+    (function tick(t) {
+      var p = Math.min(1, (t - t0) / DUR);
+      eleves.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))) + '+';
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+  }
+
+  /* ═════════ FORMULAIRE DE CANDIDATURE ═════════ */
+  var form   = document.getElementById('apply-form');
+  var sent   = document.getElementById('apply-sent');
+  var btn    = document.getElementById('frm-submit');
+  var label  = document.getElementById('frm-submit-label');
+  var arrow  = document.getElementById('frm-submit-arrow');
+  var alrt   = document.getElementById('frm-alert');
+  var alrtTx = document.getElementById('frm-alert-txt');
+  if (!form) return;
+
+  /* L'erreur d'un champ disparaît dès que le visiteur le corrige */
+  form.querySelectorAll('input, select, textarea').forEach(function (el) {
+    el.addEventListener('input', function () {
+      var f = el.closest('.fld'); if (f) f.classList.remove('err');
+    });
+    el.addEventListener('change', function () {
+      var f = el.closest('.fld'); if (f) f.classList.remove('err');
+    });
+  });
+
+  function showAlert(html) {
+    alrtTx.innerHTML = html;
+    alrt.classList.add('on');
+  }
+
+  function validate() {
+    var firstBad = null;
+    form.querySelectorAll('[required]').forEach(function (el) {
+      var fld = el.closest('.fld');
+      var ok;
+      if (el.type === 'checkbox') ok = el.checked;
+      else if (el.type === 'email') ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(el.value.trim());
+      else ok = el.value.trim().length > 0;
+
+      if (fld) fld.classList.toggle('err', !ok);
+      if (!ok && !firstBad) firstBad = el;
+    });
+    /* La case de consentement n'est pas dans un .fld : on la signale à part */
+    var consent = document.getElementById('f-consent');
+    if (!consent.checked) {
+      showAlert('Merci de cocher la case de consentement pour envoyer ta candidature.');
+      if (!firstBad) firstBad = consent;
+    }
+    return firstBad;
+  }
+
+  function collect() {
+    var v = function (name) {
+      var el = form.elements[name];
+      return el ? el.value.trim().slice(0, 2000) : '';
+    };
+    return {
+      prenom:        v('prenom'),
+      nom:           v('nom'),
+      email:         v('email'),
+      telephone:     v('telephone'),
+      reseau:        v('reseau'),
+      experience:    v('experience'),
+      marches:       v('marches'),
+      capital:       v('capital'),
+      disponibilite: v('disponibilite'),
+      objectif:      v('objectif'),
+      blocage:       v('blocage'),
+      format:        v('format'),
+      source:        v('source'),
+      page:          location.href
+    };
+  }
+
+  function mailtoLink(d) {
+    var body =
+      'Prénom : ' + d.prenom + '\nNom : ' + d.nom + '\nEmail : ' + d.email +
+      '\nTéléphone : ' + d.telephone + '\nRéseau : ' + d.reseau +
+      '\n\nExpérience : ' + d.experience + '\nMarchés : ' + d.marches +
+      '\nCompte : ' + d.capital + '\nDisponibilité : ' + d.disponibilite +
+      '\nFormat visé : ' + d.format + '\nSource : ' + d.source +
+      '\n\nObjectif :\n' + d.objectif + '\n\nBlocage :\n' + d.blocage + '\n';
+    return 'mailto:' + CONFIG.EMAIL_CONTACT +
+           '?subject=' + encodeURIComponent('Candidature accompagnement — ' + d.prenom + ' ' + d.nom) +
+           '&body=' + encodeURIComponent(body);
+  }
+
+  function loading(on) {
+    btn.disabled = on;
+    label.textContent = on ? 'Envoi en cours…' : 'Envoyer ma candidature';
+    arrow.style.display = on ? 'none' : '';
+    var s = document.getElementById('frm-spin');
+    if (on && !s) {
+      s = document.createElement('span');
+      s.className = 'spin'; s.id = 'frm-spin';
+      btn.appendChild(s);
+    } else if (!on && s) { s.remove(); }
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    alrt.classList.remove('on');
+
+    /* Robot : le champ piège est rempli → on fait semblant d'accepter */
+    if (form.elements['site-web'] && form.elements['site-web'].value) {
+      form.style.display = 'none'; sent.classList.add('on');
+      return;
+    }
+
+    var bad = validate();
+    if (bad) {
+      bad.focus({ preventScroll: true });
+      bad.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    var data = collect();
+    loading(true);
+
+    fetch(CONFIG.SUPABASE_URL + '/rest/v1/' + CONFIG.TABLE, {
+      method: 'POST',
+      headers: {
+        'apikey':        CONFIG.SUPABASE_KEY,
+        'Authorization': 'Bearer ' + CONFIG.SUPABASE_KEY,
+        'Content-Type':  'application/json',
+        'Prefer':        'return=minimal'
+      },
+      body: JSON.stringify(data)
+    })
+    .then(function (res) {
+      if (!res.ok) return res.text().then(function (t) { throw new Error(t || res.status); });
+      form.style.display = 'none';
+      sent.classList.add('on');
+      sent.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    })
+    .catch(function (err) {
+      console.error('Candidature — échec de l\'envoi :', err);
+      showAlert(
+        'L\'envoi automatique n\'a pas fonctionné. ' +
+        '<a href="' + mailtoLink(data) + '">Clique ici pour m\'envoyer ta candidature par email</a> — ' +
+        'tout est déjà pré-rempli.'
+      );
+    })
+    .then(function () { loading(false); });
+  });
+});
+</script>
+
+</body>
+</html>

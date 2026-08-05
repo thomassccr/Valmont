@@ -31,6 +31,8 @@ window.__phFallback = function (img, path) {
   var box = img.parentNode;
   if (!box) return;
   img.remove();
+  var fig = box.closest && box.closest('.proof');
+  if (fig) fig.classList.remove('zoomable');   /* rien à agrandir tant que l'image manque */
   var ph = document.createElement('div');
   ph.className = 'ph';
   ph.innerHTML =
@@ -326,6 +328,56 @@ window.__phFallback = function (img, path) {
   .ph svg { width:26px; height:26px; stroke:#3a3834; fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
   .ph span { font-family:'DM Mono',monospace; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:#3a3834; line-height:1.7; }
 
+  /* ── Preuves (certificats, trades, setup) ── */
+  /* align-items:start — chaque carte garde sa hauteur propre, les images ne sont pas étirées */
+  .proofs { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:44px; align-items:start; }
+  .proof {
+    background:rgba(255,255,255,0.028); border:1px solid rgba(255,255,255,0.08);
+    border-radius:16px; overflow:hidden; text-align:left;
+    transition:border-color .25s, transform .25s;
+  }
+  .proof.zoomable { cursor:zoom-in; }
+  .proof:hover { border-color:rgba(61,142,240,.3); transform:translateY(-3px); }
+  .proof-img { position:relative; background:#0d0d10; overflow:hidden; }
+  /* Ratios calés sur les fichiers réels, pour ne rien rogner d'important */
+  .proof-img.a4 { aspect-ratio:1 / 1.414; }          /* certificats FTMO, page entière */
+  .proof-img.trade { aspect-ratio:1180 / 612; }      /* capture du ticket de trade */
+  .proof-img.tall { aspect-ratio:4 / 5; }            /* photo du poste, verticale */
+  .proof-img img { width:100%; height:100%; object-fit:cover; object-position:top center; display:block; }
+  .proof-img.tall img { object-position:center; }
+  .proof-cap { padding:15px 18px 17px; border-top:1px solid rgba(255,255,255,0.06); }
+  .proof-cap .t { font-size:14.5px; font-weight:600; color:#e8e4de; margin-bottom:4px; }
+  .proof-cap .d { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.1em; color:#6a6864; }
+  .proof.span2 { grid-column:span 2; }
+  @media (max-width:920px){
+    .proofs { grid-template-columns:repeat(2,1fr); }
+    .proof.span2 { grid-column:span 2; }
+  }
+  @media (max-width:620px){
+    .proofs { grid-template-columns:1fr; }
+    .proof.span2 { grid-column:span 1; }
+  }
+  .proof-note {
+    margin-top:26px; font-size:12.5px; line-height:1.7; color:#5a5854;
+    text-align:center; max-width:640px; margin-left:auto; margin-right:auto;
+  }
+
+  /* Agrandissement au clic */
+  .lb {
+    position:fixed; inset:0; z-index:100; display:none;
+    align-items:center; justify-content:center; padding:32px;
+    background:rgba(4,4,6,.93); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+    cursor:zoom-out;
+  }
+  .lb.on { display:flex; animation:fadeUp .22s ease-out both; }
+  .lb img { max-width:100%; max-height:100%; border-radius:12px; box-shadow:0 40px 120px rgba(0,0,0,.8); }
+  .lb-close {
+    position:absolute; top:20px; right:22px; width:38px; height:38px; border-radius:50%;
+    border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.06); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .lb-close svg { width:17px; height:17px; stroke:#e8e4de; fill:none; stroke-width:2.2; stroke-linecap:round; }
+
   /* ── Témoignages (carrousel infini) ── */
   .t-wrap { position:relative; overflow:hidden; margin-top:40px; }
   .t-track { display:flex; gap:16px; width:max-content; animation:tScroll 46s linear infinite; will-change:transform; }
@@ -459,6 +511,7 @@ window.__phFallback = function (img, path) {
     <span>VALMONT</span>
   </a>
   <div class="nav-links">
+    <a href="#preuves">Les preuves</a>
     <a href="#methode">La méthode</a>
     <a href="#programme">Programme</a>
     <a href="#formats">Formats</a>
@@ -504,23 +557,101 @@ window.__phFallback = function (img, path) {
   </div>
 
   <div class="stats fx fx-5">
-    <!-- [À REMPLIR] tes vrais chiffres -->
+    <!-- Chiffres tirés des certificats FTMO affichés plus bas -->
     <div>
-      <div class="val" id="stat-eleves">40+</div>
-      <div>Traders accompagnés</div>
+      <div class="val">17 ans</div>
+      <div>Premier challenge validé</div>
     </div>
     <div class="sep"></div>
     <div>
-      <div class="val">12 sem.</div>
-      <div>De suivi</div>
+      <div class="val">1<sup style="font-size:.55em;">er</sup> essai</div>
+      <div>Challenge et vérification</div>
     </div>
     <div class="sep"></div>
     <div>
-      <div class="val">1-to-1</div>
-      <div>Jamais en groupe</div>
+      <div class="val">29 jours</div>
+      <div>Jusqu'au premier retrait</div>
     </div>
   </div>
 </header>
+
+<!-- ══════════════ PREUVES ══════════════
+     Dépose les images dans site/formation/ (voir CONTENU-FORMATION.md).
+     Tant qu'un fichier manque, un cadre « image à ajouter » s'affiche à sa place. -->
+<section id="preuves">
+  <div class="wrap">
+    <div class="rv">
+      <div class="k">Les preuves</div>
+      <h2 class="sec">Challenge validé à 17 ans.<br>Premier retrait en moins d'un mois.</h2>
+      <p class="sec-sub">
+        Challenge et vérification passés du premier coup, puis un premier retrait encaissé
+        dans la foulée. Les certificats sont vérifiables par le QR code.
+      </p>
+    </div>
+
+    <div class="proofs rv">
+      <figure class="proof zoomable">
+        <div class="proof-img a4">
+          <img src="formation/ftmo-challenge.jpg" alt="Certificat FTMO Challenge validé" loading="lazy"
+               onerror="window.__phFallback&&window.__phFallback(this,'formation/ftmo-challenge.jpg')">
+        </div>
+        <figcaption class="proof-cap">
+          <div class="t">FTMO Challenge — validé</div>
+          <div class="d">26 MAI 2026 · 1<sup>ER</sup> ESSAI</div>
+        </figcaption>
+      </figure>
+
+      <figure class="proof zoomable">
+        <div class="proof-img a4">
+          <img src="formation/ftmo-verification.jpg" alt="Certificat FTMO Verification validée" loading="lazy"
+               onerror="window.__phFallback&&window.__phFallback(this,'formation/ftmo-verification.jpg')">
+        </div>
+        <figcaption class="proof-cap">
+          <div class="t">Vérification — validée</div>
+          <div class="d">5 JUIN 2026 · 10 JOURS PLUS TARD</div>
+        </figcaption>
+      </figure>
+
+      <figure class="proof zoomable">
+        <div class="proof-img a4">
+          <img src="formation/ftmo-payout.jpg" alt="Certificat de retrait FTMO" loading="lazy"
+               onerror="window.__phFallback&&window.__phFallback(this,'formation/ftmo-payout.jpg')">
+        </div>
+        <figcaption class="proof-cap">
+          <div class="t">Premier retrait encaissé</div>
+          <div class="d">24 JUIN 2026 · +29 JOURS</div>
+        </figcaption>
+      </figure>
+
+      <figure class="proof zoomable span2">
+        <div class="proof-img trade">
+          <img src="formation/trade-us100.jpg" alt="Trade US100 clôturé en gain" loading="lazy"
+               onerror="window.__phFallback&&window.__phFallback(this,'formation/trade-us100.jpg')">
+        </div>
+        <figcaption class="proof-cap">
+          <div class="t">Un trade parmi d'autres — US100, sortie en 7 minutes</div>
+          <div class="d">21 MAI 2026 · STOP PLACÉ AVANT L'ENTRÉE</div>
+        </figcaption>
+      </figure>
+
+      <figure class="proof zoomable">
+        <div class="proof-img tall">
+          <img src="formation/setup.jpg" alt="Poste de trading" loading="lazy"
+               onerror="window.__phFallback&&window.__phFallback(this,'formation/setup.jpg')">
+        </div>
+        <figcaption class="proof-cap">
+          <div class="t">Le poste, tous les matins</div>
+          <div class="d">RIEN D'EXTRAORDINAIRE — DE LA RÉGULARITÉ</div>
+        </figcaption>
+      </figure>
+    </div>
+
+    <p class="proof-note">
+      Ces résultats sont les miens et ne préjugent en rien des tiens. Le trading comporte
+      un risque de perte en capital, et aucun accompagnement ne peut garantir un résultat.
+    </p>
+  </div>
+</section>
 
 <!-- ══════════════ LE CONSTAT ══════════════ -->
 <section id="constat">
@@ -916,21 +1047,23 @@ window.__phFallback = function (img, path) {
         </div>
       </div>
       <div class="coach-txt">
-        <!-- [À REMPLIR] ton histoire, en 3 paragraphes -->
+        <!-- [À COMPLÉTER] ajoute ce que tu veux — la trame est basée sur ce que tu m'as raconté -->
         <p>
-          J'ai commencé le trading en autodidacte, comme la plupart. Des années à sauter d'une
+          J'ai commencé le trading en autodidacte, comme la plupart. Des mois à sauter d'une
           stratégie à l'autre, à cramer des comptes de démonstration puis des vrais, à croire
           que le problème venait toujours du marché.
         </p>
         <p>
           Ce qui a tout changé, ce n'est pas une stratégie secrète : c'est le jour où j'ai commencé
           à <b>tout mesurer</b>. Chaque trade, chaque écart au plan, chaque décision prise sous
-          émotion. C'est de là qu'est né Valmont — l'outil que j'aurais voulu avoir dès le début.
+          émotion. Six mois plus tard, je validais mon premier challenge <b>à 17 ans</b>, du
+          premier coup — puis la vérification, puis un premier retrait <b>29 jours après</b>.
         </p>
         <p>
-          Aujourd'hui j'accompagne un petit nombre de traders à la fois, en individuel. Pas de
-          promesse de rendement, pas de vente de rêve : un cadre, des données, et quelqu'un qui
-          regarde tes trades avec toi jusqu'à ce que ça tienne.
+          C'est de là qu'est né Valmont : l'outil que j'aurais voulu avoir dès le début. Aujourd'hui
+          j'accompagne un petit nombre de traders à la fois, en individuel. Pas de promesse de
+          rendement, pas de vente de rêve : un cadre, des données, et quelqu'un qui regarde tes
+          trades avec toi jusqu'à ce que ça tienne.
         </p>
         <div class="coach-sign">— THOMAS · FONDATEUR DE VALMONT</div>
       </div>
@@ -1217,6 +1350,12 @@ window.__phFallback = function (img, path) {
   </div>
 </section>
 
+<!-- Agrandissement des preuves au clic -->
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Image agrandie">
+  <button class="lb-close" type="button" aria-label="Fermer"><svg viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+  <img id="lb-img" src="" alt="">
+</div>
+
 <!-- ══════════════ PIED DE PAGE ══════════════ -->
 <footer>
   <div class="foot-links">
@@ -1312,17 +1451,24 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  /* ── Compteur du hero ── */
-  var eleves = document.getElementById('stat-eleves');
-  if (eleves) {
-    var target = parseInt(eleves.textContent, 10) || 0;
-    var t0 = performance.now(), DUR = 1200;
-    (function tick(t) {
-      var p = Math.min(1, (t - t0) / DUR);
-      eleves.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))) + '+';
-      if (p < 1) requestAnimationFrame(tick);
-    })(t0);
-  }
+  /* ── Preuves : agrandissement au clic ── */
+  var lb = document.getElementById('lb');
+  var lbImg = document.getElementById('lb-img');
+  function closeLb() { lb.classList.remove('on'); document.body.style.overflow = ''; }
+  document.querySelectorAll('.proof.zoomable').forEach(function (fig) {
+    fig.addEventListener('click', function () {
+      var img = fig.querySelector('img');
+      if (!img) return;            /* image pas encore déposée : rien à agrandir */
+      lbImg.src = img.src;
+      lbImg.alt = img.alt;
+      lb.classList.add('on');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+  lb.addEventListener('click', closeLb);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && lb.classList.contains('on')) closeLb();
+  });
 
   /* ═════════ FORMULAIRE DE CANDIDATURE ═════════ */
   var form   = document.getElementById('apply-form');

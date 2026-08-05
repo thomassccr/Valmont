@@ -59,7 +59,22 @@ Tout va dans le dossier **`site/formation/`**.
 
 | Fichier | Format conseillé | Utilisé pour |
 |---|---|---|
+| `ftmo-challenge.jpg` | la page A4 entière | Certificat « Passed FTMO Challenge » — 26 mai 2026 |
+| `ftmo-verification.jpg` | la page A4 entière | Certificat « Passed Verification » — 5 juin 2026 |
+| `ftmo-payout.jpg` | la page A4 entière | Certificat « Reward » — 24 juin 2026 |
+| `trade-us100.jpg` | capture telle quelle | Le trade US100 dans la section preuves |
+| `setup.jpg` | photo verticale | Ton poste de trading |
 | `coach.jpg` | portrait vertical, 800 × 1000 px | Ta photo dans la section « Qui t'accompagne » |
+
+Les cinq premiers alimentent la section **Les preuves** (juste sous le hero), avec
+agrandissement au clic. Ce sont les images que tu m'as envoyées en conversation —
+je les ai vues, mais elles ne sont pas arrivées sous forme de fichiers, donc je n'ai
+pas pu les déposer moi-même.
+
+**Le plus simple pour les ajouter** : sur GitHub, va dans `site/formation/` sur la
+branche `claude/custom-training-website-kq7v02` → *Add file → Upload files* →
+glisse les 6 images en respectant exactement ces noms → *Commit*.
+Ou dépose-les dans le dossier et dis-le-moi, je m'occupe du commit.
 
 Tant qu'un fichier n'est pas là, la page affiche un cadre discret
 « Image à ajouter » — jamais une image cassée.

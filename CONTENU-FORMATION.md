@@ -44,12 +44,25 @@ Envoie-moi simplement ces éléments (un message, un doc Word, un vocal — comm
 | 7 | **Tes formats** | Nom, pour qui, prix (ou « sur devis »), ce qui est compris |
 | 8 | **Pour qui / pas pour qui** | 5 critères de chaque côté |
 | 9 | **Ta bio** | Ton parcours en 3 paragraphes + comment tu veux signer |
-| 10 | **Tes témoignages** | Prénom + initiale, une phrase de l'élève, son contexte (ex. « FTMO 50k validé ») |
-| 11 | **Ta FAQ** | Les questions qu'on te pose vraiment avant d'acheter |
+| 10 | **Ta FAQ** | Les questions qu'on te pose vraiment avant d'acheter |
 
-> Les textes actuellement en place sont **crédibles mais inventés**.
-> Les témoignages et les chiffres doivent impérativement être remplacés par des vrais
-> avant de diffuser la page — c'est aussi une obligation légale.
+> Les textes actuellement en place sont **crédibles mais inventés** — sauf les chiffres
+> du hero, la section « Les preuves » et ta bio, qui reprennent tes vrais certificats.
+> Relis chaque affirmation avant de diffuser : une allégation commerciale fausse est
+> une pratique trompeuse au sens du Code de la consommation.
+
+### Les témoignages
+
+Il n'y en a plus. La section « Ils sont passés par là » contenait cinq faux avis avec
+des prénoms inventés : c'est exactement ce qui peut être qualifié de pratique commerciale
+trompeuse, et c'est aussi le premier truc que repère un prospect un peu attentif.
+
+Elle est remplacée par une section **« Première promotion »** qui assume la situation :
+tu débutes, tu le dis, et tu l'échanges contre un tarif et une disponibilité que tu ne
+referas pas. C'est un meilleur argument que de faux avis.
+
+Quand tu auras tes premiers vrais retours d'élèves, envoie-les-moi : le carrousel est
+prêt (CSS en place, modèle de carte en commentaire dans le fichier), je le remets.
 
 ---
 
@@ -133,5 +146,16 @@ que l'accompagnement est **pédagogique** (ni conseil en investissement, ni gest
 portefeuille). Garde-le : c'est ce qui distingue une prestation de formation d'une
 activité réglementée.
 
-Si tu vends la prestation, il te faudra aussi des **CGV** (droit de rétractation,
-modalités de paiement, obligations de chaque partie). Dis-le-moi, je te prépare la page.
+Les **CGV** sont désormais en place : `site/cgv-accompagnement.html`, liées depuis le pied
+de page de /formation. C'est une **trame complète, pas un contrat prêt à l'emploi** — chaque
+champ `[ENTRE CROCHETS]` doit être renseigné, et un encadré bleu en haut de page liste les
+trois points à régler avant la première vente :
+
+1. **Ton statut** — pas de facturation sans structure ; le SIREN est obligatoire sur les CGV.
+2. **Ta minorité, le cas échéant** — un contrat conclu par un mineur est annulable, et un
+   mineur non émancipé ne peut pas immatriculer d'entreprise seul.
+3. **La qualification de l'offre** — vendue comme formation professionnelle, elle impose une
+   déclaration d'activité auprès de la DREETS ; vendue comme coaching individuel, non.
+
+Fais relire le document par un professionnel du droit avant de vendre, puis supprime
+l'encadré bleu (`<div class="todo">`).

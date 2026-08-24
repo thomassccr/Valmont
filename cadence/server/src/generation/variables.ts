@@ -22,6 +22,9 @@ export function buildVariableMap(params: {
     // Créateur
     creator_name: creator?.name ?? '',
     creator_personality: creator?.personality ?? '',
+    creator_age: creator?.age ? String(creator.age) : '',
+    content_style: creator?.content_style ?? '',
+    custom_instructions: creator?.custom_instructions ?? '',
     creator_traits: listOf(creator?.traits),
     creator_style: creator?.writing_style ?? '',
     creator_interests: listOf(creator?.interests),
@@ -44,6 +47,9 @@ export function buildVariableMap(params: {
     objective: request.objective ?? '',
     familiarity: request.familiarity ? FAMILIARITY_LABELS[request.familiarity] : '',
     subscriber_alias: request.subscriber_alias ?? "l'abonné",
+    subscriber_name: request.subscriber_alias ?? "l'abonné",
+    price: request.price ?? '',
+    content_type: request.content_type ?? '',
     extra_instructions: request.extra_instructions ?? '',
     variant_count: String(request.variant_count ?? 3),
 

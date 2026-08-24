@@ -1,11 +1,11 @@
 # Cadence — studio de messaging pour agences de créateurs
 
-Outil interne qui aide un **opérateur humain** à rédiger des messages cohérents avec la
-personnalité d'un créateur : fiches créateurs, scénarios de conversation, templates de prompt
-variabilisés, génération de plusieurs propositions de réponse, historique et garde-fous.
+Outil interne qui aide un **opérateur humain** à gérer plusieurs modèles et à rédiger des messages
+cohérents avec la personnalité de chacun : profils, bibliothèques de scripts, génération de
+réponses, favoris, analytics et garde-fous.
 
-L'outil **ne remplace pas l'opérateur** : il produit des propositions que l'opérateur relit,
-modifie et envoie. Rien n'est envoyé automatiquement, aucune connexion aux plateformes n'est faite.
+L'outil **ne remplace pas l'opérateur** : il propose, l'opérateur relit, modifie et envoie. Rien
+n'est envoyé automatiquement, aucune connexion aux plateformes n'est faite.
 
 ---
 
@@ -22,46 +22,84 @@ Ouvre <http://localhost:5173> et connecte-toi avec le compte créé au premier d
 (`ADMIN_EMAIL` / `ADMIN_PASSWORD` du `.env`, par défaut `admin@cadence.local` / `cadence`).
 **Change ce mot de passe avant toute utilisation réelle.**
 
-Sans clé API, l'outil démarre en **mode local** : il compose des ébauches à partir de la fiche
-créateur, sans appel réseau. Tout le reste (fiches, scénarios, templates, aperçu, historique)
-fonctionne à l'identique — pratique pour installer, former l'équipe et tester.
+Sans clé API, l'outil démarre en **mode local** : il compose des ébauches hors ligne. Tout le reste
+(profils, scripts, favoris, recherche, analytics) fonctionne à l'identique.
 
 ### Production
 
 ```bash
-npm run build                 # compile l'API et l'interface
-npm start                     # l'API sert aussi l'interface, sur $PORT
+npm run build && npm start    # l'API sert aussi l'interface, sur $PORT
 ```
 
-Une seule dépendance d'infrastructure : un fichier SQLite (`DATABASE_PATH`). Prévoir une
-sauvegarde de ce fichier.
+Une seule dépendance d'infrastructure : un fichier SQLite (`DATABASE_PATH`), à sauvegarder.
 
 ---
 
-## Les 6 briques
+## L'interface
 
-| Brique | Où | Ce que ça fait |
-|---|---|---|
-| **Prompt Builder** | Créateurs | Fiche complète : personnalité, ton, style, vocabulaire, sujets à privilégier / éviter, objectifs, garde-fous. |
-| **Conversation Generator** | Console | Message reçu + historique + contexte → plusieurs propositions, avec copie en un clic. |
-| **Scenario Builder** | Scénarios | 6 scénarios livrés (première interaction, relance, après achat, fidélisation, question, réactivation) + scénarios sur mesure. |
-| **Prompt Templates** | Templates | Bibliothèque : créer, dupliquer, modifier, catégoriser, rechercher, épingler. |
-| **Variables dynamiques** | Partout | `{{creator_name}}`, `{{subscriber_message}}`, `{{objective}}`… avec aperçu temps réel. |
-| **Historique** | Historique | Traçabilité complète : qui a généré quoi, quelle proposition a été envoyée, rejeu en un clic. |
+| Section | Ce qu'on y fait |
+|---|---|
+| **Dashboard** | Volume du jour et de la semaine, modèles, revenu attribué, dernières générations. |
+| **Models** | Liste des modèles, création. La sidebar reprend la liste avec recherche, avatar, statut, nombre de scripts. |
+| **Global Scripts** | Bibliothèque partagée, accessible depuis tous les modèles sans duplication. |
+| **Favorites** | Scripts, modèles et prompts épinglés, retirables d'un clic. |
+| **Prompt Generator** | Génération de réponses pour un modèle : contexte, objectif, ton, plusieurs propositions. |
+| **Analytics** | Usage, conversion, revenu et score, par script, par catégorie et par modèle. |
+| **Settings** | Prompt templates, scénarios, équipe, variables disponibles, thème. |
+
+### L'espace d'un modèle
+
+Cliquer sur un modèle ouvre son espace, en cinq onglets :
+
+- **Overview** — chiffres clés, résumé du profil, scripts récents, dernières générations.
+- **Profile** — name, age, personality, tone of voice, writing style, vocabulary, interests,
+  content style, target audience, things to mention, things to avoid, custom instructions.
+  Ces informations alimentent **automatiquement** le prompt système à chaque génération.
+- **Scripts** — bibliothèque du modèle **plus** les scripts globaux, filtrables.
+- **Prompt Generator** — la console, avec le modèle déjà sélectionné.
+- **Performance** — usage, conversion, revenu, dernière utilisation et score par script.
 
 ---
 
-## Raccourcis utiles
+## Scripts
+
+Un script appartient soit à un modèle, soit à la bibliothèque globale (`model_id = null`). Les
+scripts globaux sont visibles depuis chaque modèle **sans être dupliqués**.
+
+**16 catégories** livrées : First Message, Getting to Know, Flirting, PPV, PPV Follow-up, Upsell,
+Custom Content, Re-engagement, Retention, High Spender, Low Spender, Objection Handling,
+Thank You, Good Morning, Good Night, Other. D'autres peuvent être ajoutées.
+
+Chaque script porte un nom, une catégorie, une description, un objectif, un ton, un déclencheur,
+des tags, un contenu variabilisé, un compteur d'utilisation, un statut favori et un historique de
+versions. Actions : Edit, Duplicate, Copy, Favorite, Delete, **Generate Variations**.
+
+### Variables dynamiques
+
+`{{creator_name}}`, `{{subscriber_name}}`, `{{subscriber_message}}`, `{{conversation_context}}`,
+`{{objective}}`, `{{tone}}`, `{{price}}`, `{{content_type}}` — et une vingtaine d'autres, listées
+dans Settings. L'éditeur les insère au curseur et montre le rendu réel en temps réel.
+
+### Performance
+
+Copier un script depuis la bibliothèque compte comme une utilisation. Une conversion (avec
+montant) s'enregistre depuis l'onglet Performance. Le score sur 100 pondère conversion (60 %),
+volume (20 %) et revenu (20 %).
+
+---
+
+## Raccourcis
 
 - `⌘/Ctrl + ↵` dans la console : générer.
-- Clic sur **Copier** : copie le message *et* le marque comme envoyé (statistiques d'équipe).
-- Clic sur une variable dans l'éditeur de template : insertion au curseur.
+- Barre du haut : recherche globale (modèles, scripts, templates, historique).
+- Clic sur **Copy** : copie le message et enregistre l'utilisation.
+- Clic sur une variable dans un éditeur : insertion au curseur.
 
 ---
 
 ## Garde-fous intégrés
 
-Ces règles sont appliquées **côté serveur** et ne sont pas contournables depuis l'interface :
+Appliqués **côté serveur**, non contournables depuis l'interface :
 
 - aucun fait vérifiable inventé (lieu, âge, agenda, prix, délai, disponibilité) ;
 - aucune promesse de contenu ou de service non fourni dans le contexte ;
@@ -70,30 +108,38 @@ Ces règles sont appliquées **côté serveur** et ne sont pas contournables dep
 - message laissant penser à un mineur → génération bloquée, escalade demandée ;
 - signaux de détresse ou de difficulté financière → mode vigilance, aucune relance commerciale.
 
-Chaque proposition est ensuite **validée automatiquement** contre la fiche du créateur
-(vocabulaire interdit, sujets interdits, longueur, style d'emojis, promesses, faits personnels)
-et les problèmes sont affichés à l'opérateur avant l'envoi.
+Chaque proposition est ensuite **validée automatiquement** contre le profil du modèle (vocabulaire
+interdit, sujets interdits, longueur, style d'emojis, promesses, faits personnels) et les problèmes
+sont affichés à l'opérateur avant l'envoi.
 
 ---
 
 ## Documentation
 
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — architecture complète : modèle de données, API,
-  moteur de génération, sécurité, déploiement, évolutions.
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — modèle de données, API, moteur de génération,
+  sécurité, déploiement, évolutions.
 
 ## Structure
 
 ```
 cadence/
-├── shared/        types TypeScript, catalogue de variables, scénarios livrés
+├── shared/        types, catalogue de variables, scénarios et catégories livrés
 ├── server/        API Express + SQLite + moteur de génération
 │   └── src/
-│       ├── db/          schéma, connexion, dépôts, données initiales
-│       ├── http/        routes, validation zod, authentification
+│       ├── db/          schéma, migrations, dépôts (repos, scripts), données initiales
+│       ├── http/        routes (api, scripts, auth), validation zod
 │       ├── generation/  variables, prompts, fournisseurs LLM, validation
 │       └── lib/         erreurs, identifiants
 └── web/           interface React + Vite
     └── src/
-        ├── pages/       Dashboard, Console, Créateurs, Scénarios, Templates, Historique
-        └── components/  bibliothèque d'UI
+        ├── pages/       Dashboard, Models, ModelDetail, GlobalScripts, Favorites,
+        │                Generator, Analytics, Settings, Search, History
+        └── components/  ScriptLibrary, ScriptEditor, ModelProfileForm,
+                         GeneratorPanel, bibliothèque d'UI
+```
+
+## Tests
+
+```bash
+npm test      # 21 tests : moteur de génération, portée des scripts, favoris, performance
 ```

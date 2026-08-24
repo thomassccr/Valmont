@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { env } from '../env.js';
+import { applyColumnPatches } from './migrations.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -21,6 +22,7 @@ export function migrate(): void {
 
   if (!schemaPath) throw new Error('schema.sql introuvable');
   db.exec(fs.readFileSync(schemaPath, 'utf8'));
+  applyColumnPatches();
 }
 
 /** Helpers JSON : les colonnes `_json` sont stockées en TEXT. */

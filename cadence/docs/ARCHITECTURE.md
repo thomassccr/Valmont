@@ -31,7 +31,8 @@ Quatre décisions structurent tout le reste :
 ┌────────────────────────────────────────────────────────────────────┐
 │  Navigateur — React 18 + Vite                                      │
 │                                                                    │
-│  Dashboard   Console   Créateurs   Scénarios   Templates  Historique│
+│  Dashboard · Models · Global Scripts · Favorites · Prompt Generator │
+│  Analytics · Settings · Search        (+ espace dédié par modèle)   │
 │      │          │          │           │           │          │    │
 │      └──────────┴──────────┴─── api.ts (fetch + cookie) ──────┘    │
 └──────────────────────────────┬─────────────────────────────────────┘
@@ -39,9 +40,9 @@ Quatre décisions structurent tout le reste :
 ┌──────────────────────────────▼─────────────────────────────────────┐
 │  API — Express + TypeScript                                        │
 │                                                                    │
-│  http/       auth · api        (routes, validation zod)            │
+│  http/       auth · api · scripts   (routes, validation zod)       │
 │  generation/ variables → prompt → llm → validate   (service.ts)    │
-│  db/         repos (SQL isolé)                                     │
+│  db/         repos · scripts · migrations   (SQL isolé)            │
 └───────────┬──────────────────────────────────┬─────────────────────┘
             │                                  │
    ┌────────▼────────┐              ┌──────────▼──────────┐
@@ -69,6 +70,12 @@ dépôts font la conversion, le reste du code ne voit que des objets typés.
 | `scenarios` | Scénarios de conversation | `beats_json`, `do_json`, `dont_json`, `is_system` |
 | `templates` | Templates de prompt | `body` (avec `{{variables}}`), `variables_json`, `category`, `tags_json` |
 | `generations` | Historique complet | `suggestions_json`, `system_prompt`, `user_prompt`, `used_suggestion_id`, `rating` |
+| `script_categories` | Catégories de scripts | `key`, `label`, `sort_order`, `is_system` |
+| `scripts` | Bibliothèque de scripts | `model_id` (null = global), `category_id`, `content`, `variables_json`, `version` |
+| `script_tags` + `script_tag_links` | Tags normalisés | `slug` unique, table de liaison |
+| `script_versions` | Historique de contenu | une ligne par changement de nom ou de contenu |
+| `script_usage` | Utilisations réelles | `converted`, `revenue_cents`, `used_at` |
+| `favorites` | Favoris par utilisateur | `entity_type` (`script`/`model`/`generation`), unicité par utilisateur |
 | `meta` | Marqueurs internes | drapeaux d'initialisation |
 
 **Choix notables**
@@ -79,9 +86,28 @@ dépôts font la conversion, le reste du code ne voit que des objets typés.
 - *Pourquoi `lexicon` et `guardrails` en JSON ?* Ces blocs évoluent au rythme des retours de
   l'équipe éditoriale. Les faire évoluer sans migration SQL est un gain net ; ils ne sont jamais
   requêtés par champ.
+- *Un script, deux appartenances.* `scripts.model_id` nullable porte toute la logique : `NULL`
+  = bibliothèque globale, sinon le script appartient à un modèle. Une seule requête sert les trois
+  portées (`model` / `global` / `all`), et un script global n'est jamais dupliqué pour être visible
+  d'un modèle — il l'est par construction.
+- *Statistiques calculées, pas dénormalisées.* `usage_count`, taux de conversion, revenu et score
+  sont dérivés de `script_usage` à la lecture. Une correction se répercute immédiatement et il n'y
+  a pas de compteur à resynchroniser. À l'échelle d'une agence (quelques milliers de lignes), le
+  coût est négligeable ; si le volume changeait, un cache par script suffirait.
+- *Tags normalisés.* `script_tags` + table de liaison plutôt qu'un tableau JSON : le filtre par tag
+  reste indexé et renommer un tag ne demande pas de réécrire chaque script.
+- *Favoris par utilisateur.* Une seule table pour les trois types d'objets, avec contrainte
+  d'unicité : ajouter un type favorisable ne demande aucune migration.
 - *Pas de table `subscribers`.* L'outil ne stocke pas les abonnés : seulement un alias libre saisi
   par l'opérateur. Moins de données personnelles conservées, moins de surface RGPD.
 - `is_system` protège les six scénarios livrés : modifiables, non supprimables.
+
+**Migrations.** `schema.sql` crée les tables manquantes ; il ne sait pas ajouter une colonne à une
+table existante. `db/migrations.ts` s'en charge : il liste les colonnes attendues, interroge
+`PRAGMA table_info` et n'ajoute que ce qui manque. Idempotent, exécuté à chaque démarrage, sans
+toucher aux données — c'est ce qui a permis d'ajouter `age`, `avatar_url`, `content_style` et
+`custom_instructions` aux bases déjà en service. Pour ajouter un champ : le déclarer dans le
+`CREATE TABLE` **et** dans la liste de `migrations.ts`.
 
 Le schéma (`server/src/db/schema.sql`) est appliqué au démarrage, en `IF NOT EXISTS`. Les données
 initiales (compte admin, scénarios, templates de départ, créateur d'exemple) sont posées par
@@ -119,6 +145,24 @@ renvoie `400` avec le détail des champs.
 | `GET` `POST` `PUT` `DELETE` | `/api/templates[/:id]` | CRUD |
 | `POST` | `/api/templates/:id/duplicate` | Duplication |
 
+### Modèles, scripts, favoris
+
+| Méthode | Route | Rôle |
+|---|---|---|
+| `GET` | `/api/models[/:id]` | Modèles enrichis : compteur de scripts + performance agrégée |
+| `GET` | `/api/scripts?scope=&model_id=&category=&tag=&search=&favorites=&recent=` | Bibliothèque filtrée (`scope` : `all` / `global` / `model`) |
+| `GET` `POST` `PUT` `DELETE` | `/api/scripts[/:id]` | CRUD |
+| `POST` | `/api/scripts/:id/duplicate` | Duplication, avec `model_id` optionnel pour cibler un modèle |
+| `POST` | `/api/scripts/:id/variations` | Variantes générées, voix du modèle et variables conservées |
+| `POST` | `/api/scripts/:id/usage` | Enregistre une utilisation (`converted`, `revenue_cents`) |
+| `GET` | `/api/scripts/:id/versions` | Historique de contenu |
+| `GET` `POST` | `/api/scripts/categories` | Catégories (16 livrées, extensibles) |
+| `GET` | `/api/scripts/tags` | Tags utilisés, avec compteurs |
+| `POST` | `/api/favorites/toggle` | Bascule un favori (`script` / `model` / `generation`) |
+| `GET` | `/api/favorites` | Les trois types de favoris de l'utilisateur |
+| `GET` | `/api/analytics` | Totaux, série 14 jours, top scripts, catégories, modèles |
+| `GET` | `/api/search?q=` | Recherche globale : modèles, scripts, templates, historique |
+
 ### Génération
 
 | Méthode | Route | Rôle |
@@ -130,6 +174,12 @@ renvoie `400` avec le détail des champs.
 | `POST` | `/api/generations/:id/feedback` | Marque la proposition envoyée / note la génération |
 | `GET` | `/api/variables` | Catalogue des variables dynamiques |
 | `GET` | `/api/stats` | Chiffres du dashboard |
+
+**Mises à jour partielles.** Les routes `PUT` acceptent un corps partiel, validé par `patchOf()`
+plutôt que par `schema.partial()`. La nuance compte : zod conserve les `.default()` à travers
+`.partial()`, si bien qu'un `PUT { content }` réinitialiserait tous les autres champs à leur valeur
+par défaut — un script de modèle repasserait « global », ses tags seraient vidés. `patchOf()` retire
+les valeurs par défaut avant de rendre les champs optionnels : un champ absent reste absent.
 
 `/api/preview` est séparé de `/api/generate` pour une raison de coût : l'aperçu temps réel de
 l'éditeur de template se déclenche à chaque frappe (avec anti-rebond), il ne doit jamais appeler
@@ -225,6 +275,26 @@ Chaque proposition est confrontée à la fiche du créateur **avant affichage** 
 Les suggestions sont affichées avec leurs avertissements : l'opérateur voit *pourquoi* une
 proposition demande une relecture, plutôt que de recevoir un texte silencieusement filtré.
 
+### 5.6 Variations de script
+
+`POST /api/scripts/:id/variations` réécrit un script existant plutôt que d'en produire un nouveau.
+Le prompt système reprend la politique et la fiche du modèle, puis impose trois contraintes :
+conserver le sens et l'objectif, conserver la voix du modèle, et **conserver les variables**
+`{{…}}` à l'identique. Après génération, le service compare les variables du script d'origine à
+celles de chaque variante et signale toute variable perdue — une variante qui perd
+`{{subscriber_name}}` casse le script à l'usage.
+
+### 5.7 Score de performance
+
+Défini dans `shared/scripts.ts`, donc identique côté serveur et côté interface :
+
+```
+score = conversion × 60  +  min(usage / 25, 1) × 20  +  min(revenu / 500 €, 1) × 20
+```
+
+Le volume et le revenu sont plafonnés pour qu'un script très utilisé mais peu convertissant ne
+domine pas le classement. Le score est calculé à la lecture, jamais stocké.
+
 ---
 
 ## 6. Interface
@@ -236,12 +306,26 @@ variables de thème (sombre par défaut, clair via `data-theme`) et une petite b
 
 | Écran | Ce qu'on y fait |
 |---|---|
-| **Dashboard** | Volume du jour et de la semaine, latence moyenne, scénarios les plus utilisés, dernières générations, état du fournisseur. |
-| **Console** | Deux colonnes : formulaire à gauche (créateur, scénario, familiarité, objectif, message reçu, historique, contexte, réglages), propositions à droite. `⌘/Ctrl + ↵` pour générer, copie en un clic, prompt envoyé consultable. |
-| **Créateurs** | Prompt Builder : identité, personnalité, traits, ton, style, audience, sujets, vocabulaire, forme, garde-fous. |
-| **Scénarios** | Six scénarios livrés + création sur mesure (structure, à faire, à éviter). |
-| **Templates** | Recherche, catégories, tags, duplication, épinglage ; éditeur avec palette de variables cliquable et aperçu temps réel. |
-| **Historique** | Filtres par créateur et recherche plein texte, détail d'une génération, rejeu dans la console. |
+| **Dashboard** | Volume du jour et de la semaine, modèles, revenu attribué, dernières générations, état du fournisseur. |
+| **Models** | Grille des modèles ; la sidebar reprend la liste avec recherche, avatar, statut, nombre de scripts. |
+| **Espace modèle** | Cinq onglets : Overview, Profile, Scripts, Prompt Generator, Performance. |
+| **Global Scripts** | Bibliothèque partagée, mêmes filtres et mêmes actions que celle d'un modèle. |
+| **Favorites** | Scripts, modèles et prompts épinglés, retirables depuis la carte. |
+| **Prompt Generator** | Deux colonnes : contexte à gauche, propositions à droite, avec Copy, Save as Script, Favorite et Regenerate. |
+| **Analytics** | Série 14 jours, top scripts, ventilation par catégorie, tableau des modèles. |
+| **Settings** | Prompt templates, scénarios, équipe, catalogue des variables, thème. |
+| **Search** | Recherche globale depuis la barre du haut, résultats groupés par type. |
+| **Historique** | Détail d'une génération, rejeu dans la console. |
+
+**Composants réutilisés plutôt que dupliqués** — c'est ce qui garantit que la bibliothèque d'un
+modèle et la bibliothèque globale se comportent exactement pareil :
+
+| Composant | Utilisé par |
+|---|---|
+| `ScriptLibrary` | Global Scripts · onglet Scripts d'un modèle · Favorites · résultats de recherche |
+| `ScriptEditor` | Toute création ou édition de script, y compris « Save as Script » depuis la console |
+| `ModelProfileForm` | Modale de création d'un modèle (mode compact) · onglet Profile (mode complet) |
+| `GeneratorPanel` | Page Prompt Generator · onglet Prompt Generator d'un modèle (modèle imposé) |
 
 Détails pensés pour l'usage quotidien : le brouillon de la console est conservé localement (hors
 message reçu) pour survivre à un rechargement ; copier une proposition la marque automatiquement
@@ -290,7 +374,10 @@ Un seul processus Node, un fichier SQLite. Recommandations :
 |---|---|
 | Purge automatique de l'historique | tâche planifiée sur `generations` (`created_at`) |
 | Statistiques par opérateur | `generations.operator_id` et `used_suggestion_id` sont déjà là |
-| Versionnage des templates | table `template_versions` + `templates.version` |
+| Versionnage des templates | table `template_versions` + `templates.version` (le modèle existe déjà pour les scripts) |
+| Import automatique des revenus | remplacer la saisie manuelle par une alimentation de `script_usage` |
+| Nouvelles catégories de scripts | `POST /api/scripts/categories`, aucune migration |
+| Nouveau type de favori | ajouter une valeur à `entity_type`, aucune migration |
 | A/B testing de templates | `generations.template_id` + `rating` alimentent déjà la comparaison |
 | Passage à Postgres | réécrire `db/repos.ts` uniquement |
 | Autre fournisseur de modèle | nouvelle classe `LlmProvider` |
@@ -298,7 +385,13 @@ Un seul processus Node, un fichier SQLite. Recommandations :
 
 ## 10. Tests
 
-`npm test` couvre le cœur métier : rendu des variables, priorité des surcharges, détection du
-vocabulaire et des sujets interdits, longueur, marqueurs restants, formulations de pression, et
-l'analyse du message entrant (mineur, détresse, question d'identité). Ce sont les règles dont une
-régression est invisible à l'œil nu et coûteuse en production.
+`npm test` (21 tests) couvre les règles dont une régression est invisible à l'œil nu :
+
+- **Moteur de génération** — rendu des variables, priorité des surcharges, vocabulaire et sujets
+  interdits, longueur, marqueurs restants, formulations de pression, analyse du message entrant
+  (mineur, détresse, question d'identité).
+- **Bibliothèque de scripts** — portée globale vs modèle (un script global visible partout sans
+  duplication, un script de modèle invisible ailleurs), mise à jour partielle qui ne réinitialise
+  aucun champ, versionnage déclenché par le seul changement de contenu, duplication vers un modèle,
+  favoris propres à chaque utilisateur, calcul de l'usage, de la conversion, du revenu et du score,
+  filtres par recherche, tag et catégorie.

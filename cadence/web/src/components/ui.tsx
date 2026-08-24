@@ -263,3 +263,133 @@ export function useDebounced<T>(value: T, delay = 300): T {
   }, [value, delay]);
   return debounced;
 }
+
+/* ─────────────────────────  Avatar & identité  ───────────────────────── */
+
+const initials = (name: string): string =>
+  name
+    // On ignore la ponctuation : « Lina (exemple) » doit donner « L », pas « L( ».
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]!.toUpperCase())
+    .join('');
+
+export function Avatar({
+  name,
+  url,
+  color,
+  size,
+}: {
+  name: string;
+  url?: string;
+  color?: string;
+  size?: 'sm' | 'lg' | 'xl';
+}) {
+  const className = `avatar${size && size !== 'sm' ? ` ${size}` : ''}`;
+  if (url) return <img className={className} src={url} alt={name} />;
+  return (
+    <span className={className} style={{ background: color || 'var(--accent)' }}>
+      {initials(name)}
+    </span>
+  );
+}
+
+/* ─────────────────────────  Onglets  ───────────────────────── */
+
+export function Tabs<T extends string>({
+  tabs,
+  active,
+  onChange,
+}: {
+  tabs: { key: T; label: string; count?: number }[];
+  active: T;
+  onChange: (key: T) => void;
+}) {
+  return (
+    <div className="tabs" role="tablist">
+      {tabs.map((tab) => (
+        <button
+          key={tab.key}
+          role="tab"
+          aria-selected={tab.key === active}
+          className={`tab${tab.key === active ? ' active' : ''}`}
+          onClick={() => onChange(tab.key)}
+        >
+          {tab.label}
+          {tab.count !== undefined ? <span className="faint"> {tab.count}</span> : null}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* ─────────────────────────  Favori  ───────────────────────── */
+
+export function StarButton({
+  on,
+  onToggle,
+  title = 'Favori',
+}: {
+  on: boolean;
+  onToggle: () => void;
+  title?: string;
+}) {
+  return (
+    <button
+      type="button"
+      className={`star${on ? ' on' : ''}`}
+      title={title}
+      aria-pressed={on}
+      onClick={(event) => {
+        event.stopPropagation();
+        onToggle();
+      }}
+    >
+      {on ? '★' : '☆'}
+    </button>
+  );
+}
+
+/* ─────────────────────────  Statistiques  ───────────────────────── */
+
+export function Stat({
+  value,
+  label,
+  hint,
+}: {
+  value: string | number;
+  label: string;
+  hint?: string;
+}) {
+  return (
+    <div className="stat">
+      <div className="stat-value nums">{value}</div>
+      <div className="stat-label">{label}</div>
+      {hint ? <div className="stat-trend">{hint}</div> : null}
+    </div>
+  );
+}
+
+export function Meter({ value, tone }: { value: number; tone?: 'success' }) {
+  return (
+    <div className={`meter${tone ? ` ${tone}` : ''}`}>
+      <div style={{ width: `${Math.min(Math.max(value, 0), 1) * 100}%` }} />
+    </div>
+  );
+}
+
+/* ─────────────────────────  Dates  ───────────────────────── */
+
+export const formatDate = (iso: string | null): string =>
+  iso
+    ? new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: '2-digit' })
+    : '—';
+
+export const formatDateTime = (iso: string): string =>
+  new Date(iso).toLocaleString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });

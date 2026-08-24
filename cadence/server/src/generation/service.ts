@@ -1,4 +1,6 @@
 import type {
+  Variation,
+  VariationRequest,
   GenerationRequest,
   GenerationResult,
   PreviewRequest,
@@ -7,11 +9,18 @@ import type {
   SuggestionWarning,
   User,
 } from '../../../shared/types.js';
+import { extractVariables } from '../../../shared/variables.js';
 import { creators, generations, scenarios, templates } from '../db/repos.js';
+import { scripts } from '../db/scripts.js';
 import { badRequest, notFound } from '../lib/errors.js';
 import { id } from '../lib/id.js';
 import { getProvider } from './llm.js';
-import { DEFAULT_TEMPLATE_BODY, buildSystemPrompt } from './prompt.js';
+import {
+  DEFAULT_TEMPLATE_BODY,
+  buildSystemPrompt,
+  buildVariationSystemPrompt,
+  buildVariationUserPrompt,
+} from './prompt.js';
 import { analyzeIncomingMessage, hasBlocking, validateSuggestion } from './validate.js';
 import { buildVariableMap, render } from './variables.js';
 
@@ -50,7 +59,19 @@ export async function generate(
     template,
     operatorName: operator?.name,
   });
-  const { rendered: userPrompt } = render(template?.body || DEFAULT_TEMPLATE_BODY, variables);
+  const { rendered: rawUserPrompt } = render(template?.body || DEFAULT_TEMPLATE_BODY, variables);
+
+  // Le prix et le type de contenu restent disponibles comme variables pour les
+  // templates qui les référencent ; s'ils sont renseignés sans être utilisés,
+  // on les ajoute explicitement plutôt que de les perdre en silence.
+  const offer = [
+    request.content_type?.trim() ? `Contenu concerné : ${request.content_type.trim()}` : '',
+    request.price?.trim() ? `Prix annoncé : ${request.price.trim()}` : '',
+  ].filter(Boolean);
+  const userPrompt =
+    offer.length && !/\{\{\s*(price|content_type)\s*\}\}/i.test(template?.body ?? '')
+      ? `${rawUserPrompt}\n\nOFFRE CONCERNÉE (seule source autorisée sur ce point)\n${offer.join('\n')}`
+      : rawUserPrompt;
 
   let systemPrompt = buildSystemPrompt({
     creator,
@@ -163,4 +184,68 @@ export function preview(input: PreviewRequest, operator: User | null): PreviewRe
     overrides: input.overrides,
   });
   return render(input.body, variables);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ *  Variations d'un script existant
+ * ═══════════════════════════════════════════════════════════════ */
+
+export async function generateVariations(
+  scriptId: string,
+  input: VariationRequest,
+  user: User,
+): Promise<Variation[]> {
+  const script = scripts.find(scriptId, user.id);
+  if (!script) throw notFound('Script introuvable');
+
+  const creator = script.model_id ? creators.find(script.model_id) : null;
+
+  const provider = getProvider();
+  const raw = await provider.variations({
+    system: buildVariationSystemPrompt({ creator, categoryLabel: script.category_label }),
+    user: buildVariationUserPrompt({
+      script: {
+        name: script.name,
+        content: script.content,
+        objective: script.objective,
+        tone: script.tone,
+        trigger: script.trigger,
+      },
+      count: input.count,
+      instructions: input.instructions,
+    }),
+    original: script.content,
+    count: input.count,
+  });
+
+  const expected = extractVariables(script.content);
+
+  return raw.map((variation) => {
+    const warnings: SuggestionWarning[] = creator
+      ? validateSuggestion(variation.content, creator)
+      : [];
+
+    // Une variante qui perd une variable du script d'origine casse le script.
+    const produced = new Set(extractVariables(variation.content));
+    const lost = expected.filter((name) => !produced.has(name));
+    if (lost.length) {
+      warnings.push({
+        code: 'variable_lost',
+        severity: 'warn',
+        message: `Variables absentes de cette variante : ${lost.map((name) => `{{${name}}}`).join(', ')}.`,
+      });
+    }
+
+    for (const message of variation.warnings) {
+      if (message.trim()) warnings.push({ code: 'model_note', severity: 'info', message });
+    }
+
+    return {
+      id: id('var'),
+      label: variation.label,
+      content: variation.content,
+      rationale: variation.rationale,
+      warnings: warnings.filter((warning) => warning.code !== 'placeholder'),
+    };
+  });
 }

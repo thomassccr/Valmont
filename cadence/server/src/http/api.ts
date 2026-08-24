@@ -12,10 +12,12 @@ import { generate, preview } from '../generation/service.js';
 import { DEFAULT_TEMPLATE_BODY } from '../generation/prompt.js';
 import { asyncRoute, badRequest, forbidden, notFound } from '../lib/errors.js';
 import { requireAdmin, requireAuth } from './auth.js';
+import { scriptsRouter } from './scripts.js';
 import {
   creatorSchema,
   feedbackSchema,
   generationSchema,
+  patchOf,
   previewSchema,
   scenarioSchema,
   templateSchema,
@@ -23,6 +25,9 @@ import {
 
 export const apiRouter = Router();
 apiRouter.use(requireAuth);
+
+// Scripts, modèles enrichis, favoris, analytics et recherche globale.
+apiRouter.use(scriptsRouter);
 
 const str = (value: unknown): string | undefined =>
   typeof value === 'string' && value.trim() !== '' ? value.trim() : undefined;
@@ -72,7 +77,7 @@ apiRouter.post('/scenarios', (req, res) => {
 });
 
 apiRouter.put('/scenarios/:id', (req, res) => {
-  const parsed = scenarioSchema.partial().safeParse(req.body);
+  const parsed = patchOf(scenarioSchema).safeParse(req.body);
   if (!parsed.success) throw badRequest('Scénario invalide', parsed.error.flatten());
   const updated = scenarios.update(req.params.id, parsed.data as never);
   if (!updated) throw notFound('Scénario introuvable');
@@ -121,7 +126,7 @@ apiRouter.post('/templates', (req, res) => {
 });
 
 apiRouter.put('/templates/:id', (req, res) => {
-  const parsed = templateSchema.partial().safeParse(req.body);
+  const parsed = patchOf(templateSchema).safeParse(req.body);
   if (!parsed.success) throw badRequest('Template invalide', parsed.error.flatten());
   const updated = templates.update(req.params.id, parsed.data as never);
   if (!updated) throw notFound('Template introuvable');

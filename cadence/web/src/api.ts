@@ -1,7 +1,11 @@
 import type {
+  AnalyticsOverview,
   Creator,
   CreatorInput,
   DashboardStats,
+  FavoriteEntity,
+  FavoritesBundle,
+  ModelSummary,
   GenerationHistoryItem,
   GenerationRequest,
   GenerationResult,
@@ -12,8 +16,16 @@ import type {
   Scenario,
   ScenarioCategory,
   ScenarioInput,
+  Script,
+  ScriptCategory,
+  ScriptFilters,
+  ScriptInput,
+  ScriptUsageInput,
+  ScriptVersion,
+  SearchResults,
   User,
   VariableDefinition,
+  Variation,
 } from '../../shared/types';
 
 export class ApiError extends Error {
@@ -91,6 +103,47 @@ export const api = {
     request<PromptTemplate>('PUT', `/templates/${id}`, input),
   duplicateTemplate: (id: string) => request<PromptTemplate>('POST', `/templates/${id}/duplicate`),
   deleteTemplate: (id: string) => request<{ ok: true }>('DELETE', `/templates/${id}`),
+
+  /* Modèles (vue enrichie : compteurs + performance) */
+  models: () => request<ModelSummary[]>('GET', '/models'),
+  model: (id: string) => request<ModelSummary>('GET', `/models/${id}`),
+
+  /* Scripts */
+  scripts: (filters: ScriptFilters = {}) =>
+    request<Script[]>(
+      'GET',
+      `/scripts${qs({
+        model_id: filters.model_id ?? undefined,
+        scope: filters.scope,
+        category: filters.category,
+        tag: filters.tag,
+        search: filters.search,
+        favorites: filters.favorites ? '1' : undefined,
+        recent: filters.recent ? '1' : undefined,
+        limit: filters.limit,
+      })}`,
+    ),
+  script: (id: string) => request<Script>('GET', `/scripts/${id}`),
+  createScript: (input: ScriptInput) => request<Script>('POST', '/scripts', input),
+  updateScript: (id: string, input: Partial<ScriptInput>) =>
+    request<Script>('PUT', `/scripts/${id}`, input),
+  duplicateScript: (id: string, modelId?: string | null) =>
+    request<Script>('POST', `/scripts/${id}/duplicate`, modelId === undefined ? {} : { model_id: modelId }),
+  deleteScript: (id: string) => request<{ ok: true }>('DELETE', `/scripts/${id}`),
+  scriptVersions: (id: string) => request<ScriptVersion[]>('GET', `/scripts/${id}/versions`),
+  recordScriptUsage: (id: string, input: ScriptUsageInput = {}) =>
+    request<Script>('POST', `/scripts/${id}/usage`, input),
+  scriptVariations: (id: string, input: { count: number; instructions?: string }) =>
+    request<Variation[]>('POST', `/scripts/${id}/variations`, input),
+  scriptCategories: () => request<ScriptCategory[]>('GET', '/scripts/categories'),
+  scriptTags: () => request<{ slug: string; label: string; count: number }[]>('GET', '/scripts/tags'),
+
+  /* Favoris, analytics, recherche */
+  toggleFavorite: (entity_type: FavoriteEntity, entity_id: string) =>
+    request<{ is_favorite: boolean }>('POST', '/favorites/toggle', { entity_type, entity_id }),
+  favorites: () => request<FavoritesBundle>('GET', '/favorites'),
+  analytics: () => request<AnalyticsOverview>('GET', '/analytics'),
+  search: (q: string) => request<SearchResults>('GET', `/search${qs({ q })}`),
 
   /* Génération */
   generate: (input: GenerationRequest) => request<GenerationResult>('POST', '/generate', input),

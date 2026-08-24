@@ -68,13 +68,14 @@ const PUNCTUATION_RULE: Record<Creator['lexicon']['punctuation'], string> = {
 
 export function personaCard(creator: Creator): string {
   const { lexicon, guardrails } = creator;
-  return `FICHE CRÉATEUR — ${creator.name}${creator.handle ? ` (${creator.handle})` : ''}
-
+  return `FICHE MODÈLE — ${creator.name}${creator.handle ? ` (${creator.handle})` : ''}
+${creator.age ? `Âge : ${creator.age} ans\n` : ''}
 Personnalité : ${creator.personality || '—'}
 Traits : ${creator.traits.join(', ') || '—'}
 Ton de communication : ${creator.tone || '—'}
 Style d'écriture : ${creator.writing_style || '—'}
 Type d'audience : ${creator.audience_type || '—'}
+Type de contenu : ${creator.content_style || '—'}
 Centres d'intérêt : ${creator.interests.join(', ') || '—'}
 
 Sujets à privilégier :
@@ -100,6 +101,7 @@ RÈGLES PROPRES À CE CRÉATEUR
 ${bullets(guardrails.hard_rules, 'aucune règle supplémentaire')}
 ${guardrails.no_promises ? '- Aucune promesse de contenu, de prix ou de délai.' : ''}
 ${guardrails.no_personal_facts ? '- Aucun fait personnel inventé (lieu, âge, agenda, entourage).' : ''}
+${creator.custom_instructions ? `\nCONSIGNES PERSONNALISÉES (fiche modèle)\n${creator.custom_instructions}` : ''}
 ${creator.notes ? `\nNotes internes : ${creator.notes}` : ''}`;
 }
 
@@ -184,4 +186,54 @@ Pour chaque proposition :
   besoin d'escalade). Laisse la liste vide s'il n'y a rien à signaler.
 N'écris rien en dehors de cette structure.`);
   return blocks.join('\n\n════════════════════════\n\n');
+}
+
+/* ════════════════════════════════════════════════════════════════
+ *  6. Variations de script
+ *     Réécrit un script existant en gardant la voix du modèle et
+ *     les variables intactes.
+ * ════════════════════════════════════════════════════════════════ */
+
+export function buildVariationSystemPrompt(params: {
+  creator: Creator | null;
+  categoryLabel: string;
+}): string {
+  const blocks = [POLICY];
+  if (params.creator) blocks.push(personaCard(params.creator));
+  blocks.push(`TÂCHE — VARIATIONS DE SCRIPT
+
+On te donne un script existant de la catégorie « ${params.categoryLabel} ». Tu produis des
+variantes de ce script, pas de nouveaux messages sans rapport.
+
+Règles :
+- Le sens, l'intention et l'objectif du script d'origine sont conservés.
+- La voix du modèle est conservée : ton, longueur, ponctuation, casse, vocabulaire.
+- Toutes les variables {{comme_ceci}} présentes dans l'original doivent rester présentes,
+  écrites exactement de la même façon. N'en invente pas de nouvelles.
+- Chaque variante explore un angle distinct (plus direct, plus chaleureux, plus court,
+  ouverture par une question…). Deux variantes qui se ressemblent ne servent à rien.
+- Aucune information factuelle nouvelle : pas de prix, de date ni de contenu qui ne serait
+  pas déjà dans l'original ou sous forme de variable.
+
+Pour chaque variante : "label" (l'angle en 2 à 4 mots), "content" (le script complet),
+"rationale" (une phrase pour l'opérateur), "warnings" (points de vigilance, liste vide sinon).`);
+  return blocks.join('\n\n════════════════════════\n\n');
+}
+
+export function buildVariationUserPrompt(params: {
+  script: { name: string; content: string; objective: string; tone: string; trigger: string };
+  count: number;
+  instructions?: string;
+}): string {
+  const { script } = params;
+  return `Script d'origine — « ${script.name} »
+${script.objective ? `Objectif : ${script.objective}` : ''}
+${script.tone ? `Ton : ${script.tone}` : ''}
+${script.trigger ? `Déclencheur : ${script.trigger}` : ''}
+
+"""
+${script.content}
+"""
+
+Produis ${params.count} variantes.${params.instructions ? `\n\nConsigne supplémentaire de l'opérateur : ${params.instructions}` : ''}`;
 }

@@ -9,7 +9,7 @@
     "build": "tsc -p tsconfig.json && node -e \"require('node:fs').copyFileSync('src/db/schema.sql','dist/server/src/db/schema.sql')\"",
     "start": "node dist/server/src/index.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --import tsx --test src/generation/engine.test.ts"
+    "test": "node --import tsx --test src/generation/engine.test.ts src/db/scripts.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.120.0",

@@ -1,8 +1,10 @@
 import bcrypt from 'bcryptjs';
 import { SYSTEM_SCENARIOS } from '../../../shared/scenarios.js';
+import { SCRIPT_CATEGORIES } from '../../../shared/scripts.js';
 import { env } from '../env.js';
 import { DEFAULT_TEMPLATE_BODY } from '../generation/prompt.js';
 import { creators, metaGet, metaSet, scenarios, templates, users } from './repos.js';
+import { scriptCategories, scripts } from './scripts.js';
 
 /** Templates livrés avec l'outil, prêts à être dupliqués par l'équipe. */
 const STARTER_TEMPLATES = [
@@ -179,9 +181,116 @@ export async function seed(): Promise<void> {
     metaSet('seed:templates:v1', new Date().toISOString());
   }
 
-  // 4. Créateur de démonstration (une seule fois, supprimable)
+  // 4. Catégories de scripts (ajoutées si manquantes, jamais écrasées)
+  for (const category of SCRIPT_CATEGORIES) {
+    scriptCategories.ensure({ ...category, isSystem: true });
+  }
+
+  // 5. Scripts globaux de départ (une seule fois)
+  if (!metaGet('seed:scripts:v1')) {
+    for (const script of STARTER_SCRIPTS) {
+      scripts.create({ ...script, model_id: null, variables: [] }, null);
+    }
+    metaSet('seed:scripts:v1', new Date().toISOString());
+  }
+
+  // 6. Créateur de démonstration (une seule fois, supprimable)
   if (!metaGet('seed:demo-creator:v1')) {
     creators.create(DEMO_CREATOR as never, null);
     metaSet('seed:demo-creator:v1', new Date().toISOString());
   }
 }
+
+/**
+ * Scripts globaux livrés avec l'outil : des squelettes utilisables tels quels,
+ * volontairement neutres, à dupliquer et adapter par modèle.
+ */
+const STARTER_SCRIPTS = [
+  {
+    category_key: 'first_message',
+    name: 'Premier message — accueil simple',
+    description: "Premier contact après l'abonnement, une question ouverte.",
+    objective: "Obtenir une première réponse et apprendre quelque chose sur l'abonné",
+    tone: 'Chaleureux, simple',
+    trigger: "Dans l'heure suivant un nouvel abonnement",
+    tags: ['accueil', 'nouveau'],
+    content:
+      "hey {{subscriber_name}} ! merci d'être là 🙂\nDis-moi, c'est quoi qui t'a donné envie de t'abonner ?",
+  },
+  {
+    category_key: 'getting_to_know',
+    name: 'Découverte — routine du soir',
+    description: "Faire parler l'abonné de son quotidien.",
+    objective: 'Récolter une information réutilisable dans les prochains échanges',
+    tone: 'Curieux, détendu',
+    trigger: 'Après deux ou trois échanges',
+    tags: ['découverte'],
+    content:
+      "tu fais quoi de tes soirées en général {{subscriber_name}} ?\nmoi c'est {{creator_name}}, et je suis clairement du genre à finir la journée tranquille",
+  },
+  {
+    category_key: 'ppv',
+    name: 'PPV — annonce sobre',
+    description: 'Proposer un contenu payant sans insister.',
+    objective: 'Présenter le contenu et laisser la décision libre',
+    tone: 'Direct, sans pression',
+    trigger: 'Conversation déjà engagée, abonné réceptif',
+    tags: ['ppv', 'vente'],
+    content:
+      "je viens de préparer {{content_type}} et j'ai pensé à toi en le faisant\nc'est à {{price}} si ça te tente — sinon aucun souci, on continue à discuter 🙂",
+  },
+  {
+    category_key: 'ppv_follow_up',
+    name: 'PPV Follow-up — sans achat',
+    description: "Relancer après un PPV non ouvert, sans culpabiliser.",
+    objective: 'Rouvrir la conversation, pas forcer la vente',
+    tone: 'Léger',
+    trigger: '24 à 48 h après un PPV non acheté',
+    tags: ['relance', 'ppv'],
+    content:
+      "pas de souci si {{content_type}} c'était pas le bon moment {{subscriber_name}}\ndis-moi plutôt, ta journée elle a donné quoi ?",
+  },
+  {
+    category_key: 'objection_handling',
+    name: 'Objection — « c\'est trop cher »',
+    description: "Répondre à une objection de prix sans braderie ni insistance.",
+    objective: "Accepter le refus et garder la relation",
+    tone: 'Compréhensif',
+    trigger: "L'abonné évoque le prix",
+    tags: ['objection', 'prix'],
+    content:
+      "je comprends totalement {{subscriber_name}}, aucun souci\nde toute façon j'aime bien qu'on discute, le reste c'est vraiment quand tu en as envie",
+  },
+  {
+    category_key: 're_engagement',
+    name: 'Réactivation — silence long',
+    description: "Reprendre contact avec un abonné inactif depuis plusieurs semaines.",
+    objective: 'Obtenir une réponse simple',
+    tone: 'Léger, assumé',
+    trigger: 'Plus de 3 semaines sans échange',
+    tags: ['réactivation', 'inactif'],
+    content:
+      "ça fait un moment {{subscriber_name}} 🙂\nje me demandais : toujours sur {{conversation_context}} ou tu es passé à autre chose ?",
+  },
+  {
+    category_key: 'thank_you',
+    name: 'Remerciement — après achat',
+    description: 'Remercier de façon spécifique et vérifier la réception.',
+    objective: "Confirmer la satisfaction, garder la conversation ouverte",
+    tone: 'Sincère',
+    trigger: 'Juste après un achat',
+    tags: ['après achat'],
+    content:
+      "merci beaucoup {{subscriber_name}}, vraiment 🙂\ntu me diras ce que tu en as pensé ? ça m'aide à savoir ce que tu aimes",
+  },
+  {
+    category_key: 'good_night',
+    name: 'Good Night — court',
+    description: 'Message de fin de journée, sans intention commerciale.',
+    objective: 'Entretenir la régularité des échanges',
+    tone: 'Doux',
+    trigger: 'Fin de soirée',
+    tags: ['routine'],
+    content: 'bonne nuit {{subscriber_name}} 🌙 raconte-moi ta journée demain si tu y penses',
+  },
+];

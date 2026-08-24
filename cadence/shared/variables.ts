@@ -16,6 +16,9 @@ export const VARIABLE_CATALOG: VariableDefinition[] = [
   { name: 'banned_topics', label: 'Sujets à éviter', description: 'Sujets interdits dans les messages.', source: 'creator', example: 'politique, religion' },
   { name: 'banned_words', label: 'Mots interdits', description: 'Vocabulaire à ne jamais employer.', source: 'creator', example: 'bébé, chéri' },
   { name: 'signature_phrases', label: 'Expressions signature', description: 'Formules typiques du créateur.', source: 'creator', example: 'tu me manques déjà' },
+  { name: 'creator_age', label: 'Âge', description: 'Âge déclaré dans la fiche du modèle.', source: 'creator', example: '24' },
+  { name: 'content_style', label: 'Style de contenu', description: 'Type de contenu produit par le modèle.', source: 'creator', example: 'photos et vidéos douces' },
+  { name: 'custom_instructions', label: 'Consignes personnalisées', description: 'Consignes libres de la fiche modèle.', source: 'creator', example: 'toujours finir par une question' },
   { name: 'audience_type', label: 'Type d’audience', description: 'Profil dominant des abonnés.', source: 'creator', example: 'hommes 30-45, francophones' },
   { name: 'tone', label: 'Ton', description: 'Ton de communication (surchargé par la console si besoin).', source: 'creator', example: 'chaleureux et complice' },
 
@@ -31,6 +34,9 @@ export const VARIABLE_CATALOG: VariableDefinition[] = [
   { name: 'objective', label: 'Objectif', description: 'Objectif commercial ou relationnel du message.', source: 'request', example: 'Proposer le pack photo sans insister' },
   { name: 'familiarity', label: 'Familiarité', description: 'Niveau de proximité avec l’abonné.', source: 'request', example: 'régulier' },
   { name: 'subscriber_alias', label: 'Abonné', description: 'Pseudo ou alias de l’abonné.', source: 'request', example: 'marc_92' },
+  { name: 'subscriber_name', label: 'Prénom de l’abonné', description: 'Prénom utilisé dans le message (identique à l’alias si non renseigné).', source: 'request', example: 'Marc' },
+  { name: 'price', label: 'Prix', description: 'Prix du contenu proposé, tel que saisi par l’opérateur.', source: 'request', example: '15 €' },
+  { name: 'content_type', label: 'Type de contenu', description: 'Contenu concerné par le message (photo, vidéo, custom…).', source: 'request', example: 'vidéo custom' },
   { name: 'extra_instructions', label: 'Consignes additionnelles', description: 'Consigne ponctuelle de l’opérateur.', source: 'request', example: 'Rester très court' },
   { name: 'variant_count', label: 'Nombre de variantes', description: 'Nombre de suggestions demandées.', source: 'request', example: '3' },
 

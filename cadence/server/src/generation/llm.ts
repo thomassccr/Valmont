@@ -19,10 +19,26 @@ export interface LlmInput {
   scenario: Scenario | null;
 }
 
+export interface VariationInput {
+  system: string;
+  user: string;
+  /** Contenu du script d'origine, utilisé par le mode local. */
+  original: string;
+  count: number;
+}
+
+export interface RawVariation {
+  label: string;
+  content: string;
+  rationale: string;
+  warnings: string[];
+}
+
 export interface LlmProvider {
   readonly name: string;
   readonly model: string;
   generate(input: LlmInput): Promise<RawSuggestion[]>;
+  variations(input: VariationInput): Promise<RawVariation[]>;
 }
 
 /* ─────────────────────────  Anthropic  ───────────────────────── */
@@ -40,6 +56,19 @@ const SuggestionsSchema = z.object({
       }),
     )
     .describe('Les propositions, de la plus sûre à la plus audacieuse'),
+});
+
+const VariationsSchema = z.object({
+  variations: z
+    .array(
+      z.object({
+        label: z.string().describe('Angle de la variante, en 2 à 4 mots'),
+        content: z.string().describe('Script complet, variables conservées telles quelles'),
+        rationale: z.string().describe('Pourquoi cette variante, en une phrase'),
+        warnings: z.array(z.string()).describe('Points de vigilance ; liste vide si aucun'),
+      }),
+    )
+    .describe('Les variantes du script'),
 });
 
 class AnthropicProvider implements LlmProvider {
@@ -82,6 +111,33 @@ class AnthropicProvider implements LlmProvider {
       warnings: suggestion.warnings ?? [],
     }));
   }
+
+  async variations(input: VariationInput): Promise<RawVariation[]> {
+    const response = await this.client.messages.parse({
+      model: this.model,
+      max_tokens: env.llm.maxTokens,
+      system: [{ type: 'text', text: input.system, cache_control: { type: 'ephemeral' } }],
+      messages: [{ role: 'user', content: input.user }],
+      thinking: { type: 'adaptive' },
+      output_config: {
+        effort: env.llm.effort,
+        format: zodOutputFormat(VariationsSchema),
+      },
+    });
+
+    if (response.stop_reason === 'refusal') {
+      throw new Error('Le modèle a refusé de traiter ce script.');
+    }
+    const parsed = response.parsed_output;
+    if (!parsed) throw new Error('Réponse du modèle illisible (sortie structurée absente).');
+
+    return parsed.variations.slice(0, input.count).map((variation) => ({
+      label: variation.label,
+      content: variation.content.trim(),
+      rationale: variation.rationale,
+      warnings: variation.warnings ?? [],
+    }));
+  }
 }
 
 /* ─────────────────────────  Mode local (sans clé API)  ───────────────────────── */
@@ -91,6 +147,9 @@ class AnthropicProvider implements LlmProvider {
  * Sert de mode dégradé (clé absente, incident fournisseur) et de mode démo/test :
  * les ébauches contiennent des marqueurs explicites, jamais de faits inventés.
  */
+const LOCAL_NOTICE =
+  'Mode local actif (aucune clé API configurée) : ces ébauches doivent être complétées à la main.';
+
 class LocalProvider implements LlmProvider {
   readonly name = 'local';
   readonly model = 'composition-locale';
@@ -126,9 +185,28 @@ class LocalProvider implements LlmProvider {
       label: angle.label,
       text: angle.build(),
       rationale: angle.rationale,
-      warnings: [
-        'Mode local actif (aucune clé API configurée) : ces ébauches doivent être complétées à la main.',
-      ],
+      warnings: [LOCAL_NOTICE],
+    }));
+  }
+
+  /**
+   * Sans modèle, on ne réécrit pas un texte. On renvoie des squelettes de
+   * variantes qui conservent l'original et ses variables, en indiquant
+   * clairement le travail restant à l'opérateur.
+   */
+  async variations(input: VariationInput): Promise<RawVariation[]> {
+    const angles = [
+      { label: 'Plus court', hint: 'Retirer une phrase, garder l’essentiel.' },
+      { label: 'Plus chaleureux', hint: 'Ajouter une marque d’attention personnelle.' },
+      { label: 'Ouverture par question', hint: 'Commencer par la question, finir par l’accroche.' },
+      { label: 'Plus direct', hint: 'Aller au message principal dès la première phrase.' },
+      { label: 'Plus léger', hint: 'Alléger le ton, retirer toute insistance.' },
+    ];
+    return angles.slice(0, input.count).map((angle) => ({
+      label: angle.label,
+      content: `[À RETRAVAILLER — ${angle.hint}]\n\n${input.original}`,
+      rationale: angle.hint,
+      warnings: [LOCAL_NOTICE],
     }));
   }
 }

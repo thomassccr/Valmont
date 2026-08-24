@@ -5,14 +5,17 @@ import type {
   Familiarity,
   GenerationRequest,
   GenerationResult,
+  ScriptInput,
+  Suggestion,
   SuggestionWarning,
 } from '../../../shared/types';
 import { api } from '../api';
-import { Badge, CopyButton, Empty, Field, Spinner, useAsync, useToast } from '../components/ui';
+import ScriptEditor from './ScriptEditor';
+import { Badge, CopyButton, Empty, Field, Spinner, StarButton, useAsync, useToast } from './ui';
 
-const STORAGE_KEY = 'cadence:console:draft';
+const STORAGE_KEY = 'cadence:generator:draft';
 
-const EMPTY_FORM: GenerationRequest = {
+const EMPTY: GenerationRequest = {
   creator_id: '',
   scenario_id: null,
   template_id: null,
@@ -24,19 +27,21 @@ const EMPTY_FORM: GenerationRequest = {
   familiarity: 'nouveau',
   tone_override: '',
   extra_instructions: '',
+  price: '',
+  content_type: '',
   variant_count: 3,
 };
 
 const loadDraft = (): GenerationRequest => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? { ...EMPTY_FORM, ...JSON.parse(raw) } : EMPTY_FORM;
+    return raw ? { ...EMPTY, ...JSON.parse(raw) } : EMPTY;
   } catch {
-    return EMPTY_FORM;
+    return EMPTY;
   }
 };
 
-function WarningLine({ warning }: { warning: SuggestionWarning }) {
+export function WarningLine({ warning }: { warning: SuggestionWarning }) {
   const tone = warning.severity === 'block' ? 'block' : warning.severity === 'warn' ? 'warn' : 'info';
   return (
     <div className={`alert ${tone}`} style={{ marginTop: 8 }}>
@@ -46,41 +51,65 @@ function WarningLine({ warning }: { warning: SuggestionWarning }) {
   );
 }
 
-export default function Console() {
+/**
+ * Console de génération.
+ * `lockedModelId` : utilisée dans l'onglet Prompt Generator d'un modèle, où le
+ * modèle est imposé ; sans lui, l'opérateur choisit le modèle dans la liste.
+ */
+export default function GeneratorPanel({
+  lockedModelId,
+  embedded,
+}: {
+  lockedModelId?: string;
+  /** Intégrée dans un onglet : la page porte le défilement. */
+  embedded?: boolean;
+}) {
   const toast = useToast();
   const location = useLocation();
   const prefill = (location.state as { prefill?: Partial<GenerationRequest> } | null)?.prefill;
 
-  const creators = useAsync(() => api.creators(), []);
+  const models = useAsync(() => api.models(), []);
   const scenarios = useAsync(() => api.scenarios(), []);
   const templates = useAsync(() => api.templates(), []);
+  const categories = useAsync(() => api.scriptCategories(), []);
 
-  const [form, setForm] = useState<GenerationRequest>(() => ({ ...loadDraft(), ...prefill }));
+  const [form, setForm] = useState<GenerationRequest>(() => ({
+    ...loadDraft(),
+    ...prefill,
+    ...(lockedModelId ? { creator_id: lockedModelId } : {}),
+  }));
   const [result, setResult] = useState<GenerationResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [used, setUsed] = useState<string | null>(null);
+  const [favorited, setFavorited] = useState(false);
+  const [saveAs, setSaveAs] = useState<Partial<ScriptInput> | null>(null);
 
   const set = <K extends keyof GenerationRequest>(key: K, value: GenerationRequest[K]) =>
     setForm((current) => ({ ...current, [key]: value }));
 
-  // Le créateur sélectionné est mémorisé : l'opérateur enchaîne les conversations.
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...form, subscriber_message: '' }));
   }, [form]);
 
   useEffect(() => {
-    if (!form.creator_id && creators.data?.length) set('creator_id', creators.data[0].id);
+    if (lockedModelId) set('creator_id', lockedModelId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [creators.data]);
+  }, [lockedModelId]);
+
+  useEffect(() => {
+    if (!lockedModelId && !form.creator_id && models.data?.length) {
+      set('creator_id', models.data[0].id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [models.data]);
 
   const scenario = useMemo(
     () => scenarios.data?.scenarios.find((item) => item.id === form.scenario_id) ?? null,
     [scenarios.data, form.scenario_id],
   );
 
-  // Un scénario propose un objectif et un niveau de familiarité par défaut.
   const applyScenario = (scenarioId: string) => {
     const picked = scenarios.data?.scenarios.find((item) => item.id === scenarioId) ?? null;
     setForm((current) => ({
@@ -93,23 +122,24 @@ export default function Console() {
 
   const generate = async () => {
     if (!form.creator_id) {
-      toast('Sélectionne un créateur', true);
+      toast('Sélectionne un modèle', true);
       return;
     }
     setBusy(true);
     setError(null);
     setUsed(null);
+    setFavorited(false);
     try {
       const generated = await api.generate({
         ...form,
         subscriber_alias: form.subscriber_alias || undefined,
         tone_override: form.tone_override || undefined,
         extra_instructions: form.extra_instructions || undefined,
+        price: form.price || undefined,
+        content_type: form.content_type || undefined,
       });
       setResult(generated);
-      if (!generated.suggestions.length) {
-        toast('Génération bloquée : voir les avertissements', true);
-      }
+      if (!generated.suggestions.length) toast('Génération bloquée : voir les avertissements', true);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Génération impossible');
     } finally {
@@ -133,29 +163,55 @@ export default function Console() {
     if (result) await api.feedback(result.id, { used_suggestion_id: suggestionId }).catch(() => {});
   };
 
+  const toggleFavorite = async () => {
+    if (!result) return;
+    const { is_favorite } = await api.toggleFavorite('generation', result.id);
+    setFavorited(is_favorite);
+  };
+
+  const saveAsScript = (suggestion: Suggestion) => {
+    setSaveAs({
+      model_id: form.creator_id,
+      name: suggestion.label,
+      content: suggestion.text,
+      objective: form.objective,
+      tone: form.tone_override || '',
+      trigger: scenario?.name ?? '',
+      category_key: categories.data?.[0]?.key ?? 'first_message',
+      description: `Généré depuis la console le ${new Date().toLocaleDateString('fr-FR')}`,
+      tags: [],
+      variables: [],
+    });
+  };
+
+  const currentModel = models.data?.find((model) => model.id === form.creator_id);
+
   return (
-    <div className="console">
-      {/* ─────────  Formulaire  ───────── */}
+    <div className={`console${embedded ? ' embedded' : ''}`}>
+      {/* ─── Formulaire ─── */}
       <div className="console-form">
         <div className="section-title">Contexte</div>
 
-        <Field label="Créateur">
-          <select value={form.creator_id} onChange={(event) => set('creator_id', event.target.value)}>
-            <option value="">— Sélectionner —</option>
-            {creators.data?.map((creator) => (
-              <option key={creator.id} value={creator.id}>
-                {creator.name}
-              </option>
-            ))}
-          </select>
-        </Field>
+        {lockedModelId ? (
+          <Field label="Model">
+            <input type="text" value={currentModel?.name ?? '…'} disabled />
+          </Field>
+        ) : (
+          <Field label="Model">
+            <select value={form.creator_id} onChange={(event) => set('creator_id', event.target.value)}>
+              <option value="">— Sélectionner —</option>
+              {models.data?.map((model) => (
+                <option key={model.id} value={model.id}>
+                  {model.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+        )}
 
         <div className="split" style={{ gap: 10 }}>
-          <Field label="Scénario">
-            <select
-              value={form.scenario_id ?? ''}
-              onChange={(event) => applyScenario(event.target.value)}
-            >
+          <Field label="Situation">
+            <select value={form.scenario_id ?? ''} onChange={(event) => applyScenario(event.target.value)}>
               <option value="">Libre</option>
               {scenarios.data?.scenarios.map((item) => (
                 <option key={item.id} value={item.id}>
@@ -164,7 +220,6 @@ export default function Console() {
               ))}
             </select>
           </Field>
-
           <Field label="Familiarité">
             <select
               value={form.familiarity}
@@ -179,40 +234,40 @@ export default function Console() {
           </Field>
         </div>
 
-        <Field label="Objectif de ce message" hint={scenario ? `But du scénario : ${scenario.goal}` : undefined}>
+        <Field label="Objective" hint={scenario ? `But du scénario : ${scenario.goal}` : undefined}>
           <input
             type="text"
             value={form.objective}
-            placeholder="ex. faire parler l’abonné de sa semaine"
+            placeholder="Re-engage subscriber"
             onChange={(event) => set('objective', event.target.value)}
           />
         </Field>
 
         <div className="section-title">Conversation</div>
 
-        <Field label="Message reçu de l’abonné">
+        <Field label="Message reçu">
           <textarea
-            value={form.subscriber_message}
             rows={3}
-            placeholder="Colle ici le dernier message reçu"
+            value={form.subscriber_message}
+            placeholder="Colle ici le dernier message de l’abonné"
             onChange={(event) => set('subscriber_message', event.target.value)}
           />
         </Field>
 
-        <Field label="Historique récent" hint="Du plus ancien au plus récent, une ligne par message.">
+        <Field label="Historique récent" hint="Du plus ancien au plus récent.">
           <textarea
+            rows={3}
             value={form.conversation_history}
-            rows={4}
             placeholder={'Abonné : salut\nCréateur : coucou toi'}
             onChange={(event) => set('conversation_history', event.target.value)}
           />
         </Field>
 
-        <Field label="Contexte / notes" hint="Tout ce que le modèle n’a pas le droit d’inventer doit figurer ici.">
+        <Field label="Context" hint="Tout ce que le modèle n’a pas le droit d’inventer va ici.">
           <textarea
-            value={form.conversation_context}
             rows={2}
-            placeholder="ex. a acheté le pack photo hier, a raté le live"
+            value={form.conversation_context}
+            placeholder="Subscriber has not purchased"
             onChange={(event) => set('conversation_context', event.target.value)}
           />
         </Field>
@@ -220,7 +275,7 @@ export default function Console() {
         <div className="section-title">Réglages</div>
 
         <div className="split" style={{ gap: 10 }}>
-          <Field label="Abonné (alias)">
+          <Field label="Subscriber">
             <input
               type="text"
               value={form.subscriber_alias ?? ''}
@@ -242,11 +297,30 @@ export default function Console() {
           </Field>
         </div>
 
-        <Field label="Ton (surcharge ponctuelle)" hint="Vide = ton de la fiche créateur.">
+        <div className="split" style={{ gap: 10 }}>
+          <Field label="Prix" hint="Alimente {{price}}.">
+            <input
+              type="text"
+              value={form.price ?? ''}
+              placeholder="15 €"
+              onChange={(event) => set('price', event.target.value)}
+            />
+          </Field>
+          <Field label="Type de contenu" hint="Alimente {{content_type}}.">
+            <input
+              type="text"
+              value={form.content_type ?? ''}
+              placeholder="vidéo custom"
+              onChange={(event) => set('content_type', event.target.value)}
+            />
+          </Field>
+        </div>
+
+        <Field label="Tone (surcharge)" hint="Vide = ton du profil du modèle.">
           <input
             type="text"
             value={form.tone_override ?? ''}
-            placeholder="ex. plus sobre que d’habitude"
+            placeholder="Playful"
             onChange={(event) => set('tone_override', event.target.value)}
           />
         </Field>
@@ -256,7 +330,7 @@ export default function Console() {
             value={form.template_id ?? ''}
             onChange={(event) => set('template_id', event.target.value || null)}
           >
-            <option value="">Standard (console)</option>
+            <option value="">Standard</option>
             {templates.data?.map((template) => (
               <option key={template.id} value={template.id}>
                 {template.name}
@@ -265,24 +339,24 @@ export default function Console() {
           </select>
         </Field>
 
-        <Field label="Consignes additionnelles">
+        <Field label="Additional instructions">
           <textarea
-            value={form.extra_instructions ?? ''}
             rows={2}
-            placeholder="ex. rester très court, ne pas parler du live"
+            value={form.extra_instructions ?? ''}
+            placeholder="Rester très court, ne pas parler du live"
             onChange={(event) => set('extra_instructions', event.target.value)}
           />
         </Field>
 
         <div className="btn-row" style={{ marginTop: 16 }}>
           <button className="btn primary" onClick={generate} disabled={busy}>
-            {busy ? <Spinner /> : '✦'} Générer
+            {busy ? <Spinner /> : '✦'} Generate
           </button>
           <kbd>⌘/Ctrl + ↵</kbd>
           <button
             className="btn ghost sm"
             onClick={() => {
-              setForm({ ...EMPTY_FORM, creator_id: form.creator_id });
+              setForm({ ...EMPTY, creator_id: form.creator_id });
               setResult(null);
             }}
           >
@@ -291,14 +365,14 @@ export default function Console() {
         </div>
       </div>
 
-      {/* ─────────  Résultats  ───────── */}
+      {/* ─── Résultats ─── */}
       <div className="console-output">
         {error ? <div className="alert block">{error}</div> : null}
 
         {!result && !busy && !error ? (
           <Empty
             title="Aucune génération pour l’instant"
-            hint="Renseigne le message reçu à gauche, puis lance la génération."
+            hint="Renseigne le contexte à gauche, puis lance la génération."
           />
         ) : null}
 
@@ -315,8 +389,13 @@ export default function Console() {
               <Badge tone="accent">{result.suggestions.length} proposition(s)</Badge>
               <Badge>{result.provider === 'blocked' ? 'bloqué' : result.model}</Badge>
               <Badge>{result.latency_ms} ms</Badge>
+              <StarButton on={favorited} onToggle={toggleFavorite} title="Mettre en favori" />
+              <div className="spacer" />
               <button className="btn ghost sm" onClick={() => setShowPrompt((value) => !value)}>
-                {showPrompt ? 'Masquer le prompt' : 'Voir le prompt envoyé'}
+                {showPrompt ? 'Masquer le prompt' : 'Voir le prompt'}
+              </button>
+              <button className="btn sm" onClick={generate} disabled={busy}>
+                ↻ Regenerate
               </button>
             </div>
 
@@ -342,13 +421,8 @@ export default function Console() {
             <div style={{ marginTop: 14 }}>
               {result.suggestions.map((suggestion, index) => (
                 <article
-                  className="suggestion"
+                  className={`suggestion${used === suggestion.id ? ' used' : ''}`}
                   key={suggestion.id}
-                  style={
-                    used === suggestion.id
-                      ? { borderColor: 'var(--success)', boxShadow: '0 0 0 1px var(--success)' }
-                      : undefined
-                  }
                 >
                   <div className="suggestion-head">
                     <div className="row">
@@ -367,15 +441,12 @@ export default function Console() {
                   <div className="suggestion-foot">
                     <span className="suggestion-why">{suggestion.rationale}</span>
                     <div className="btn-row">
-                      <button
-                        className="btn ghost sm"
-                        onClick={() => markUsed(suggestion.id)}
-                        title="Marquer comme envoyée (statistiques d’équipe)"
-                      >
-                        {used === suggestion.id ? '✓ Envoyée' : 'Marquer envoyée'}
+                      <button className="btn ghost sm" onClick={() => saveAsScript(suggestion)}>
+                        Save as Script
                       </button>
                       <CopyButton
                         text={suggestion.text}
+                        label="Copy"
                         className="btn primary sm"
                         onCopied={() => {
                           void markUsed(suggestion.id);
@@ -390,6 +461,20 @@ export default function Console() {
           </>
         ) : null}
       </div>
+
+      {saveAs ? (
+        <ScriptEditor
+          script={null}
+          defaults={saveAs}
+          categories={categories.data ?? []}
+          models={models.data ?? []}
+          onClose={() => setSaveAs(null)}
+          onSaved={() => {
+            setSaveAs(null);
+            toast('Script enregistré dans la bibliothèque');
+          }}
+        />
+      ) : null}
     </div>
   );
 }

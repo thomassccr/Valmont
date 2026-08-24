@@ -100,6 +100,8 @@ interface CreatorRow {
   name: string;
   handle: string;
   accent_color: string;
+  avatar_url: string;
+  age: number;
   personality: string;
   traits_json: string;
   tone: string;
@@ -108,6 +110,8 @@ interface CreatorRow {
   audience_type: string;
   preferred_topics_json: string;
   objectives_json: string;
+  content_style: string;
+  custom_instructions: string;
   lexicon_json: string;
   guardrails_json: string;
   notes: string;
@@ -122,6 +126,8 @@ const toCreator = (row: CreatorRow): Creator => ({
   name: row.name,
   handle: row.handle,
   accent_color: row.accent_color,
+  avatar_url: row.avatar_url ?? '',
+  age: row.age ?? 0,
   personality: row.personality,
   traits: json.parse<string[]>(row.traits_json, []),
   tone: row.tone,
@@ -130,6 +136,8 @@ const toCreator = (row: CreatorRow): Creator => ({
   audience_type: row.audience_type,
   preferred_topics: json.parse<string[]>(row.preferred_topics_json, []),
   objectives: json.parse<string[]>(row.objectives_json, []),
+  content_style: row.content_style ?? '',
+  custom_instructions: row.custom_instructions ?? '',
   lexicon: { ...DEFAULT_LEXICON, ...json.parse(row.lexicon_json, {}) },
   guardrails: { ...DEFAULT_GUARDRAILS, ...json.parse(row.guardrails_json, {}) },
   notes: row.notes,
@@ -143,6 +151,8 @@ const creatorParams = (input: CreatorInput) => ({
   name: input.name,
   handle: input.handle ?? '',
   accent_color: input.accent_color || '#7c5cff',
+  avatar_url: input.avatar_url ?? '',
+  age: Number.isFinite(input.age) ? input.age : 0,
   personality: input.personality ?? '',
   traits_json: json.stringify(input.traits ?? []),
   tone: input.tone ?? '',
@@ -151,6 +161,8 @@ const creatorParams = (input: CreatorInput) => ({
   audience_type: input.audience_type ?? '',
   preferred_topics_json: json.stringify(input.preferred_topics ?? []),
   objectives_json: json.stringify(input.objectives ?? []),
+  content_style: input.content_style ?? '',
+  custom_instructions: input.custom_instructions ?? '',
   lexicon_json: json.stringify({ ...DEFAULT_LEXICON, ...input.lexicon }),
   guardrails_json: json.stringify({ ...DEFAULT_GUARDRAILS, ...input.guardrails }),
   notes: input.notes ?? '',
@@ -182,12 +194,14 @@ export const creators = {
       updated_at: timestamp,
     };
     db.prepare(
-      `INSERT INTO creators (id, name, handle, accent_color, personality, traits_json, tone,
-        interests_json, writing_style, audience_type, preferred_topics_json, objectives_json,
-        lexicon_json, guardrails_json, notes, archived, created_by, created_at, updated_at)
-       VALUES (@id, @name, @handle, @accent_color, @personality, @traits_json, @tone,
-        @interests_json, @writing_style, @audience_type, @preferred_topics_json, @objectives_json,
-        @lexicon_json, @guardrails_json, @notes, @archived, @created_by, @created_at, @updated_at)`,
+      `INSERT INTO creators (id, name, handle, accent_color, avatar_url, age, personality,
+        traits_json, tone, interests_json, writing_style, audience_type, preferred_topics_json,
+        objectives_json, content_style, custom_instructions, lexicon_json, guardrails_json, notes,
+        archived, created_by, created_at, updated_at)
+       VALUES (@id, @name, @handle, @accent_color, @avatar_url, @age, @personality,
+        @traits_json, @tone, @interests_json, @writing_style, @audience_type, @preferred_topics_json,
+        @objectives_json, @content_style, @custom_instructions, @lexicon_json, @guardrails_json, @notes,
+        @archived, @created_by, @created_at, @updated_at)`,
     ).run(params);
     return creators.find(params.id)!;
   },
@@ -197,11 +211,12 @@ export const creators = {
     const params = { ...creatorParams({ ...existing, ...input }), id: creatorId, updated_at: now() };
     db.prepare(
       `UPDATE creators SET name=@name, handle=@handle, accent_color=@accent_color,
-        personality=@personality, traits_json=@traits_json, tone=@tone,
-        interests_json=@interests_json, writing_style=@writing_style, audience_type=@audience_type,
-        preferred_topics_json=@preferred_topics_json, objectives_json=@objectives_json,
-        lexicon_json=@lexicon_json, guardrails_json=@guardrails_json, notes=@notes,
-        archived=@archived, updated_at=@updated_at
+        avatar_url=@avatar_url, age=@age, personality=@personality, traits_json=@traits_json,
+        tone=@tone, interests_json=@interests_json, writing_style=@writing_style,
+        audience_type=@audience_type, preferred_topics_json=@preferred_topics_json,
+        objectives_json=@objectives_json, content_style=@content_style,
+        custom_instructions=@custom_instructions, lexicon_json=@lexicon_json,
+        guardrails_json=@guardrails_json, notes=@notes, archived=@archived, updated_at=@updated_at
        WHERE id=@id`,
     ).run(params);
     return creators.find(creatorId);

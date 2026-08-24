@@ -52,6 +52,10 @@ export interface Creator {
   name: string;
   handle: string;
   accent_color: string;
+  /** URL ou data-URI de l'avatar. Vide = initiales sur fond coloré. */
+  avatar_url: string;
+  /** Âge affiché dans la persona. 0 = non renseigné. */
+  age: number;
   personality: string;
   traits: string[];
   tone: string;
@@ -60,6 +64,10 @@ export interface Creator {
   audience_type: string;
   preferred_topics: string[];
   objectives: string[];
+  /** Type de contenu produit (photos, vidéos, custom…), utilisé dans la persona. */
+  content_style: string;
+  /** Consignes libres injectées telles quelles dans le prompt système. */
+  custom_instructions: string;
   lexicon: CreatorLexicon;
   guardrails: CreatorGuardrails;
   notes: string;
@@ -71,8 +79,26 @@ export interface Creator {
 
 export type CreatorInput = Omit<
   Creator,
-  'id' | 'created_by' | 'created_at' | 'updated_at'
+  'id' | 'created_by' | 'created_at' | 'updated_at' | 'is_favorite' | 'script_count' | 'performance'
 >;
+
+/** Alias métier : dans l'interface, un « créateur » est présenté comme un *model*. */
+export type Model = Creator;
+
+/** Fiche enrichie renvoyée par les listes : compteurs et performance agrégée. */
+export interface ModelSummary extends Creator {
+  is_favorite: boolean;
+  script_count: number;
+  performance: ModelPerformance;
+}
+
+export interface ModelPerformance {
+  usage_count: number;
+  conversion_rate: number;
+  revenue_cents: number;
+  last_used_at: string | null;
+  score: number;
+}
 
 /* ─────────────────────────  Scénarios  ───────────────────────── */
 
@@ -155,6 +181,10 @@ export interface GenerationRequest {
   familiarity: Familiarity;
   tone_override?: string;
   extra_instructions?: string;
+  /** Prix du contenu proposé, alimente {{price}}. */
+  price?: string;
+  /** Type de contenu concerné, alimente {{content_type}}. */
+  content_type?: string;
   variant_count: number;
 }
 
@@ -254,4 +284,145 @@ export interface DashboardStats {
 export interface ApiError {
   error: string;
   details?: unknown;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ *  Scripts — bibliothèque de messages réutilisables
+ *  Un script appartient soit à un modèle (model_id), soit à la
+ *  bibliothèque globale (model_id = null).
+ * ═══════════════════════════════════════════════════════════════ */
+
+export interface ScriptCategory {
+  id: string;
+  key: string;
+  label: string;
+  sort_order: number;
+  is_system: boolean;
+}
+
+export interface ScriptVariable {
+  name: string;
+  label: string;
+  default_value: string;
+}
+
+export interface Script {
+  id: string;
+  /** null = script global, accessible à tous les modèles. */
+  model_id: string | null;
+  model_name: string | null;
+  category_key: string;
+  category_label: string;
+  name: string;
+  description: string;
+  objective: string;
+  tone: string;
+  /** Déclencheur : dans quelle situation utiliser ce script. */
+  trigger: string;
+  content: string;
+  tags: string[];
+  variables: ScriptVariable[];
+  /** Favori de l'utilisateur courant. */
+  is_favorite: boolean;
+  usage_count: number;
+  last_used_at: string | null;
+  conversion_rate: number;
+  revenue_cents: number;
+  performance_score: number;
+  version: number;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ScriptInput = Pick<
+  Script,
+  | 'model_id'
+  | 'category_key'
+  | 'name'
+  | 'description'
+  | 'objective'
+  | 'tone'
+  | 'trigger'
+  | 'content'
+  | 'tags'
+  | 'variables'
+>;
+
+export interface ScriptFilters {
+  model_id?: string | null;
+  /** 'all' = scripts du modèle + globaux ; 'global' = globaux seuls ; 'model' = modèle seul. */
+  scope?: 'all' | 'global' | 'model';
+  category?: string;
+  tag?: string;
+  search?: string;
+  favorites?: boolean;
+  recent?: boolean;
+  limit?: number;
+}
+
+export interface ScriptVersion {
+  id: string;
+  script_id: string;
+  version: number;
+  name: string;
+  content: string;
+  author_name: string | null;
+  created_at: string;
+}
+
+export interface ScriptUsageInput {
+  converted?: boolean;
+  revenue_cents?: number;
+  note?: string;
+}
+
+/* ─────────────────────────  Favoris  ───────────────────────── */
+
+export type FavoriteEntity = 'script' | 'model' | 'generation';
+
+export interface FavoritesBundle {
+  scripts: Script[];
+  models: ModelSummary[];
+  generations: GenerationHistoryItem[];
+}
+
+/* ─────────────────────────  Variations de script  ───────────────────────── */
+
+export interface VariationRequest {
+  count: number;
+  instructions?: string;
+}
+
+export interface Variation {
+  id: string;
+  label: string;
+  content: string;
+  rationale: string;
+  warnings: SuggestionWarning[];
+}
+
+/* ─────────────────────────  Analytics  ───────────────────────── */
+
+export interface AnalyticsOverview {
+  totals: {
+    generations_week: number;
+    scripts_total: number;
+    scripts_used_week: number;
+    revenue_cents: number;
+    conversion_rate: number;
+  };
+  by_day: { date: string; generations: number; usages: number }[];
+  top_scripts: Script[];
+  by_category: { category: string; usage_count: number; revenue_cents: number }[];
+  models: ModelSummary[];
+}
+
+/* ─────────────────────────  Recherche globale  ───────────────────────── */
+
+export interface SearchResults {
+  models: ModelSummary[];
+  scripts: Script[];
+  templates: PromptTemplate[];
+  generations: GenerationHistoryItem[];
 }

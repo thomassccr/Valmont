@@ -1,5 +1,25 @@
 import { z } from 'zod';
 
+/**
+ * Schéma de mise à jour partielle.
+ *
+ * `schema.partial()` ne suffit pas : zod conserve les `.default()`, si bien
+ * qu'un PATCH ne transmettant qu'un champ réinitialiserait tous les autres à
+ * leur valeur par défaut (un script mis à jour repasserait « global », son
+ * contenu serait vidé…). On retire donc les valeurs par défaut avant de rendre
+ * les champs optionnels : un champ absent reste absent.
+ */
+export function patchOf<T extends z.ZodRawShape>(
+  schema: z.ZodObject<T>,
+): z.ZodType<Partial<z.infer<z.ZodObject<T>>>> {
+  const shape: Record<string, z.ZodType> = {};
+  for (const [key, field] of Object.entries(schema.shape as unknown as Record<string, z.ZodType>)) {
+    const inner = (field instanceof z.ZodDefault ? field.unwrap() : field) as z.ZodType;
+    shape[key] = inner.optional();
+  }
+  return z.object(shape) as unknown as z.ZodType<Partial<z.infer<z.ZodObject<T>>>>;
+}
+
 const strArray = z.array(z.string().trim().min(1)).max(50).default([]);
 
 export const lexiconSchema = z.object({
@@ -26,6 +46,8 @@ export const creatorSchema = z.object({
   name: z.string().trim().min(1, 'Le nom est obligatoire').max(80),
   handle: z.string().trim().max(80).default(''),
   accent_color: z.string().trim().max(20).default('#7c5cff'),
+  avatar_url: z.string().trim().max(500_000).default(''),
+  age: z.number().int().min(0).max(120).default(0),
   personality: z.string().max(2000).default(''),
   traits: strArray,
   tone: z.string().max(500).default(''),
@@ -34,6 +56,8 @@ export const creatorSchema = z.object({
   audience_type: z.string().max(500).default(''),
   preferred_topics: strArray,
   objectives: strArray,
+  content_style: z.string().max(500).default(''),
+  custom_instructions: z.string().max(4000).default(''),
   lexicon: lexiconSchema.partial().default({}),
   guardrails: guardrailsSchema.partial().default({}),
   notes: z.string().max(4000).default(''),
@@ -102,6 +126,8 @@ export const generationSchema = z.object({
   familiarity: z.enum(['nouveau', 'occasionnel', 'regulier', 'fidele']).default('nouveau'),
   tone_override: z.string().max(300).optional(),
   extra_instructions: z.string().max(1000).optional(),
+  price: z.string().max(40).optional(),
+  content_type: z.string().max(120).optional(),
   variant_count: z.number().int().min(1).max(5).default(3),
 });
 
@@ -128,4 +154,55 @@ export const userSchema = z.object({
 export const feedbackSchema = z.object({
   used_suggestion_id: z.string().nullable().optional(),
   rating: z.number().int().min(1).max(5).nullable().optional(),
+});
+
+/* ─────────────────────────  Scripts  ───────────────────────── */
+
+export const scriptVariableSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .regex(/^[a-z0-9_]+$/i, 'Nom de variable invalide'),
+  label: z.string().trim().max(80).default(''),
+  default_value: z.string().max(1000).default(''),
+});
+
+export const scriptSchema = z.object({
+  model_id: z.string().nullable().default(null),
+  category_key: z.string().trim().min(1),
+  name: z.string().trim().min(1, 'Le nom est obligatoire').max(120),
+  description: z.string().max(1000).default(''),
+  objective: z.string().max(500).default(''),
+  tone: z.string().max(200).default(''),
+  trigger: z.string().max(500).default(''),
+  content: z.string().max(20_000).default(''),
+  tags: z.array(z.string().trim().min(1)).max(30).default([]),
+  variables: z.array(scriptVariableSchema).max(40).default([]),
+});
+
+export const scriptUsageSchema = z.object({
+  converted: z.boolean().default(false),
+  revenue_cents: z.number().int().min(0).max(100_000_000).default(0),
+  note: z.string().max(500).default(''),
+});
+
+export const variationSchema = z.object({
+  count: z.number().int().min(1).max(5).default(3),
+  instructions: z.string().max(1000).optional(),
+});
+
+export const favoriteSchema = z.object({
+  entity_type: z.enum(['script', 'model', 'generation']),
+  entity_id: z.string().min(1),
+});
+
+export const categorySchema = z.object({
+  key: z
+    .string()
+    .trim()
+    .min(2)
+    .max(60)
+    .regex(/^[a-z0-9_]+$/i, 'Clé alphanumérique uniquement'),
+  label: z.string().trim().min(1).max(60),
+  sort_order: z.number().int().min(0).max(9999).default(500),
 });

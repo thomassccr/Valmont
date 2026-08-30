@@ -1,0 +1,5 @@
+# Base SQLite generee localement (donnees 100% fictives, non versionnees)
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm

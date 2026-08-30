@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simulateur de livraison — dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f8cff'/%3E%3Ctext x='16' y='23' font-size='20' text-anchor='middle' fill='white' font-family='sans-serif'%3ES%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="conteneur large">
+    <header class="entete">
+      <div>
+        <h1>Dashboard des commandes</h1>
+        <p class="sous-titre">Toutes les commandes du faux fournisseur, mises à jour en temps réel.</p>
+      </div>
+      <nav>
+        <a href="/">Commander</a>
+        <a href="/dashboard" class="actif">Dashboard</a>
+      </nav>
+    </header>
+
+    <p class="avertissement">
+      <strong>Simulation.</strong> Ces chiffres proviennent uniquement de la base locale
+      <code>data/simulateur.db</code>. Aucun réseau social n'est contacté.
+    </p>
+
+    <!-- Compteurs globaux -->
+    <section class="carte">
+      <h2>Vue d'ensemble</h2>
+      <div class="chiffres">
+        <div class="chiffre"><div class="valeur" id="s-total">0</div><div class="libelle">Commandes</div></div>
+        <div class="chiffre"><div class="valeur" id="s-encours">0</div><div class="libelle">En cours</div></div>
+        <div class="chiffre"><div class="valeur" id="s-terminees">0</div><div class="libelle">Terminées</div></div>
+        <div class="chiffre"><div class="valeur" id="s-livres">0</div><div class="libelle">Abonnés livrés</div></div>
+        <div class="chiffre"><div class="valeur" id="s-chutes">0</div><div class="libelle">Chutes</div></div>
+        <div class="chiffre"><div class="valeur" id="s-remplaces">0</div><div class="libelle">Remplacés</div></div>
+        <div class="chiffre"><div class="valeur" id="s-pool">0</div><div class="libelle">Stock de faux comptes</div></div>
+      </div>
+    </section>
+
+    <!-- Tableau des commandes -->
+    <section class="carte">
+      <h2>Commandes</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Commande</th>
+            <th>Cible</th>
+            <th>Statut</th>
+            <th style="width: 230px">Progression</th>
+            <th class="nombre">Livrés</th>
+            <th class="nombre">Restants</th>
+            <th class="nombre">Chutes</th>
+            <th>Vitesse</th>
+            <th>Créée</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="lignes"></tbody>
+      </table>
+      <p class="vide" id="vide">Aucune commande pour l'instant. <a class="lien" href="/">Lancer la première</a>.</p>
+    </section>
+  </div>
+
+  <script type="module" src="/js/dashboard.js"></script>
+</body>
+</html>

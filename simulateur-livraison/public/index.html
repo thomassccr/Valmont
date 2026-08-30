@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simulateur de livraison — commande</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f8cff'/%3E%3Ctext x='16' y='23' font-size='20' text-anchor='middle' fill='white' font-family='sans-serif'%3ES%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="conteneur">
+    <header class="entete">
+      <div>
+        <h1>Simulateur de livraison d'abonnés</h1>
+        <p class="sous-titre">Environnement 100 % local et 100 % fictif — outil pédagogique.</p>
+      </div>
+      <nav>
+        <a href="/" class="actif">Commander</a>
+        <a href="/dashboard">Dashboard</a>
+      </nav>
+    </header>
+
+    <p class="avertissement">
+      <strong>Simulation.</strong> Aucune connexion à un réseau social, aucune API externe,
+      aucun compte réel : les « abonnés » sont des lignes générées dans une base SQLite locale.
+    </p>
+
+    <!-- ============================= FORMULAIRE ============================= -->
+    <section class="carte">
+      <h2>Nouvelle commande</h2>
+      <form id="formulaire" autocomplete="off">
+        <div class="ligne">
+          <div class="champ">
+            <label for="cible">Username cible</label>
+            <input type="text" id="cible" name="cible" placeholder="@test" value="@test" required />
+          </div>
+          <div class="champ">
+            <label for="quantite">Nombre d'abonnés</label>
+            <input type="number" id="quantite" name="quantite" value="10000" min="1" required />
+          </div>
+        </div>
+
+        <div class="ligne">
+          <div class="champ">
+            <label for="vitesse">Vitesse de livraison</label>
+            <select id="vitesse" name="vitesse"></select>
+            <p class="aide" id="aide-vitesse"></p>
+          </div>
+          <div class="champ">
+            <label for="chute">Taux de chute simulé : <span id="valeur-chute">0 %</span></label>
+            <input type="range" id="chute" name="chute" min="0" max="60" step="5" value="0" />
+            <p class="aide">Probabilité que des abonnés livrés « disparaissent » ensuite.</p>
+          </div>
+        </div>
+
+        <div class="champ">
+          <label class="case">
+            <input type="checkbox" id="refill" name="refill" />
+            Garantie de remplacement (refill automatique après une chute)
+          </label>
+        </div>
+
+        <div class="actions">
+          <button type="submit" id="bouton-lancer">Lancer la commande</button>
+        </div>
+        <p class="erreur masque" id="erreur"></p>
+      </form>
+    </section>
+
+    <!-- ============================= SUIVI ============================= -->
+    <section class="carte masque" id="carte-suivi">
+      <header class="entete" style="margin-bottom: 14px">
+        <h2 style="margin:0">Commande <span id="numero"></span></h2>
+        <span class="statut" id="statut"></span>
+      </header>
+
+      <p class="sous-titre" id="rappel-cible" style="margin:0 0 10px"></p>
+
+      <div class="compteur">
+        <span id="livres">0</span> <small>/ <span id="total">0</span></small>
+      </div>
+      <div class="barre" id="barre"><span></span></div>
+
+      <div class="chiffres">
+        <div class="chiffre"><div class="valeur" id="c-restant">0</div><div class="libelle">Restants</div></div>
+        <div class="chiffre"><div class="valeur" id="c-chutes">0</div><div class="libelle">Chutes</div></div>
+        <div class="chiffre"><div class="valeur" id="c-remplaces">0</div><div class="libelle">Remplacés</div></div>
+        <div class="chiffre"><div class="valeur" id="c-vitesse">—</div><div class="libelle">Vitesse</div></div>
+      </div>
+
+      <div class="actions" style="margin-top:18px">
+        <button type="button" class="secondaire" id="bouton-drop">Simuler une chute (10 %)</button>
+        <button type="button" class="secondaire" id="bouton-refill">Lancer un remplacement</button>
+        <button type="button" class="danger" id="bouton-annuler">Annuler la commande</button>
+      </div>
+      <p class="erreur masque" id="erreur-action"></p>
+    </section>
+
+    <!-- ============================= JOURNAL ============================= -->
+    <section class="carte masque" id="carte-journal">
+      <h2>Journal du fournisseur</h2>
+      <div class="journal"><ul id="journal"></ul></div>
+    </section>
+
+    <!-- ====================== FAUX ABONNÉS LIVRÉS ====================== -->
+    <section class="carte masque" id="carte-abonnes">
+      <h2>Faux abonnés associés à la cible <small style="color:var(--texte-faible);font-weight:400">(40 derniers)</small></h2>
+      <div class="abonnes" id="abonnes"></div>
+      <p class="aide">Chacun de ces pseudos a été généré localement : aucun n'existe.</p>
+    </section>
+  </div>
+
+  <script type="module" src="/js/order.js"></script>
+</body>
+</html>

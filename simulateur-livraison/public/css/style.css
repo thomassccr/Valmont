@@ -1,0 +1,136 @@
+/* =====================================================================
+   style.css — Feuille de style unique du simulateur.
+   Interface volontairement sobre : l'important est de voir les chiffres
+   bouger, pas de faire joli.
+   ===================================================================== */
+
+:root {
+  --fond: #0f1115;
+  --carte: #171a21;
+  --carte-bordure: #262b35;
+  --texte: #e8eaed;
+  --texte-faible: #9aa3b0;
+  --accent: #4f8cff;
+  --ok: #3ddc84;
+  --alerte: #ffb020;
+  --danger: #ff5c5c;
+  --rayon: 12px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--fond);
+  color: var(--texte);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.conteneur { max-width: 900px; margin: 0 auto; padding: 32px 20px 64px; }
+.conteneur.large { max-width: 1180px; }
+
+/* --- En-tête ------------------------------------------------------ */
+header.entete { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+h1 { font-size: 22px; margin: 0; letter-spacing: -0.2px; }
+.sous-titre { color: var(--texte-faible); margin: 4px 0 24px; font-size: 14px; }
+nav a { color: var(--texte-faible); text-decoration: none; font-size: 14px; padding: 6px 12px; border: 1px solid var(--carte-bordure); border-radius: 999px; }
+nav a:hover, nav a.actif { color: var(--texte); border-color: var(--accent); }
+
+/* --- Bandeau d'avertissement -------------------------------------- */
+.avertissement {
+  background: rgba(255, 176, 32, 0.08);
+  border: 1px solid rgba(255, 176, 32, 0.3);
+  color: #ffd88a;
+  padding: 10px 14px;
+  border-radius: var(--rayon);
+  font-size: 13px;
+  margin-bottom: 24px;
+}
+
+/* --- Cartes ------------------------------------------------------- */
+.carte { background: var(--carte); border: 1px solid var(--carte-bordure); border-radius: var(--rayon); padding: 20px; margin-bottom: 20px; }
+.carte h2 { font-size: 16px; margin: 0 0 16px; }
+
+/* --- Formulaire --------------------------------------------------- */
+.champ { margin-bottom: 16px; }
+label { display: block; font-size: 13px; color: var(--texte-faible); margin-bottom: 6px; }
+input[type="text"], input[type="number"], select {
+  width: 100%; padding: 11px 12px; font-size: 15px; color: var(--texte);
+  background: #0f1218; border: 1px solid var(--carte-bordure); border-radius: 8px;
+}
+input:focus, select:focus { outline: none; border-color: var(--accent); }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+.ligne { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.case { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--texte); }
+.case input { accent-color: var(--accent); width: 16px; height: 16px; }
+.aide { font-size: 12px; color: var(--texte-faible); margin-top: 6px; }
+
+button {
+  font: inherit; font-weight: 600; cursor: pointer; border-radius: 8px;
+  padding: 11px 18px; border: 1px solid transparent; background: var(--accent); color: #fff;
+}
+button:hover:not(:disabled) { filter: brightness(1.1); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+button.secondaire { background: transparent; border-color: var(--carte-bordure); color: var(--texte); }
+button.danger { background: transparent; border-color: rgba(255, 92, 92, 0.4); color: var(--danger); }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* --- Statuts ------------------------------------------------------ */
+.statut { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.4px; }
+.statut::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.statut.pending { color: var(--alerte); background: rgba(255, 176, 32, 0.12); }
+.statut.processing { color: var(--accent); background: rgba(79, 140, 255, 0.12); }
+.statut.completed { color: var(--ok); background: rgba(61, 220, 132, 0.12); }
+.statut.cancelled { color: var(--texte-faible); background: rgba(154, 163, 176, 0.12); }
+
+/* --- Progression -------------------------------------------------- */
+.barre { height: 10px; background: #0f1218; border-radius: 999px; overflow: hidden; border: 1px solid var(--carte-bordure); }
+.barre > span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), #7aa8ff); transition: width 0.35s ease; }
+.barre.terminee > span { background: linear-gradient(90deg, var(--ok), #86f0b4); }
+.barre.mini { height: 6px; }
+.compteur { font-variant-numeric: tabular-nums; font-size: 26px; font-weight: 700; margin: 12px 0 8px; }
+.compteur small { font-size: 15px; font-weight: 500; color: var(--texte-faible); }
+
+/* --- Grille de chiffres ------------------------------------------- */
+.chiffres { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-top: 18px; }
+.chiffre { background: #0f1218; border: 1px solid var(--carte-bordure); border-radius: 10px; padding: 12px; }
+.chiffre .valeur { font-size: 19px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.chiffre .libelle { font-size: 12px; color: var(--texte-faible); }
+
+/* --- Journal ------------------------------------------------------ */
+.journal { max-height: 240px; overflow-y: auto; font-size: 13px; }
+.journal li { list-style: none; padding: 7px 0; border-bottom: 1px solid var(--carte-bordure); display: flex; gap: 10px; }
+.journal li:last-child { border-bottom: none; }
+.journal .heure { color: var(--texte-faible); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.journal ul { margin: 0; padding: 0; }
+.etiquette { font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 1px 7px; border-radius: 4px; background: rgba(79, 140, 255, 0.14); color: var(--accent); flex-shrink: 0; height: fit-content; }
+.etiquette.drop { background: rgba(255, 92, 92, 0.14); color: var(--danger); }
+.etiquette.refill { background: rgba(61, 220, 132, 0.14); color: var(--ok); }
+.etiquette.completed { background: rgba(61, 220, 132, 0.14); color: var(--ok); }
+.etiquette.cancelled { background: rgba(154, 163, 176, 0.14); color: var(--texte-faible); }
+
+/* --- Liste des faux abonnés --------------------------------------- */
+.abonnes { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; max-height: 300px; overflow-y: auto; }
+.abonne { display: flex; align-items: center; gap: 9px; padding: 7px 9px; background: #0f1218; border: 1px solid var(--carte-bordure); border-radius: 8px; font-size: 13px; }
+.abonne.dropped { opacity: 0.45; text-decoration: line-through; }
+.avatar { width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0; font-size: 11px; font-weight: 700; color: #0f1115; display: flex; align-items: center; justify-content: center; }
+.abonne .pseudo { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.abonne .qualite { margin-left: auto; font-size: 10px; color: var(--texte-faible); text-transform: uppercase; }
+
+/* --- Tableau du dashboard ----------------------------------------- */
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--texte-faible); padding: 0 10px 10px; font-weight: 600; }
+td { padding: 12px 10px; border-top: 1px solid var(--carte-bordure); vertical-align: middle; }
+td.nombre { font-variant-numeric: tabular-nums; white-space: nowrap; }
+tbody tr:hover { background: rgba(255, 255, 255, 0.02); }
+td .actions-ligne { display: flex; gap: 6px; }
+.vide { text-align: center; color: var(--texte-faible); padding: 40px 0; }
+
+/* --- Divers ------------------------------------------------------- */
+.erreur { color: var(--danger); font-size: 14px; margin-top: 12px; }
+.masque { display: none !important; }
+a.lien { color: var(--accent); text-decoration: none; }
+a.lien:hover { text-decoration: underline; }

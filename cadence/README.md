@@ -23,7 +23,17 @@ Ouvre <http://localhost:5173> et connecte-toi avec le compte créé au premier d
 **Change ce mot de passe avant toute utilisation réelle.**
 
 Sans clé API, l'outil démarre en **mode local** : il compose des ébauches hors ligne. Tout le reste
-(profils, scripts, favoris, recherche, analytics) fonctionne à l'identique.
+(profils, scripts, favoris, recherche, analytics) fonctionne à l'identique. Pour activer la
+génération complète, ajoute ta clé dans `cadence/.env` :
+
+```
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+La clé reste côté serveur, elle n'est jamais envoyée au navigateur.
+
+> **Où sont mes données ?** Dans un fichier unique : `cadence/server/data/cadence.db`.
+> C'est lui qu'il faut sauvegarder — il contient les modèles, les scripts et l'historique.
 
 ### Production
 

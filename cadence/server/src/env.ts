@@ -1,5 +1,15 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import fs from 'node:fs';
 import path from 'node:path';
+
+// npm workspaces lance le serveur depuis `cadence/server`, alors que le fichier
+// de configuration est documenté à la racine du projet (`cadence/.env`). On
+// charge donc les deux emplacements, du plus spécifique au plus général :
+// dotenv n'écrase jamais une variable déjà définie, la priorité est respectée.
+for (const candidate of ['.env', '../.env']) {
+  const file = path.resolve(candidate);
+  if (fs.existsSync(file)) dotenv.config({ path: file });
+}
 
 function str(key: string, fallback: string): string {
   const value = process.env[key];
